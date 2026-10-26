@@ -14,7 +14,6 @@ static const A AME[] = {
     {8,1,"ORACLE CHOIR"}, {8,2,"AMARU CHOIR"},
     {0,8,"ANALOG 9"}, {1,4,"PHASE LEAD"},
 };
-static char buf[128][13];
 
 const char *amaru_preset_name(uint16_t engine, uint16_t preset,
                                const char *engine_name, const char *fallback)
@@ -22,14 +21,7 @@ const char *amaru_preset_name(uint16_t engine, uint16_t preset,
     for (unsigned i = 0; i < sizeof AME/sizeof AME[0]; i++)
         if (AME[i].engine == engine && AME[i].preset == preset)
             return AME[i].name;
-    int key = engine * 32 + preset;
-    if (key >= 128) key %= 128;
-    if (!buf[key][0]) {
-        buf[key][0] = 'P';
-        buf[key][1] = (char)('0' + ((preset / 10) % 10));
-        buf[key][2] = (char)('0' + (preset % 10));
-        buf[key][3] = 0;
-    }
-    return buf[key];
+    /* No curated alias -> keep the factory preset name untouched.  */
+    return (fallback ? fallback : engine_name);
 }
 #endif

@@ -16,8 +16,12 @@ redistribution rights are not verified and their binary footprint is too large.
 ## ⏭ Next
 
 - [ ] **Macintosh-style icons (AMARU-original, monochrome)**
-  - Design a small set of 1984-Mac-style glyphs ourselves in the AMARU monochrome
-    style (no import of `thomasareed/Classic-Mac-icons`). Reuse Bunker's icon
+  - Design a small set of 1980s-Mac-style glyphs ourselves in the AMARU monochrome
+    style (no import of `thomasareed/Classic-Mac-icons`, and **no import of
+    `therenegar/retro-icons`** either — that repo ships 3,798 Windows-Icons
+    extracted from old software and has **no LICENSE file / no SPDX grant**, the
+    same licensing gap that rejected Classic-Mac). Use the icon sources only as
+    monochrome shape reference, then redraw in AMARU style. Reuse Bunker's icon
     drawing primitives; add a `B_` → `AM_` icon table.
   - Gate: pass strict-terminal contrast checks.
 

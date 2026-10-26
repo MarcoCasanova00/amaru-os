@@ -1,0 +1,21 @@
+Bunker Evolved English product film
+1280x720 / H.264 / 30 fps container / AAC stereo / 4:23
+Actual display captured at 10 fps; the firmware itself draws at up to about 8 Hz.
+C display and C audio captured together; continuous native DSP, no substitute synthesizer.
+Intro/outro use the simulator-derived panel illustration. Other chapters enlarge the exact display.
+Voice: Runway preset Noah, steady English narration, speed 0.94.
+The eight separate narrator chapters and text are included for editing.
+Background music is ducked under narration. Final measured integrated loudness -17.79 LUFS, true peak -3.38 dBTP.
+Optional VTT/SRT captions use sentence-weighted timing inside each recorded chapter, not word alignment.
+
+Rebuild:
+1. Build the firmware once to generate its tables/assets (see README).
+2. Install Pillow and cairosvg; provide ffmpeg and a C compiler.
+3. python3 tools/capture_video.py
+4. python3 tools/make_video.py
+BUNKER_VIDEO_CAPTURE may override the capture directory.
+
+Narration usage reference: https://help.runwayml.com/hc/en-us/articles/18927776141715-Usage-rights
+Accessed 17 October 2026. The film is supplied for this project's publication; software component licenses remain separate.
+
+Release 1.0 promotion, 17 October 2026: the owner completed the normal original-firmware round trip, with working audio and controls. The firmware and film are unchanged. The new English film is published at https://www.youtube.com/watch?v=NJ5UFi62s_0; see YouTube-Description.txt for the updated release status and links.

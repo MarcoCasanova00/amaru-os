@@ -1,0 +1,35 @@
+Bunker Evolved turns the M-VAVE FM-1 into a hands-on generative ambient instrument. Four editable musical layers, 64 sound recipes, 24 complete worlds, 24 motif templates and 32 scales — with quick ways to grow, lock and reshape a melody.
+
+Free website, browser instrument, installer, guide and full source:
+https://bunker-evolved.sugarypixie10.chatgpt.site
+
+This walkthrough shows actual screens and audio rendered together from the firmware's C code. The front-panel drawing is an illustration, not filmed hardware. English narration is AI-generated.
+
+CHAPTERS
+00:00 Meet Bunker Evolved
+00:29 Choose a world
+00:58 GROW: scale-based variations
+01:34 Shape the sound
+02:05 EVOLVE: ongoing change
+02:35 Install from original firmware
+03:15 Recovery and rollback
+03:52 Free and open source
+
+FEATURES
+• AIR, MELODY, ROOT and SPARK: four freely editable tracks.
+• GROW: TUNE, SOFT, FLOW and NEW; root/scale selection; one-step undo.
+• EVOLVE: seven bounded processes with chance, loop interval and lock.
+• Thirteen synthesis engines, deep editors, effects and individual note editing.
+• Four project slots, user sounds, and a browser backup/restore workflow for Bunker.
+
+INSTALLATION
+Desktop Chrome or Edge, a charged FM-1 and a direct USB data cable. Original firmware uses the supported update protocol; AMB-1 is not required as an intermediate step. V15 is the documented stock baseline. Back up your music and read the recovery guide before flashing. Keep power and USB connected throughout the transfer.
+
+The owner has confirmed RC2 operation on real hardware. Physical original-V15 round-trip and power-loss recovery are not established by the automated tests. UBOOT is a separate chip mode, not guaranteed Chrome rescue. A firmware rollback does not restore overwritten music.
+
+CREDITS
+A project by Kid Bunka, built on Felucca 1.6.1 by Leo Kuroshita / Hügelton Instruments and its contributors. Browser work derives through Felucca from Charles Vestal's X0X. Full source and component notices are linked on the website. Software: GPL-3.0-only plus retained component licenses. Independent project; no affiliation with M-VAVE or Dirtywave.
+
+Build: Bunker Evolved 1.0 RC2 / FM-1_7100002.
+
+#FM1 #GenerativeMusic #Ambient #Synthesizer #OpenSource

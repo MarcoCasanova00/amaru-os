@@ -1,0 +1,13 @@
+{
+  "published_utc": "2026-10-17",
+  "website": "https://bunker-evolved.sugarypixie10.chatgpt.site",
+  "github_release": "https://github.com/kidbee85-beep/bunker-evolved/releases/tag/v1.0.0",
+  "english_video": "https://www.youtube.com/watch?v=NJ5UFi62s_0",
+  "youtube_channel": "Kid Bunka",
+  "firmware_changed_for_publication": false,
+  "source_distribution": "Bunker-Evolved-Source.zip release asset",
+  "github_source_tree_upload": "blocked: Resource not accessible by integration",
+  "release_name": "Bunker Evolved 1.0",
+  "hardware_acceptance": "Owner confirmed normal original-firmware round trip, audio and controls on 2026-10-17",
+  "internal_build": "BE 1.0-RC2"
+}

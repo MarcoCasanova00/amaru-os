@@ -1,0 +1,19 @@
+ui: HUMANIZE (#213): VEL and TIME appended after DEPTH (20): 21, 22; the names ok
+ui:   VEL: RAND -> VEL AMT 32: each note its own velocity (100 +- 63, 1..127), the RAND draws as without it ok
+ui:   VEL: MODW -> VEL clamps to 127 / 1, 0 nothing; VEL / TIME slots do no per-block work ok
+ui:   TIME: none: on the step; MODW full AMT 63: every step late by ~30 ms (QUANTIZE ON) ok
+ui:   TIME: RAND: each step its own delay (0..30 ms, never early); a ratchet on time; AMT -64 at 0 the most ok
+ui:   TIME: QUANTIZE OFF adds to the step's NUDGE; a short step: at most 7/16 of it (as NUDGE) ok
+ui:   a project keeps VEL / TIME slots (FUN10, no format change)               ok
+ui: KITS (#216): DEEP TIGHT PERC appended (9..11), each lane one of the five kits' (DEEP's kick 2 st down) ok
+ui:   DRUM's presets: DRUM KIT first as before, then DEEP KIT, TIGHT KIT, PERC KIT (category DRUM) ok
+ui:   the lanes' names (DEEP: CYM; PERC: CONGA CLAVE), the GM notes on the kit's pieces, the 8 lanes play ok
+ui:   a project keeps the kit; a 1.5.1-range KIT reads 9..11 as 77 (the README's downgrade note) ok
+ui: LEDS (#212): OFF DIM LO DIM HI INV, then INV LO INV HI appended; each its own value ok
+ui:   INV: idle lit; INV HI / LO: idle at the mid level (LO the darker one), a held key dark; DIM HI as before ok
+ui:   saved: INV in the LEDS field (older firmware: INV), the level in a spare byte; older settings as before ok
+ui: SELECT (#84): BPM PAGE MODW VEL; PAGE bit 4 as 1.5.5, MODW / VEL bit 6 too; saved, older settings BPM ok
+ui:   MODW: the track's mod wheel 0..127 (shown), CC1 out on its channel, the matrix's MODW; GLO + SELECT tempo ok
+ui:   VEL: the keys' velocity 1..127 (100 at power-on), shown, sounding and sent; GLO + SELECT as ever ok
+ui:   HELP: CLOCK's hint names KNOB 1 the tempo with MODW / VEL too            ok
+1.5.6 tests passed

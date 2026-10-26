@@ -1,0 +1,23 @@
+emu: power-on LED sweep: at 200 ms the head on key 11, glow behind, dark ahead, buttons dark ok
+emu:   over by 1 s (~0.70 s)                                                      ok
+emu: boots: the splash, then HOME (146 colours), the HOME LED lit                 ok
+emu: silent at rest                                                               ok
+emu: a key sounds (peak 0.066) and lights its LED                                 ok
+emu: a MIDI note in (USB-MIDI's queue) sounds (peak 0.048)                        ok
+emu: KNOB 1 redraws the screen                                                    ok
+emu: PLAY: the sequencer runs, PLAY's green LED                                   ok
+emu: PLAY again stops it                                                          ok
+emu: FX held: its button and the effects' keys breathe, none lit; let go: nothing ok
+emu: the page's breath peaks 0.80 0.80 0.58 0.58 ~ 0.80 (HI) 0.58 (LO)            ok
+emu: SAVE, OCT+, OCT+: user preset 1 written (2 sectors kept)                     ok
+emu: a fresh instance with the kept sectors has it; one without does not          ok
+emu: absolute (the default) CC 22 (PRESETS): its first value takes its place, then +3, -2; CC 27 MASTER; CC 74, 28 the firmware's ok
+emu: relative CC 22: 64+-n, two's complement, sign bit; CC 27 absolute in each    ok
+emu: CC 22 abs 64 65 66 67 turns PRESETS as three detents of the panel's knob do  ok
+emu: CC 22 bin 65 65 65 turns PRESETS as three detents of the panel's knob do     ok
+emu: CC 22 twos 1 1 1 turns PRESETS as three detents of the panel's knob do       ok
+emu: CC 22 sign 1 1 1 turns PRESETS as three detents of the panel's knob do       ok
+emu: the heavy song plays (peak 0.238), twice the same samples                    ok
+emu: the same song from the native build (cc): 88200 frames, bit for bit          ok
+emu: 1 s of the heavy song (FM6 PHYS GRAIN chords + DRUM) in 13.5 ms: 1.4 % of real time ok
+emu: all ok

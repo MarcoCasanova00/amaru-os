@@ -1,0 +1,132 @@
+BUNKER EVOLVED 1.0 — RELEASE VERIFICATION
+17 October 2026
+
+STATUS
+Bunker Evolved 1.0 — released on 17 October 2026.
+Owner hardware acceptance: Bunker -> original -> Bunker -> original completed.
+The owner confirmed working audio and controls and approved public release.
+This is a user report from one FM-1, not independent certification. The owner
+reported the Bunker screen as "PE1.0-RC2"; the source-defined display label is
+"BE 1.0-RC2". No screenshot or installer log was supplied. The exact stock
+version was not separately reported; V15 is the documented installer baseline.
+The binary and WASM are unchanged. Release promotion changes documentation,
+not firmware behaviour or the embedded RC2 build label.
+
+IDENTITY
+FM-1_7100002 / BE 1.0-RC2
+Firmware package: 610090 bytes
+SHA-256: db0b50d0ae9c3bfccee76e3b93de09fffa55389169278a0c5899dad9c79e6bb8
+WASM: 796688 bytes
+SHA-256: a79103ba50b2a75c9311e375e38affdaeebe472068602e75d5c2f5b87788c0fa
+Original V15 fetched again and matched its pinned SHA-256:
+db1642b2b6fa5c2cccb11ffd13878068bb28601678d3644049f99dc40e7edb8a
+Source: https://www.m-vave.com/download
+File: https://yms-file-store.oss-cn-hongkong.aliyuncs.com/software/firmware/FM-1.fwsc
+
+REPEATED FOR THIS PUBLICATION: PASS
+19/19 defined native suites compiled and passed:
+storage_test, upreset_test, input_test, midi_uart_test, scale_test, project_test,
+motion_test, detail_test, ui155_test, v156_test, fun10_test, midi_control_test,
+audio_test, persistence_test, backup_test, editor_test, robust_test,
+fm6bank_test, ui_test.
+This is the defined release subset, not every optional upstream suite.
+
+GROW: 3,309,372 assertions. All 12 keys x 32 scales x 4 styles, target range
+24..108 and scale membership, rhythm/velocity/chance preservation, actual
+panel gestures, exact undo, persistence, ONE/ALL, recording/chain guards,
+drum/slice exclusion, empty patterns, edge notes and live LOCK.
+Bunker smoke: 3,809,144 checks, 24 worlds, 64 sounds, 24 motifs x 32 scales,
+actual controls, freeze, project persistence and recording ownership.
+
+INSTALLER / ARCHIVE TESTS: PASS IN HOST MODEL
+1024 binary pack/unpack round trips, bounded SysEx queue, malformed frames,
+zero/oversized/out-of-range reads, disconnect, failed completion ACK,
+identity mismatch, error cleanup and MIDI-loader retry.
+Simulated starting identities include original V14 and V15, AMB and RC1.
+These establish host protocol handling, not execution of proprietary stock code.
+DOM integration: detection never flashes; explicit acknowledgement is required;
+stock-V15 identity -> RC2 installation and RC1 rollback; bad SHA rejected.
+
+New music archive UI reuses Felucca's existing complete-backup protocol.
+Native backup tests and browser archive-codec tests pass. Integration with the
+actual archive codec checks read-only capture, complete CRC validation,
+explicit restore consent, all object transfers, cleanup, corruption refusal,
+foreign-firmware refusal, and backup disabled for stock identities.
+Backup/restore require a stopped, running Bunker RC1/RC2. Restore is not a
+transaction across every object: disconnect can leave some objects replaced.
+No real USB backup/restore session was performed by the agent.
+
+PRIOR RC2 MEASUREMENTS, STILL APPLICABLE TO THE IDENTICAL BINARY
+Build: application 527692 bytes; loader 6934 bytes.
+.data+.bss 61156 / 73728 bytes. Pool 328924 / 368640 bytes.
+Single-core build; the experimental second core is disabled.
+RAM flash routine: 916 instructions, no XIP calls. HAL-only register access.
+These are layout checks, not chip CPU-headroom measurements.
+
+Stress: 3606.50 seconds of simulated audio, 322,108,942 assertions,
+maximum 8 voices, peak 8675 / 32768, RMS 713.65. Changes include worlds,
+sounds, scales, tempos, motifs, GROW and undo, and all six HOME pages.
+Accelerated host execution, not a one-hour physical device test.
+
+Memory checks: GROW combinations plus 1202.50 simulated seconds,
+107,399,922 assertions, maximum 8 voices, peak 8439 / 32768.
+No ASan or enabled UBSan report. Flags:
+-fsanitize=address,undefined
+-fno-sanitize=signed-integer-overflow,shift,bounds,object-size,pointer-overflow
+-fno-sanitize-recover=all -ffp-contract=off
+ASAN_OPTIONS=detect_leaks=0
+Excluded categories include fixed-point wrapping and the host XIP model;
+this is not a claim of complete freedom from undefined behaviour.
+
+Audio/WASM: 88200 stereo frames match native C bit for bit. The native
+reference also matches the preserved RC1 audio render bit for bit.
+Boot, keys, LEDs, MIDI controls, PLAY, encoders and preset persistence pass.
+The unchanged 64-sound/24-world library and listening previews retain their
+RC1 audibility/distinct-PCM checks, available in docs/test-results-rc1.
+
+OTA/loader: modelled RC1 -> RC2 and RC2 -> RC1 round trips preserve protected
+boot and user regions. CRC, wrong-board, write windows, repeat, and the
+current and older Wolf/AMB OTA entry were checked. No project-format change.
+The stock application uses the upstream M-UPGRADE-compatible protocol;
+it was not reverse engineered or executed by these tests.
+
+DOCUMENTATION AUDIT
+EVOLVE knob 4 is the keyboard transpose parameter. Default SCL QUANT=SEQ
+keeps sequence playback untransposed; choose SEQ+T for sequence transpose,
+or use GROW/TUNE for a direct note/scale change. This is now explicit in
+the guide; no hidden change to the hardware-tested musical behaviour.
+RC1 and RC2 projects use 114 parameters. Felucca 1.6.1 cannot load them.
+Firmware rollback is not a project-data backup.
+
+VIDEO
+263.22 seconds; H.264 1280x720 at 30 fps; AAC stereo; optional English captions.
+Actual C DSP and display captured together, with a code-drawn FM-1 panel.
+Calm AI English narration, original firmware music, no camera footage.
+Caption sentence timing is estimated within independently recorded chapters.
+Frames inspected for readability; audio levels measured programmatically.
+
+VERIFICATION LIMITS
+Managed browser preview could not start: sandbox /proc mount unavailable.
+DOM, links, package hashes and scripts checked; interactive Chrome layout,
+Web MIDI permission/USB behaviour and browser audio remain unverified here.
+The normal original-firmware round trip is owner-confirmed. USB interruption,
+battery and power-loss recovery are not established by that report or by host
+tests. No deliberately interrupted flash tested.
+Watchdog, eight-voice budget and overload fade remain active. UBOOT is a chip
+mode, not guaranteed Chrome rescue. Do not provoke power loss as a test.
+
+Full corresponding source, notices, build instructions and logs are supplied.
+
+EDITOR 0.1 — 17 October 2026
+Actual JavaScript requests through the firmware's real C SysEx handler in a host harness:
+49,337 assertions passed. All 64 sound recipes exactly match native bunker_sound()
+parameters; 24 motifs across four roles match native bunker_pattern(). Four-track
+writes, 114-parameter metadata, 32 scales, full step fields, readback, undo and
+stale-undo refusal passed. All 1,536 key/scale/style combinations stayed in range
+and scale. Timeout injection rejected queued writes without automatic replay.
+No explicit flash erase/write commands were issued by the editor test.
+DOM interactions: boot, layer choice, GROW, undo, sounds, motifs, chords, paging
+and validation passed (linkedom; not a real-browser visual test).
+Managed visual browser preview remains unavailable due to the reported /proc mount
+restriction. Physical Chrome/USB acceptance of the new editor is still pending.
+Firmware bytes and internal RC2 version were not changed.

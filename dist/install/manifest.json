@@ -1,0 +1,20 @@
+{
+  "wolf": {
+    "file": "bunker-evolved-rc2.fwsc",
+    "product": "FM-1_7100002",
+    "sha256": "db0b50d0ae9c3bfccee76e3b93de09fffa55389169278a0c5899dad9c79e6bb8",
+    "bytes": 610090
+  },
+  "amb": {
+    "file": "amb-1.2.fwsc",
+    "product": "FM-1_7010200",
+    "sha256": "7372e07e845bfad8ec3797963b4312563addc6451dae35bdadc0ba92b73875d0",
+    "bytes": 609666
+  },
+  "rc1": {
+    "file": "bunker-evolved-rc1.fwsc",
+    "product": "FM-1_7100001",
+    "sha256": "eb0b0924a9da226b53f0bfcb0bfed7bb47763ab237eab03b79c8f7311d1fe6d4",
+    "bytes": 610090
+  }
+}

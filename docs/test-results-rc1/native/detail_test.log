@@ -1,0 +1,23 @@
+ui: SEQ: STEP -> DETAIL (the same cursor) -> AUTOMATION -> STEP                ok
+ui:   its footer title DETAIL 2/3 (not the scale), its HELP hint               ok
+ui: DETAIL: KNOB 2 the cursor step's RATCH, KNOB 1 its CHANCE (the cursor stays), nothing else ok
+ui:   PRESETS walks the cursor; on step 3 CHANCE 90 %, NUDGE +3, VEL 80 (96 - 16), the note kept ok
+ui:   AUTOMATION lists them as rows (CHANCE, RATCH, NUDGE; no motion record used) ok
+ui:   turned back to x1 / 100 %: the step as it was, its rows gone from AUTOMATION ok
+ui:   the ends hold: NUDGE -8..+7, RATCH x4, VEL 1..127                        ok
+ui:   a REST, an empty step: NO NOTE, nothing stored; a TIE takes its CHANCE only ok
+ui:   NUDGE with QUANTIZE ON: QUANTIZE IS ON (kept); VEL on an ACC step: ACC PLAYS 127 (kept) ok
+ui:   while a song plays: STOP TO EDIT, nothing changes                        ok
+ui: undo: the last gesture (step 3's) alone; held again redone                 ok
+ui: EDIT: the step's CHANCE RATCH NUDGE VEL back to 100 % x1 0 96 (the note and the cursor stay; again: NOTHING TO RESET); SAVE held brings them back ok
+ui: AUTOMATION: EDIT on a row deletes that entry alone (RATCH x1; the step's CHANCE and NUDGE stay) ok
+ui: playback: the pattern untouched, six note-ons at 96                        ok
+ui: chords: RATCH on the chord's step (one value for its three notes)          ok
+ui:   played: the chord three times (9 note-ons), A4 at CHANCE 0 never, E4 at VEL 50 ok
+ui: DETAIL on a DRUM track: the white keys pick the step (no hit toggled)      ok
+ui:   KNOB 2 the step's RATCH; steps held together: each takes the turn (an empty one none) ok
+ui:   the key LEDs: the steps holding any hit (the hat on 7 too)               ok
+ui:   played: the ratcheted kick twice, the others once (4 + 1 + 1 note-ons)   ok
+ui: STEP: KNOB 1 is still the cursor                                           ok
+ui:   a step with a CHANCE is marked over its column on the roll (its neighbour not) ok
+detail tests passed

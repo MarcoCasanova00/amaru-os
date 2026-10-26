@@ -1,0 +1,1 @@
+PASS installer DOM: no auto-flash, read-only connect, explicit acknowledgement, RC2 install + RC1 rollback, bad hash rejected, original firmware unavailable until verified. Mock device; not browser/USB QA.

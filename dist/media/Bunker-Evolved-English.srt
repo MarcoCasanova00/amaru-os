@@ -1,0 +1,205 @@
+1
+00:00:02,000 --> 00:00:03,825
+Meet Bunker Evolved.
+
+2
+00:00:03,825 --> 00:00:10,515
+A free, open-source ambient instrument for your M-VAVE F M One.
+
+3
+00:00:10,515 --> 00:00:12,339
+Four musical layers.
+
+4
+00:00:12,339 --> 00:00:14,164
+Sixty-four sound presets.
+
+5
+00:00:14,164 --> 00:00:15,988
+Twenty-four complete worlds.
+
+6
+00:00:15,988 --> 00:00:19,029
+And thirty-two scales to explore.
+
+7
+00:00:19,029 --> 00:00:25,719
+Start with a world, press play, and let the music breathe.
+
+8
+00:00:31,800 --> 00:00:39,262
+Choose a world while playback is stopped, then press octave plus
+to load it.
+
+9
+00:00:39,262 --> 00:00:44,060
+Use Algorithm to choose Air, Melody, Root, or Spark.
+
+10
+00:00:44,060 --> 00:00:46,192
+These are musical roles.
+
+11
+00:00:46,192 --> 00:00:50,456
+Every layer can use its own synthesis engine.
+
+12
+00:00:50,456 --> 00:00:54,187
+Home moves between the six Bunker pages.
+
+13
+00:01:00,200 --> 00:01:02,833
+For a new melody, open Grow.
+
+14
+00:01:02,833 --> 00:01:07,659
+The four knobs choose the root note, scale, style, and target.
+
+15
+00:01:07,659 --> 00:01:10,731
+Tune fits your notes to the scale.
+
+16
+00:01:10,731 --> 00:01:12,486
+Soft makes small changes.
+
+17
+00:01:12,486 --> 00:01:13,802
+Flow moves further.
+
+18
+00:01:13,802 --> 00:01:17,312
+New reshapes the phrase over its existing rhythm.
+
+19
+00:01:17,312 --> 00:01:19,506
+Press octave plus to apply.
+
+20
+00:01:19,506 --> 00:01:23,455
+Press octave minus to undo the last Grow step.
+
+21
+00:01:23,455 --> 00:01:26,088
+Your sound and mix stay intact.
+
+22
+00:01:26,088 --> 00:01:30,476
+Grow locks the new phrase, giving you time to listen.
+
+23
+00:01:36,500 --> 00:01:38,050
+Want more control?
+
+24
+00:01:38,050 --> 00:01:45,799
+Sound gives each layer sixteen starting points, with quick
+controls for colour, release, and reverb.
+
+25
+00:01:45,799 --> 00:01:51,481
+Edit, Envelope, L F O, and Effects open the deeper tools.
+
+26
+00:01:51,481 --> 00:01:56,647
+The step sequencer lets you change individual notes and chords.
+
+27
+00:01:56,647 --> 00:02:01,813
+Save the complete composition in one of four project slots.
+
+28
+00:02:07,900 --> 00:02:12,347
+To let a phrase develop by itself, open Evolve.
+
+29
+00:02:12,347 --> 00:02:18,277
+Choose a process, its probability, and the number of loops
+between changes.
+
+30
+00:02:18,277 --> 00:02:25,689
+Try Walk for gentle melodic movement, or Breath for changes in
+touch and rhythm probability.
+
+31
+00:02:25,689 --> 00:02:31,619
+Octave minus locks the current phrase whenever you want to keep
+it.
+
+32
+00:02:37,700 --> 00:02:45,171
+To install, charge your F M One and connect it directly with a
+USB data cable.
+
+33
+00:02:45,171 --> 00:02:51,241
+Open the installer in desktop Chrome, close other MIDI apps, and
+click Detect.
+
+34
+00:02:51,241 --> 00:02:54,510
+Stock firmware uses the same update protocol.
+
+35
+00:02:54,510 --> 00:02:58,712
+There is no need to install Amb One first.
+
+36
+00:02:58,712 --> 00:03:05,716
+Back up your music, choose Bunker Evolved, read the recovery
+guide, and start the update.
+
+37
+00:03:05,716 --> 00:03:11,320
+Keep power and USB connected until the final firmware identity
+is confirmed.
+
+38
+00:03:17,400 --> 00:03:27,172
+The recovery page includes the previous Bunker build, Amb One,
+and a verified original V fifteen file from M-VAVE.
+
+39
+00:03:27,172 --> 00:03:33,858
+An interrupted transfer can be restarted if the MIDI update
+loader still responds.
+
+40
+00:03:33,858 --> 00:03:41,058
+The watchdog can restart a stalled application, but it cannot
+repair every failed flash.
+
+41
+00:03:41,058 --> 00:03:45,173
+A chip recovery mode may need separate tools.
+
+42
+00:03:45,173 --> 00:03:48,773
+Firmware rollback does not restore overwritten music.
+
+43
+00:03:54,800 --> 00:04:01,763
+Bunker Evolved is built on Felucca, with gratitude to the open-
+source FM One community.
+
+44
+00:04:01,763 --> 00:04:06,737
+The project owner has tested this build on real hardware.
+
+45
+00:04:06,737 --> 00:04:14,198
+Explore the browser instrument, hear the worlds, read the guide,
+and download the complete source.
+
+46
+00:04:14,198 --> 00:04:15,690
+Free to play.
+
+47
+00:04:15,690 --> 00:04:17,183
+Free to explore.
+
+48
+00:04:17,183 --> 00:04:19,172
+Make something that grows.

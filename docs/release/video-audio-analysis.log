@@ -1,0 +1,51 @@
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'dist/media/Bunker-Evolved-Introduction.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf60.16.100
+  Duration: 00:04:23.22, start: 0.000000, bitrate: 286 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1280x720, 116 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+      encoder         : Lavc60.31.102 libx264
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 161 kb/s (default)
+    Metadata:
+      handler_name    : SoundHandler
+      vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:0 -> #0:0 (h264 (native) -> wrapped_avframe (native))
+  Stream #0:1 -> #0:1 (aac (native) -> pcm_s16le (native))
+Press [q] to stop, [?] for help
+Output #0, null, to 'pipe:':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf60.16.100
+  Stream #0:0(und): Video: wrapped_avframe, yuv420p(progressive), 1280x720, q=2-31, 200 kb/s, 30 fps, 30 tbn (default)
+    Metadata:
+      handler_name    : VideoHandler
+      vendor_id       : [0][0][0][0]
+      encoder         : Lavc60.31.102 wrapped_avframe
+  Stream #0:1(und): Audio: pcm_s16le, 192000 Hz, stereo, s16, 6144 kb/s (default)
+    Metadata:
+      handler_name    : SoundHandler
+      vendor_id       : [0][0][0][0]
+      encoder         : Lavc60.31.102 pcm_s16le
+frame=   78 fps=0.0 q=-0.0 size=N/A time=00:00:02.66 bitrate=N/A speed=37.2x    frame=  516 fps=0.0 q=-0.0 size=N/A time=00:00:17.20 bitrate=N/A speed=  30x    frame=  973 fps=907 q=-0.0 size=N/A time=00:00:32.43 bitrate=N/A speed=30.2x    frame= 1415 fps=899 q=-0.0 size=N/A time=00:00:47.16 bitrate=N/A speed=  30x    frame= 1885 fps=908 q=-0.0 size=N/A time=00:01:02.83 bitrate=N/A speed=30.3x    frame= 2350 fps=912 q=-0.0 size=N/A time=00:01:18.36 bitrate=N/A speed=30.4x    frame= 2835 fps=921 q=-0.0 size=N/A time=00:01:34.50 bitrate=N/A speed=30.7x    frame= 3306 fps=923 q=-0.0 size=N/A time=00:01:50.23 bitrate=N/A speed=30.8x    frame= 3747 fps=918 q=-0.0 size=N/A time=00:02:04.93 bitrate=N/A speed=30.6x    frame= 4220 fps=921 q=-0.0 size=N/A time=00:02:20.70 bitrate=N/A speed=30.7x    frame= 4678 fps=920 q=-0.0 size=N/A time=00:02:35.96 bitrate=N/A speed=30.7x    frame= 5140 fps=920 q=-0.0 size=N/A time=00:02:51.36 bitrate=N/A speed=30.7x    frame= 5617 fps=923 q=-0.0 size=N/A time=00:03:07.26 bitrate=N/A speed=30.8x    frame= 6071 fps=922 q=-0.0 size=N/A time=00:03:22.36 bitrate=N/A speed=30.7x    frame= 6463 fps=912 q=-0.0 size=N/A time=00:03:35.43 bitrate=N/A speed=30.4x    frame= 6840 fps=901 q=-0.0 size=N/A time=00:03:48.03 bitrate=N/A speed=  30x    frame= 7288 fps=901 q=-0.0 size=N/A time=00:04:02.96 bitrate=N/A speed=  30x    frame= 7784 fps=906 q=-0.0 size=N/A time=00:04:19.50 bitrate=N/A speed=30.2x    [out#0/null @ 0x55c7051f3d80] video:3701kB audio:197568kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
+frame= 7896 fps=899 q=-0.0 Lsize=N/A time=00:04:23.20 bitrate=N/A speed=  30x    
+[Parsed_loudnorm_0 @ 0x55c7051f1ac0] 
+{
+	"input_i" : "-17.79",
+	"input_tp" : "-3.38",
+	"input_lra" : "8.50",
+	"input_thresh" : "-29.15",
+	"output_i" : "-16.14",
+	"output_tp" : "-1.68",
+	"output_lra" : "6.80",
+	"output_thresh" : "-27.27",
+	"normalization_type" : "dynamic",
+	"target_offset" : "0.14"
+}

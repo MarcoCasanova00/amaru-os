@@ -1,0 +1,6 @@
+firmware/build/
+firmware/*.log
+**/__pycache__/
+node_modules/
+*.tar.gz
+!dist/install/AMB-1-v1.2-Source.tar.gz

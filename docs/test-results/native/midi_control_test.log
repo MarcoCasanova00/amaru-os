@@ -1,0 +1,150 @@
+ui: USB maximum bend is exactly the default +2 semitones                       ok
+ui: USB minimum bend is exactly the default -2 semitones                       ok
+ui: bend centre is zero                                                        ok
+ui: RPN0 supports semitone and cent bend sensitivity                           ok
+ui: selecting NRPN cancels RPN data entry                                      ok
+ui: bend is smoothed toward the target in the real voice renderer              ok
+ui: bend smoothing reaches the exact target without changing saved pitch       ok
+ui: Reset Controllers centres bend and preserves RPN sensitivity               ok
+ui: existing modwheel/expression/aftertouch stay routed to the track           ok
+ui: drum track ignores pitch bend                                              ok
+ui: pedal holds a released synth note and its owner                            ok
+ui: pedal release releases its held note                                       ok
+ui: All Notes Off honours sustain rather than hard-killing                     ok
+ui: Reset Controllers releases pedal-held notes                                ok
+ui: drum note-offs do not accumulate pedal-held owners                         ok
+ui: All Sound Off ignores pedal and discards all track ownership               ok
+ui: USB/TRS channels can share one sounding note with independent owners       ok
+ui: one channel's note-off preserves another channel's hold                    ok
+ui: last channel owner releases the shared note                                ok
+ui: MIDI release cannot cut a still-held local keyboard note                   ok
+ui: local release after MIDI release ends the shared note                      ok
+ui: note-off follows its note-on across selected-track changes                 ok
+ui: preset panic forgets old pedal owners so later pedal-up preserves new notes ok
+ui: queue overflow recovers ownership and releases stuck notes                 ok
+ui: USB mode ignores TRS Start                                                 ok
+ui: USB Start begins at step zero                                              ok
+ui: USB six pulses advance exactly one 16th step                               ok
+ui: external Stop preserves step position and releases sequence notes          ok
+ui: external Continue resumes the existing step position                       ok
+ui: lost clock times out and releases transport notes                          ok
+ui: Start after timeout restarts cleanly at the master's phase                 ok
+ui: external-clock playback applies recorded motion                            ok
+ui: external Stop restores the musical parameter base                          ok
+ui: TRS mode ignores USB Start                                                 ok
+ui: TRS Start begins at step zero                                              ok
+ui: TRS six pulses advance exactly one 16th step                               ok
+ui: external Stop preserves step position and releases sequence notes          ok
+ui: external Continue resumes the existing step position                       ok
+ui: lost clock times out and releases transport notes                          ok
+ui: Start after timeout restarts cleanly at the master's phase                 ok
+ui: external-clock playback applies recorded motion                            ok
+ui: external Stop restores the musical parameter base                          ok
+ui: wrong-source clocks cannot advance the ARP                                 ok
+ui: selected-source MIDI clock advances the ARP                                ok
+ui: TRS realtime interleaving preserves the incomplete note message            ok
+ui: external clock timestamps survive uint32 millisecond wrap                  ok
+ui: local PLAY waiting for missing external clock also times out               ok
+ui: ARP HOLD on the external clock plays the upper octave                      ok
+ui: external Stop ends the sounding ARP note                                   ok
+ui: external Stop keeps the latched HOLD chord                                 ok
+ui: Continue plays the latched chord again                                     ok
+ui: a lost external clock stops the transport and ends the ARP note            ok
+ui: a tap while the external transport is stopped sounds                       ok
+ui: its ARP gate still ends in real time                                       ok
+ui: internal clock: STOP leaves the free-running ARP note to its gate          ok
+ui: internal clock: the ARP keeps stepping after STOP                          ok
+ui: a USB burst fills the MIDI ring without overflowing it                     ok
+ui: the packet that does not fit is refused (left for the next poll)           ok
+ui: TRS MIDI into a ring full of USB still fits (no overflow)                  ok
+ui: the ring drains with no panic: the held note keeps sounding                ok
+ui: the refused packet is taken once the ring has room                         ok
+ui: the held note survives all 88 events                                       ok
+ui: free space below one packet refuses a whole packet                         ok
+ui: ROUT defaults to CH1-4                                                     ok
+ui: CH1-4: note-ons on channels 5..16 (USB and TRS) play nothing               ok
+ui: CH1-4: channels 2 and 4 still play parts 2 and 4                           ok
+ui: CH1-4: pitch bend on channels 5, 10, 16 bends no part                      ok
+ui: CH1-4: CC1 / CC11 and aftertouch on channels 5..16 reach no MOD source     ok
+ui: CH1-4: RPN on channel 5 changes nothing                                    ok
+ui: CH1-4: a channel 5 sustain pedal does not hold channel 2's note            ok
+ui: CH1-4: CC120 / CC123 / CC121 on channels 5..16 leave parts 1..4 sounding   ok
+ui: CH1-4: panic on channel 2 still works                                      ok
+ui: SEL: channels 1, 5, 10, 16 all play the selected track                     ok
+ui: SEL: bend, CC1 and aftertouch from channels 5..16 reach the selected track ok
+ui: SEL: channel 5 pedal holds its note                                        ok
+ui: SEL -> CH1-4 releases channels 5..16's notes (pedal-held too), keeps channel 1's ok
+ui: .. and resets their bend: each part follows its own channel 1..4           ok
+ui: channel 1's note-off still releases its note after the switch              ok
+ui: ROUT: CH1-4 SEL (stored 0 1, as before), CH5-8 CH9-12 CH13-16 appended, 1.5.5 TRACK ok
+ui: ROUT CH5-8: channels 5..8 play tracks 1..4 (notes, bend, CC map, CC1, panic); the rest ignored ok
+ui: ROUT CH9-12: channels 9..12 play tracks 1..4; the rest ignored             ok
+ui: ROUT CH13-16: channels 13..16 play tracks 1..4; the rest ignored           ok
+ui: ROUT CH5-8 -> CH9-12 lets go of channels 5..8 (pedal-held too, bend reset); -> SEL keeps notes ok
+ui: ROUT CH13-16: the USB clock (Start, pulses, Stop) runs the transport as ever ok
+ui: MIDI out: the keys of track 3 send on channel 3 (CH1-4, SEL), 7 (CH5-8), 11 (CH9-12), 15 (CH13-16) ok
+ui: TRACK: T1..T4 CHANNEL (MENU > MIDI) 1..16 OMNI OFF, channels 1..4 by default (song.mch all 0) ok
+ui: CH1-4 (for the comparison): channels 1..4 play tracks 1..4, 5..16 nothing  ok
+ui: TRACK, the default channels: channels 1..4 play tracks 1..4, 5..16 nothing (as CH1-4) ok
+ui: TRACK: T1 on 10, T2 on 2, T3 OMNI (every other channel), T4 OFF (none; the selected track too) ok
+ui: TRACK: bend, CC1, aftertouch, the CC map (CC7) and All Notes Off on channel 10 reach T1 only ok
+ui: TRACK: a learned CC (T3 PAN) from channel 10 sets T3; from a channel no track hears, nothing ok
+ui: TRACK: T1 and T2 both on 10: the first (T1) plays it                       ok
+ui: TRACK: T1 10 -> 11 lets go of channel 10 (pedal-held too, bend reset); 11 plays, 10 is ignored ok
+ui: TRACK -> CH5-8 -> TRACK: each switch lets go of what the new routing does not hear ok
+ui: TRACK: a PC on channel 10 loads T1's; on 3 (T3 OFF) and 1 (no track) nothing ok
+ui: TRACK: MIDI out of track 3's keys on its channel 12; OMNI / OFF on channel 3 ok
+ui: AUTO SELECT OFF (the default): a note into T2 lights its cushion ~90 ms, says MIDI IN -> T2, T1 stays ok
+ui: AUTO SELECT ON: a note into T3 selects it; T2 right after does not (hold-off), 300 ms later it does ok
+ui:   a chord across T1 and T4: the lower selected once, no flicker; the selected track with another: stays ok
+ui:   SEL: every note is the selected track's (no switch); TRACK: T4 on 10 selected; not with the menu up ok
+ui:   a note in the menu or NAME: its light there, the flag taken; no AUTO SELECT from it later ok
+ui:   a step held for a lock (DRUM grid): no switch while held (the lock on its own track), the next note after ok
+ui: power-on parts: ANALOG, FM6, LOFI, DRUM                                    ok
+ui: CC5 7 72 73 75 91 93 94: GLIDE LEVEL REL ATK DEC REV CHO DLY, 0..127 over their range ok
+ui: CC10 PAN: 0 left, 64 centre, 127 right                                     ok
+ui: CC74 / CC71 on ANALOG: CUT / RES                                           ok
+ui: CC74 on FM6 (channel 2): MLVL, bipolar (127: +63)                          ok
+ui: CC71 on FM6 (no resonance): ignored                                        ok
+ui: CC74 on DRUM (channel 4): TONE                                             ok
+ui: every engine's CC74 / CC71 target is a continuous EDIT value (or none)     ok
+ui: CC74 / CC71 on WHEEL: ignored                                              ok
+ui: CC121 resets no mapped parameter (RP-015)                                  ok
+ui: CCs outside the map change nothing                                         ok
+ui: ROUT CH1-4: mapped CCs on channels 5..16 reach no part                     ok
+ui: ROUT SEL: channel 10's CC7 sets the selected track's LEVEL                 ok
+ui: armed and playing: CC74 records a motion event of CUT on the selected track ok
+ui:   another track (channel 2, not selected): not recorded                    ok
+ui:   stopped: the patch's own CUT comes back                                  ok
+ui: not armed: the CC is the new value, no event                               ok
+ui: MIDI LEARN: nothing learned at power-on (every older setting: all 0)       ok
+ui:   an unlearned CC changes nothing (as before)                              ok
+ui: GLO + D4: MIDI LEARN on (the D4 cell / LED lit), the map closes with GLO   ok
+ui:   no parameter picked yet: a CC learns nothing, sets nothing               ok
+ui:   EDIT 2 KNOB 1 picks T1 CUT; CC1 / CC64 / CC0 are passed over; CC20 is learned ok
+ui:   CC20 sets T1 CUT on any channel ROUT hears; the knob again shows its CC  ok
+ui:   ROUT CH1-4: CC20 on channel 10 is ignored as before                      ok
+ui:   GLO + KNOB 2 picks T2 LEVEL; CC74 learned: T2 LEVEL, no more T1 CUT (the standard map) ok
+ui:   learning again replaces: CUT on CC21 drops CC20; CC21 on RES drops CUT's ok
+ui:   OCT- clears the picked parameter's CC (OCT- again: none), no octave      ok
+ui:   OCT- keeps CC16 learned on another parameter                             ok
+ui:   16 learned: the 17th says LEARN FULL, nothing replaced; CC1 / 64 / 123 are never learned ok
+ui: OCT+: LEARN DONE (the map stays, OCT± shift the octave again)             ok
+ui: GLO + D4 twice: on, then LEARN DONE                                        ok
+ui: MENU > MIDI > LEARN CLEAR: OCT+ clears every CC (LEARN CLEARED; none: NOTHING LEARNED) ok
+ui: MIDI LEARN codes with Bunker's P_E0 106: common ids + 1 (INSERT MIX, ESYNC), engine ML_E0 + k; all ids round trip ok
+ui: PC on ch 1: the audio side only notes it (track 1, program 3), nothing loaded there ok
+ui:   the main loop loads track 1's preset 3                                   ok
+ui:   as PRESETS loads it: steps, LEVEL, ARP, SLICER kept; INSERT, TYPE, ESYNC the preset's ok
+ui:   two before a frame: the last loads; a run of PCs is one undo (SAVE held: the sound before) ok
+ui:   a RELOAD to the editor for the selected track's load, none for another's ok
+ui:   every engine: 0.. its presets in PRESETS' order (no alias twice); past the last ignored ok
+ui:   SAMPLE: PC 1 is FLUTE (not PIANO's alias); PC 4 (once PERC) does not turn the track into DRUM ok
+ui:   DRUM: 0..8 the nine kits (STD 80 10 66 55 77 DEEP TIGHT PERC; HAND CYM H+CYM skipped), only KIT; 9.. ignored ok
+ui:   FM6: 0..7 its presets (PC 4: PAD, SLOT F5, its DTUN)                     ok
+ui:   FM6: 8.. the voice bank B1..B32 through SLOT (the rest stays), an empty or no bank ignored ok
+ui:   ROUT CH1-4: a PC on channels 5..16 is ignored                            ok
+ui:   ROUT SEL: any channel the selected track; CH5-8: channel 6 track 2, channel 1 ignored ok
+ui:   TRS MIDI IN: a PC (one data byte) and the next under running status      ok
+ui:   MIDI LEARN waiting: a PC is not taken for a CC, it loads                 ok
+MIDI control/clock integration tests passed

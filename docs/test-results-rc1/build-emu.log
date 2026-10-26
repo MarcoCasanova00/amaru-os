@@ -1,0 +1,2 @@
+shared:INFO: (Emscripten: Running sanity checks)
+emu: build/emu (784818 B wasm, BE 1.0-RC1)

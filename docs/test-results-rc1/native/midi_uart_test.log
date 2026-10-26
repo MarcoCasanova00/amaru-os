@@ -1,0 +1,14 @@
+uart: running status, realtime, SysEx, system common ok
+clock: timestamps and USB/TRS source, no active sensing ok
+uart: channels 1, 2, 3, 10, 16 -> USB-MIDI packets   ok
+usb: ota_wire_send packets (CIN 4.. then 5/6/7)      ok
+usb: received frame == the bytes between F0 and F7   ok
+usb: a frame while one is pending is dropped         ok
+usb: a truncated frame is replaced by the next one   ok
+usb: an oversized frame (698 B) is not taken         ok
+usb: soft key -> uboot_req, not a frame              ok
+usb: upgrade key -> ota_req, not a frame             ok
+usb: bytes outside F0..F7 are ignored                ok
+usb: send with a full ring and no host fails at once ok
+usb: send with a full ring times out (200 ms)        ok
+midi parser test passed

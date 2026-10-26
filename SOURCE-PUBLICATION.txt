@@ -1,0 +1,34 @@
+BUNKER EVOLVED 1.0 — COMPLETE SOURCE PUBLICATION
+18 October 2026
+
+This repository contains the complete tree from the existing release asset:
+https://github.com/kidbee85-beep/bunker-evolved/releases/download/v1.0.0/Bunker-Evolved-Source.zip
+
+Original archive: 10,713,182 bytes; 505 files.
+SHA-256: ce2a58de3944b2318142dc7851f77ee0de1dd5a91e9978ca383dd8c55fbed726
+
+The Bunker-Evolved/ archive prefix was removed so that firmware/, dist/,
+docs/, tests/, tools/, LICENSE and README.md are directly at the repository
+root. All 505 original files are included. README.md was updated with project
+links and the new source availability; this publication note was added.
+Firmware implementation, engine sources, assets and tests are unchanged.
+The engines are vendored ordinary files, not Git submodule links.
+The browser upload stores scripts without executable flags; README.md
+documents invoking them with sh/python3 or restoring those flags. Their
+contents remain unchanged. The original release ZIP retains its file modes.
+
+The corresponding released firmware is:
+https://github.com/kidbee85-beep/bunker-evolved/releases/download/v1.0.0/bunker-evolved-rc2.fwsc
+Size: 610,090 bytes
+SHA-256: db0b50d0ae9c3bfccee76e3b93de09fffa55389169278a0c5899dad9c79e6bb8
+Identity: FM-1_7100002 / BE 1.0-RC2
+
+No firmware was rebuilt or changed for this publication. Compiler/SDK
+binaries and generated firmware, WASM and audio outputs are not source
+files; dependencies and generation steps are described in README.md and
+firmware/BUILDING.md. The flashable firmware remains a release asset.
+
+The existing v1.0.0 release tag was not moved. Its automatically generated
+GitHub source archives therefore retain the original README-only tree.
+For mirroring, use the commit that introduced this source publication or
+the complete Bunker-Evolved-Source.zip release asset linked above.

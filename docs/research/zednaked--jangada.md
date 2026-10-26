@@ -1,0 +1,520 @@
+<p align="center"><img src="docs/jangada.gif" alt="Jangada" width="720"></p>
+
+<p align="center">
+<b>English</b> · <a href="README.pt-BR.md">Português</a><br>
+<a href="https://github.com/zednaked/jangada/actions/workflows/ci.yml"><img src="https://github.com/zednaked/jangada/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+<img src="https://img.shields.io/badge/license-GPL--3.0-ff14aa" alt="GPL-3.0">
+<img src="https://img.shields.io/badge/M--VAVE-FM--1-ff14aa" alt="M-VAVE FM-1">
+<a href="https://github.com/zednaked/jangada/releases/latest"><img src="https://img.shields.io/github/v/release/zednaked/jangada?include_prereleases&color=ff14aa&label=version" alt="version"></a>
+</p>
+
+# Jangada 🛶
+
+**Alternative firmware for the M-VAVE FM-1, with a dark, industrial and Brazilian accent.**
+
+Drones that breathe and evolve on their own, rust, worn tape, machines and manguebeat, on a €70
+pocket synth. Thirteen synth engines (a 6-operator FM that talks to Dexed, a superwave analog with a
+Moog-style ladder filter), four
+tracks, a modulation matrix, our own drum kits, effects made to be played live.
+
+A fork of [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments).
+A *felucca* is a Nile sailboat; a *jangada* is the Brazilian one.
+
+**[Play it in the browser](https://zednaked.github.io/jangada/webapp/studio/)** ·
+**[Play it from a mixer](#play-it-from-a-mixer)** ·
+**[Install](https://zednaked.github.io/jangada/)** ·
+**[Listen](#listen)** ·
+**[Releases](https://github.com/zednaked/jangada/releases)**
+
+> Use at your own risk. The FM-1's boot area is never touched, and you can go back to the
+> official firmware at any time.
+
+<p align="center"><img src="docs/screens.png" alt="Jangada screens: HOME, TRACKS, DRONE, the layers, KIT, DIST, MASTER, FM6, menu" width="100%"></p>
+
+## Philosophy
+
+Jangada does not want to be a compendium of the other FM-1 firmwares. It has a taste:
+
+- **Dark and industrial.** For people who think of Nine Inch Nails, *The Downward Spiral*, *Ghosts I–IV*,
+  film scores: sounds with rust, grain, worn tape, a hum underneath, metal, broken pianos.
+- **Drones as a language.** A chord that holds and breathes on its own while you play the rest, and that
+  evolves slowly, with a tension that opens over bars. It is the most Jangada idea of all.
+- **Brazilian.** A *jangada* is a boat from the Brazilian northeast. **Manguebeat** (Chico Science &
+  Nação Zumbi) already crossed maracatu with industrial weight: that is our crossing. Alfaia, zabumba,
+  gonguê, agogô and cuíca; maracatu, baião and coco; the northeastern scale; rabeca and sanfona drones.
+- **Made to be played live.** Hold a button and everything changes, effects that come in with one
+  finger, nothing that makes you stare at the screen.
+
+We bring in the good things from the other forks (Felucca 1.0, SLOOP, Felucca [Salt], Melodee) when
+they serve that taste, always with Jangada's name and look and with credit to whoever made them. What
+is only more of the same stays out.
+
+## Listen
+
+All rendered by the firmware's own DSP (the same C code that runs on the FM-1, running on a PC).
+
+**Drones that evolve** (about a minute each: the sound moves on its own)
+
+| | |
+|---|---|
+| [FERRUGEM](docs/sounds/drone-ferrugem.mp3) | a superwave that rusts, its tension rising over 16 bars |
+| [SERTAO](docs/sounds/drone-sertao.mp3) | the accordion that turns sour |
+| [CINZA](docs/sounds/drone-cinza.mp3) | the ash of a struck plate, in grains |
+| [ABISMO](docs/sounds/drone-abismo.mp3) | FM that keeps opening |
+| [tension ramp](docs/sounds/drone-tension-ramp.mp3) | TENS from 0 to 100 % over 16 bars |
+| [static × evolving](docs/sounds/drone-static-vs-evolving.mp3) | the same drone without and with EVOL |
+
+**Mangue** · [MARACATU](docs/sounds/mangue-maracatu.mp3) (baque virado) ·
+[BAIAO](docs/sounds/mangue-baiao.mp3) · [COCO](docs/sounds/mangue-coco.mp3) ·
+[baião with bass and sanfona](docs/sounds/baiao-bass-sanfona.mp3) ·
+[coco with rabeca](docs/sounds/coco-rabeca.mp3)
+
+**Machines** · [RUST](docs/sounds/kit-rust-grind.mp3) · [FORGE](docs/sounds/kit-forge-anvil.mp3) ·
+[PISTON](docs/sounds/kit-piston-engine.mp3) · [HURT](docs/sounds/kit-hurt-fragile.mp3)
+
+**Grit** · [dry](docs/sounds/grit-dry.mp3) → [worn tape](docs/sounds/grit-tape.mp3) →
+[hum, tape and dust](docs/sounds/grit-hum-tape-dust.mp3) → [everything](docs/sounds/grit-all.mp3) ·
+bass through [FUZZ](docs/sounds/grit-bass-fuzz.mp3), [FOLD](docs/sounds/grit-bass-fold.mp3) and
+[RING](docs/sounds/grit-bass-ring.mp3)
+
+**From 0.1** · [RUST BASS](docs/sounds/rust-bass.mp3) · [HURT PAD](docs/sounds/hurt-pad.mp3) ·
+[GRIND LEAD](docs/sounds/grind-lead.mp3) · [MACHINE](docs/sounds/machine.mp3) ·
+[METAL HIT](docs/sounds/metal-hit.mp3) · [BROKEN BELL](docs/sounds/broken-bell.mp3) ·
+[STATIC](docs/sounds/static.mp3) · [GHOST KEYS](docs/sounds/ghost-keys.mp3) ·
+[DIRTY ORGAN](docs/sounds/dirty-organ.mp3) · [DRONE SAW](docs/sounds/drone-saw.mp3) ·
+[DRONE RING](docs/sounds/drone-ring.mp3) · [DRONE FM](docs/sounds/drone-fm.mp3) ·
+[DRONE VOX](docs/sounds/drone-vox.mp3) · [SUPER SAW](docs/sounds/super-saw.mp3) ·
+[SUPER PAD](docs/sounds/super-pad.mp3) · [HP SHIMMER](docs/sounds/hp-shimmer.mp3) ·
+[four tracks together](docs/sounds/four-tracks.mp3)
+
+## Play it in the browser
+
+<a href="https://zednaked.github.io/jangada/webapp/studio/"><img src="docs/studio.png" alt="Jangada Studio" width="100%"></a>
+
+The **[Jangada Studio](https://zednaked.github.io/jangada/webapp/studio/)** runs the firmware's DSP as
+WebAssembly, sample for sample the same as the device: pick a track and a preset, play with the
+computer keyboard (or a MIDI keyboard), hold drones, run the sequencer, turn the master. No FM-1 needed,
+and nothing leaves your browser.
+
+## Play it from a mixer
+
+![The FM-1 in Nirbija: a step sequencer playing it, and its four tracks read from the device](docs/nirbija-fm1.png)
+
+Plug the FM-1 into [Nirbija](https://github.com/zednaked/Nirbija), a Linux mixer, and it becomes one of
+its instruments: the four tracks in an editor on screen, each engine's parameters read from the device and
+moving both ways, the whole project saved with the session, a track's sound swapped by a scene on the bar
+line, and a step sequencer per track. Both sides speak Jangada's own SysEx protocol (1.0.1), opened after a
+user asked to keep the synth's edit buffer with their DAW projects ([#7](https://github.com/zednaked/jangada/issues/7)).
+Any host can use it: [web/EDITOR_PROTOCOL.md](web/EDITOR_PROTOCOL.md).
+
+## By the numbers
+
+| | |
+|---|---|
+| **Engines** | 13: ANALOG (superwave, Moog-style ladder filter), FM6 (6-operator, Dexed), PHYS (physical models), ROBO (VOSIM, GENDYN, Walsh, scanned), NOISE, DIGITAL (4-op FM), PHASE, LOFI, SAMPLE, VOICE, TRIO, WHEEL, GRAIN |
+| **Voices and tracks** | 8 voices over 4 tracks (3 synths + drums, or 4 synths) |
+| **Parameters** | 16 per engine, a 4-slot modulation matrix with 13 sources (4 of them macro knobs) |
+| **Presets** | 145 factory (45 dark, drone, industrial and northeastern ones by Jangada), 32 user, 72 FM6 patches (8 + two banks of 32) |
+| **Drums** | 5 Jangada kits + 32 synthesised + GM; 49 factory beats, each with its own fill |
+| **Sequencer** | 64 steps per track, chords, ratchet, chance, velocity, accent, slide, swing; **VIVO** (Euclid, chance with memory, cycles, a cellular automaton); 13 arp modes up to 4 bars; metronome and count-in |
+| **Effects** | per-track distortion (5 types) and INSERT (8 types), SLICER, chorus, delay, 3 reverbs, DUST / DUCK / FILT / TAPE / HUM on the master, 16 punch-ins |
+| **Live** | 5 layers (hold a button), MOMENTARY (hold LFO), REV / ECHO THROW, drones with HOLD, EVOL, TENS, RAMP |
+| **Connections** | USB MIDI + audio (stereo 44.1 kHz input) + console, TRS MIDI, clock in (USB / TRS) and out, MIDI LEARN (16 CCs), Program Change |
+| **Storage** | 4 projects, autosave, full backup from the editor, projects and presets with stable keys |
+| **Hardware** | a stock FM-1: nothing to solder, the boot area is never touched |
+
+## Install
+
+Current version: **[Jangada 1.0.1](https://github.com/zednaked/jangada/releases/tag/v1.0.1)**.
+Plug the FM-1 straight into the computer with a USB **data** cable.
+
+**Mac / Windows / Linux, in the browser**: open the
+**[Jangada web installer](https://zednaked.github.io/jangada/)** in Chrome or Edge and press
+*Install*. It carries the latest release; the editor and the Studio are next to it.
+
+**Linux, from a terminal**: clone this repository and run
+
+```
+./instalar-linux.sh                    # downloads and installs the latest release
+./instalar-linux.sh jangada-1.0.fwsc     # installs a file downloaded from the releases
+./instalar-linux.sh --original         # back to M-VAVE's official firmware (V15)
+./instalar-linux.sh --info             # what the FM-1 is running
+./instalar-linux.sh --console          # serial console access (a udev rule, asks for sudo)
+```
+
+It sets up its own Python environment (`mido` + `python-rtmidi`) in `~/.local/share/jangada/` and
+checks the SHA-256 of what it downloaded.
+
+- **If an install fails**: hold **OCT−** while switching the FM-1 on (USB rescue) and install again. We
+  have been through it for real: a 0.5.1 write dropped halfway (the cable), the FM-1 came up in *JANGADA
+  USB RESCUE*, the installer wrote through it and the device came back whole.
+- **Back to the official firmware**: from the web installer (a backup first), `./instalar-linux.sh
+  --original`, or M-VAVE's M-UPGRADE.
+- Since 0.2 the FM-1 shows up on the computer as **Jangada** (MIDI and audio). Felucca's web installer
+  no longer finds an FM-1 running Jangada: use Jangada's.
+
+## First steps
+
+1. **A drone.** PRESETS to **FERRUGEM** (ANALOG), play a chord and let go: it keeps breathing and
+   evolving on its own. Tap ARP until the **DRONE** page and turn **TENS**. **Hold ARP** to let the
+   drone go; hold it again to cut the tails.
+2. **The mangue.** ALGORITHM to track 4, PRESETS to the **MANGUE** kit: its maracatu beat comes with
+   it. Press PLAY. In **GLO → KIT**, the BEAT knob switches to baião, coco, ijexá, samba, xote, frevo
+   or funk. Hold **GLO + 9** and the beat plays its fill.
+3. **Grit.** Hold **FX**: the white keys become 16 effects (loops, reverse, tape stop…) and the knobs
+   become FILT, DUST, DUCK and TAPE.
+4. **Live mix.** Hold **GLO**: keys 1–4 mute, 5–8 solo, 9 held a fill, 10 the next bar a fill, the last
+   one is tap tempo.
+5. **Record.** **REC** on a page with nothing to record opens the tracks view; the FM-1 is also a sound
+   card: record the master on the computer from the **Jangada** input.
+
+## What's in it
+
+### Drones
+The drone presets run the arpeggiator in **RPT** every **4 bars** with **HOLD**: play a chord, let go,
+and it keeps breathing on its own, even while you play the other tracks.
+- **Hold ARP** → DRONE OFF (the latched chords fade with their release); **again** → SILENCE.
+- **DRONE page** (tap ARP until it): **HOLD**, **EVOL**, **TENS**, **RAMP**, per track.
+  - **EVOL**: slow, smooth random walks (cycles of tens of seconds to minutes, never the same) move the
+    filter, the shape and the engine's natural parameter; each voice detunes and breathes its own way.
+    It stops when the drone stops; a new drone starts from the preset's sound.
+  - **TENS**: opens the filter, raises resonance, drive and brightness, spreads the voices (up to ±12
+    cents) and makes the walks deeper and faster. At 0, nothing changes.
+  - **RAMP**: OFF or 1 to 32 bars for the tension to reach TENS, in time. A drone born from silence
+    starts at 0 and builds.
+  - The screen shows the four walks and the tension bar.
+- In the modulation matrix, the **DRIFT** source is the track's walk, for any destination.
+- Presets: **FERRUGEM** (ANALOG), **ABISMO** (DIGITAL), **SERTAO** (WHEEL), **CINZA** (GRAIN),
+  **CARVAO** (FM6), **LODO** (ANALOG through the ladder), **RABECA** and **SANFONA**, and DRONE SAW, RING, FM, DUST, VOX and ORGAN.
+- To sequence a drone: arp OFF, PATTERN with **DIV 4BAR**, one chord per step.
+
+### Mangue and the northeast
+- **MANGUE** kit: alfaia and its middle drum, zabumba and its bacalhau stick, maracatu snare, low and
+  high gonguê, agogô, rising cuíca, ganzá, triangle (closed chokes open), claps and tamanco, with the
+  mangue's weight.
+- **Factory beats** (GLO → KIT, **BEAT** knob): **MARACATU** (baque virado), **BAIAO**, **COCO**,
+  **IJEXA** (afoxé), **SAMBA**, **XOTE**, **FREVO** and **FUNK** (tamborzão), all on the MANGUE kit. A
+  kit on an empty drum track brings its beat along; over a pattern of yours, BEAT asks for a
+  second turn of the knob.
+- **NORD** scale (SCL): mixolydian with a raised 4th, the northeastern mode. NORD or MIX for baião, DOR
+  for xote and toada.
+- **BAIAO BASS** (ANALOG), **RABECA** (ANALOG) and **SANFONA** (WHEEL) presets, the last two as drones.
+
+### Grit: tape, master and punch
+- **TAPE** (GLO → MASTER, or knob 4 while holding FX): worn tape, with saturation, wow (the pitch
+  swaying slowly), flutter (the fast tremble) and treble loss, all on one knob.
+- **HUM** (GLO → MASTER 2): the 60 Hz mains hum with hiss and crackle, only while playing.
+- **DUST** (an old sampler and a record: bits, rate, crackle), **DUCK** (the kick dips the synths for an
+  eighth note), **FILT** (DJ filter: left low-pass, right high-pass).
+- **Distortion per track** (FX → DIST, TYPE): **SOFT** (as always), **FUZZ** (a gated pedal), **FOLD**
+  (wavefolder), **CRUSH** (bits and rate) and **RING** (ring mod, carrier on FREQ).
+- **Punch-in** (hold **FX** + a white key): loops 1/4 to 1/32, stutter, reverse, tape stop, half, LP /
+  HP sweeps, phone, crush, alias, gate, echo and wobble on the whole mix, while the key is held.
+- **Reverbs** (FX → REVERB, TYPE): **ROOM**, **SPRING** and **PLATE** (a stereo feedback delay network).
+- **INSERT per track** (FX → INSERT, after DIST; MIX on INSERT 2): **SOFT**, **HARD**, **FOLD**, **FUZZ**
+  (DRIVE TONE LEVEL), **CRUSH** (BITS, a sample-and-hold RATE from 689 Hz to 44 kHz, LPF), **PHASR**,
+  **FLANG** and **CHOR** (RATE DEPTH FDBK), **DISP** (AMNT STRCH FDBK: a chain of all-passes that pulls the
+  partials' phases apart, from a stiff string's chirp to a metal sheet, ringing with FDBK). After the DIST,
+  so the grit stacks: a FUZZ into a FOLD, a CRUSH into a FLANG, an FM6 into a FOLD into a DISP. OFF (the default) leaves the track as it was, bit for bit.
+
+### Drums
+- Jangada's kits, first in the list (PRESETS on the drum track, or GLO → KIT): **RUST** (dry
+  industrial: distorted kick, gated snare, crushed hats), **FORGE** (anvil, chains, plates), **PISTON**
+  (clicks, steam, valves), **HURT** (low, muffled, breathy) and **MANGUE**, each with its beat
+  (**GRIND**, **ANVIL**, **ENGINE**, **FRAGILE**, maracatu), and five more dark ones for them:
+  **CORRODE**, **FOUNDRY**, **TURBINE**, **WOUND** and **DESCENT**.
+- 32 more synthesised kits (808, 909, TECHNO, INDUSTR, GLITCH, DUBSTEP, JUNGLE…) and the sampled GM kit,
+  each synthesised kit with its own beat (HIPHOP, CLUB, ACID, TRAP, DRILL, BOOMBAP, LOFI, PHONK, HOUSE,
+  DEEP, TECHNO, ELECTRO, 2STEP, JUNGLE, DUBSTEP, DEMBOW, AMAPIANO, AFRO, LATIN, EBM, SWING…).
+- **Fills:** every factory beat brings its own. Hold **GLO + 9** (or GLO + 10 for the next bar) and it
+  plays in place of the bar: its steps are steps with a FILL / NO FILL condition, so they can be
+  edited on the SEQ layer. Some steps have a chance (75–25 %), so the beat breathes.
+- The BEAT knob speeds up when turned fast.
+- **Track 4: DRUM or SYNTH** (TRACKS, knob 1 TYPE): it becomes a fourth synth part.
+
+### Engines
+- **Turbo ANALOG** (EDIT 3 / 4): **SUPR** superwave (up to 6 detuned copies), **SDTN**, **SUB**,
+  **DRFT** (slow per-voice detune), **FTYP** LP12 / LP24 / BP / HP / **LADR**: a Moog-style filter, a
+  four-pole transistor ladder (24 dB/octave) with saturated feedback: RES makes it sing and thins the lows as the
+  hardware does, DRV pushes it into a growl. To find it: tap **EDIT** (don't
+  hold it) up to the EDIT 4 page and turn knob 1 to the end; CUT, RES and DRV are on EDIT 2. Presets **PICHE BASS**, **MOTOR LEAD** and **LODO** (a drone).
+  **SAT** (EDIT 4, knobs 2 and 3): a saturation per voice after the filter, before the VCA
+  (OSC → FILTER → SAT → VCA): **WARM** (tube, even harmonics), **HARD** (a wall: buzz) or **FOLD** (a
+  wavefolder); **SDRV** how hard. Each voice is shaped alone, so chords stay clean where the track's DIST
+  would smear them. Preset **SUCATA**. **SPOS** (EDIT 4, knob 4) moves it before the filter: **PRE** is
+  OSC → SAT → FILTER → VCA, so the filter and its envelope sweep through what the folder made (POST, the
+  default, keeps the raw harmonics after the filter); the same cost either way. Preset **DOBRA**.
+- **LFO 2** (LFO → LFO 2): **SYNC** the LFO to a note value (4BAR to 1/32, dotted and triplets; locked to
+  the beat while playing, a MIDI clock too), **TRIG** NOTE or FREE, **POL** BI or UNI. **ESYNC** (ENV DEST,
+  knob 4): ATK, DEC and REL as note values of the tempo.
+- **Modulation into the filter**: the MOD 1–4 matrix reaches every engine parameter, so CUT, RES, DRV and SDRV
+  are destinations: LFO → RES, ENV → CUT, VEL → DRV, ENV → SDRV. They move per voice, every block.
+- **FM6**: 6-operator FM (Dexed's msfa core), 32 algorithms, 8 factory patches (PTCH F1–F8) and
+  **two banks of 32** in flash (B1–B32 and B33–B64: two whole cartridges), with macros on the knobs (ALG
+  FB MLVL MRAT MEG VMOD DTUN). Each track's patch goes along in the project, the autosave and the backup.
+- **The bank voices in PRESETS**: after the factory presets, PRESETS lists every voice stored in the
+  banks by name (tagged BK1 / BK2), before the user presets; picking one puts the track on FM6 with that
+  patch. **Hold HOME and turn PRESETS** to jump a group at a time (each engine's presets, FM6 BANK 1,
+  FM6 BANK 2, the user presets; the group shows in the top bar, and that HOME press opens nothing);
+  **KNOB 3 (KIND)** on the PRESETS page does the same.
+- **Preset categories**: every factory preset is a **BASS**, **LEAD**, **PAD**, **KEYS**, **PLUCK**, **PERC**,
+  **DRONE** or **FX**. **KNOB 2 (CAT)** on the PRESETS page picks one, and from then on the PRESETS knob,
+  KNOB 1 and the group jump walk only those presets, across all the engines (No. counts within the
+  category). **ALL** is the whole list. FM6 bank voices and user presets show under ALL.
+- **The PRESETS page**: tap **SAVE** (again: USER, PROJECT, TOOLS) with a synth track selected. KNOB 1
+  **No.** one preset at a time, KNOB 2 **CAT** the category, KNOB 3 **KIND** a group at a time (with the
+  engine's icon); KNOB 4 shows how many there are. To change only the engine, use the EDIT layer (keys 1–12).
+- **Dexed edits Jangada live**: point Dexed's (or another DX7 editor's) MIDI at the FM-1 and turning a
+  knob there changes the FM6 track at once; send a voice to the track or a 32-voice cartridge to a
+  bank, and ask for them back. The cartridge goes to the bank the FM6 track's PTCH is in (B33–B64:
+  bank 2); with PTCH on a factory patch the screen asks **FM6 BANK 1? SAVE=YES**: OCT- / OCT+ choose
+  bank 1 or 2, SAVE writes it, any other button cancels.
+- **PHYS**: physical models (DaisySP and Rings, in fixed point). **MODAL** (bells, bars, plates), **STRNG**
+  (a plucked string: a curved bridge that buzzes, or a stiff one), **MEMB** (a drum head that drops in
+  pitch after the hit) and **SYMP** (a string with three sympathetic strings ringing along); BRIT, DAMP,
+  POS, ACC, **BOW** (sustains it) and EXC. Jangada's presets: **BERIMBAU**, **VIOLA CAIPIRA**, **ALFAIA**,
+  **BIGORNA** (an anvil), **TRILHO** (a struck rail), **SINO RACHADO** (a cracked bell), **PIANO PODRE** (a
+  rotten piano) and **FERRO VELHO** (bowed scrap, a drone).
+- **NOISE**: **ANLG** (white noise and impulses), **DUST** (only the impulses: crackle, drops), **LFSR** (a
+  shift register clocked above the key) and **META** (a short register sequence: a metallic tone); COLR
+  from white to pink to brown, a filter from low-pass to a narrow band, DRFT, CRSH. Jangada's presets:
+  **FORNALHA** and **CHAMINE** (brown-noise drones), **ESTATICA**, **ENGRENAGEM**, **VAPOR**, **SUCATA NZ**.
+  Two machines of Jangada's own: **MOTR** (bursts of noise, a gear's teeth, struck in time with the key: DIV
+  divides it from a pitched saw blade down to slow pistons, GRIT from a click to a grind, every 4th tooth
+  harder; the picture is a gear turning) and **COMB** (the noise rung by a comb tuned to the key: a pipe, a
+  plate, a hammer on iron; FDBK how long it rings). Presets **SERRA**, **PISTAO**, **BETONEIRA**, **ESTEIRA**,
+  **TUBO**, **MARRETA**, **GARGANTA**.
+- **ROBO**: machine voices (ideas from issue #4). **VOSIM** (bursts of sin² pulses at a formant, each smaller
+  than the last: vowels, buzzes, a talking chip; FORM, PULS, DCAY, TRK), **GENDY** (Xenakis' dynamic stochastic
+  synthesis: the period's breakpoints walk in level and length every cycle while the pitch holds; STEP, PTS,
+  TIME, SEED: 0 a new walk each note, 1–127 the same one) and **WALSH** (a sum of ±1 Walsh functions,
+  band-limited; SEQ, TERM, BLND from cal to sal, SWP) and **SCAN** (scanned synthesis, Lite: a ring of 16
+  masses on springs moving at haptic rates, read round at the note's pitch, so pitch and timbre are apart;
+  STIF, DAMP (0 rings on), CNTR, HIT the starting shape, DRFT pushes it). DRFT, CRSH and TONE for all. Presets:
+  **ROBO VOX**, **CORAL MORTO** (a dead choir, a drone), **LATA**, **ABOIO** (the sertão's cowherd call),
+  **XENAKIS**, **ENXAME**, **GERADOR**, **ESTILHACO**, **WALSH BASS**, **TELEX**, **SINAL**, **CHAPA**,
+  **MARE** (a tide, a drone), **ONDA PRESA**, **ESTACA**, **VIDRO**.
+- And the others: DIGITAL (4-operator FM), PHASE, LOFI, SAMPLE, VOICE, TRIO, WHEEL, GRAIN.
+- **16 parameters per engine** (Felucca has 8).
+- **Modulation matrix** (LFO → MOD 1–4): sources LFO, ENV, VEL, KEY, RND, MODW, AT, EXPR, DRIFT and
+  MAC1–MAC4; destinations filter, pitch, shape or any engine parameter.
+- **Macros for playing live** (LFO → MACRO): four knobs, MAC1–MAC4, for the whole song. Point matrix slots
+  at the same MAC, on one part or on all of them, and one knob moves them together: MAC1 → CUT on every part
+  is a BRIGHTNESS, MAC2 → DRV + SDRV a DRIVE. MIDI CC 16–19 move them from a controller (any channel). They
+  belong to the hands, not the song: a project does not store them, and loading one leaves them where they are.
+- **One-key chords** (SCL → CHORD): TRIAD, 7TH, 9TH, SUS4, POWER; the white keys walk the scale and
+  each plays its chord.
+
+### Live: hold a button
+Tap a function button and its pages open; tap again for the next page, with **OCT−** held for the one
+before. **Hold** it and it becomes a **layer**: the 16 white keys and
+the 4 knobs change job, and the screen shows 16 tiles and 4 dials. **HOME** tapped while a layer is held
+**locks** it open, and so does a **double tap** of its button; a tap lets it go. PLAY, REC and OCT keep working
+inside it.
+
+| Hold | Keys | Knobs 1 · 2 · 3 · 4 |
+|---|---|---|
+| **FX** | the 16 punch-in effects; black keys **F#3 REV THROW**, **G#3 ECHO THROW** | FILT · DUST · DUCK · TAPE |
+| **GLO** | 1–4 mute, 5–8 solo, 9 held = a fill, 10 = the next bar a fill, 14 = MIDI LEARN, the last one tap tempo; **SELECT** turns the BPM (alone only on HOME, since 0.9.9) | levels of tracks 1–4 |
+| **SEQ** | the 16 steps of the page (empty = set, set = press and release clears); black keys: page, shift, half / double, transpose, **F#5 held erases** what the playhead passes | NOTE · DIV · SWG · LEN; steps held: NOTE · RTCH · CHNC · FLAG |
+| **SCL** | any key = the key of the song | CHRD · SCL · QNT · TRN |
+| **EDIT** | the track's engine; the last one = track 4 DRUM / SYNTH | PRST · VOICE · GLIDE · LVL |
+
+With **SEQ** held, **OCT− / OCT+** = undo / redo of the pattern. With steps held, the other knobs work on
+them too: **SELECT** nudges them off the grid (1/64 of a step, up to half a step early or late),
+**ALGORITHM** picks a sound parameter and **PRESETS** gives it another value on those steps only (a
+parameter lock; it goes back at the next step without one), **OCT+** sets their condition (ALWAYS,
+**FILL** only in a fill, **NO FILL** never in one) and **OCT−** takes their locks and nudge away. The
+title shows the picked parameter, its value on the step, the nudge and the condition; a small square at
+the top right of a tile marks a lock or a nudge, one at the top left a condition (full: FILL, hollow:
+NO FILL). **REC** on a page with nothing to
+record opens the **TRACKS** view: BPM, bar.beat, one row per track with its steps and playhead.
+
+- **MOMENTARY**: hold **LFO** and turn knobs (HOME or any page); let go of LFO and every value you turned
+  goes back. **OCT+** while holding LFO keeps them. While held, the top line says so (TURN A KNOB, how many
+  values will go back, KEPT). A tap of LFO opens its pages.
+- **THROWs** (FX layer): **F#3** held sends every track's reverb to full, **G#3** every delay send (and
+  FDBK up to 70 % if lower); they glide in and out in ~12 ms and nothing is saved.
+- **FX LATCH**: tap an effect's key twice, quickly, and it stays on after you let go, out of the FX layer too
+  (the top line says **LATCH:** and which); a tap of that key again lets it go, another effect replaces it.
+
+### Sequencer and arpeggiator
+- 64 steps per track, chords, ties, accent, slide; live recording (it keeps how hard you played).
+- **RTCH** ratchet x1–x4, **CHNC** chance 100/75/50/25 % and **VEL** velocity per step (STEP 2).
+- **VIVO** (SEQ → VIVO, VIVO 2, VIVO 3), the pattern alive: a layer that decides step by step what plays,
+  without changing what is written (all at their defaults: the pattern as written).
+  - **PULS** Euclid's rhythm (k hits spread over LEN, **ROT** turns them): each hit plays the next note
+    step of the pattern in turn, so the melody walks over the rhythm; an empty pattern plays the key played
+    last.
+  - **DENS** the chance a step plays; **MEM** gives it memory (+ bursts, − alternation).
+  - **CYC** the chances repeat every CYC steps, a cycle of their own against LEN; **ACC** an accent every
+    ACC steps, another cycle.
+  - **EVOL** a cellular automaton (R30, R90, R110, R150, R54, R184, R22) born from the rhythm, changing
+    it every **LOOP** passes; **FRZ** holds what you hear.
+  - **SEED**: every chance comes from it and the count since PLAY, so the same settings play the same.
+  - The page draws the pattern as a ring: the rhythm outside, what played in the last pass inside, accents
+    white.
+- **Metronome** (GLO → CLICK): **CLICK** OFF, REC (while a track is armed) or ON, a blip on each beat,
+  higher on the bar's first; **LEVEL**; **COUNT** OFF, 1BAR, 2BAR: PLAY with a track armed counts in
+  first. To the headphones and the speaker only, never into USB audio. **PREV**: stopped, turning STEP
+  on the STEP page plays the step the cursor lands on.
+- The **arp** follows TRN, ROOT, SCALE and QNT on the keys it holds (HOLD too): change the key and the
+  arpeggio moves with it.
+- **CHORD+**: with a chord mode on (SCL → CHORD), the black keys change the chord, held before the white
+  key or pressed while the chord sounds: **F#** major ↔ minor, **G#** + 7th, **A#** sus4, **C#** + 9th,
+  **D#** inversion (they combine; the 7th and 9th come from the scale). On the same page **STRM** spreads
+  a chord's notes like a strummed guitar (1–60 ms a note; right low to high, left high to low; on the
+  keys and the chord steps) and **VLEAD** voices each chord nearest the last one.
+- Delay TIME up to the dotted **1/8D** and **1/16D**.
+- **FILT** on every track (FX → DIST, knob 4): left a low-pass, right a high-pass, centre off; it stays
+  when the sound changes and can be locked on a step.
+- **Micro timing**, **parameter locks** (12 a track) and **fills** per step, in the SEQ layer; they are
+  saved with the project.
+- Arpeggiator: UP, DN, UPDN, RND, ORD, **UDI**, **RPT**, **DNUP**, **CONV** (outside in), **DIVG** (inside
+  out), **PINKY**, **THUMB** (the top / bottom note every other), **WALK**; divisions up to **4BAR** (in the
+  sequencer too).
+
+### MIDI and USB
+- **MIDI in on the TRS jack** (3.5 mm) and over USB: channels 1–3 the synth tracks, 4 track 4 when it
+  is a SYNTH, the drum channel (default 10) the drums, the others the selected track. **GLO → SYSTEM
+  ROUT = SEL**: every channel plays the selected track (a keyboard on channel 1 plays what PRESETS browses);
+  **CH5-8**, **CH9-12**, **CH13-16**: tracks 1–4 on another block of channels (two FM-1s on one cable).
+- **Program Change** on a track's channel loads its engine's sound n, in PRESETS' order (FM6: then the bank
+  voices); on the drum track, kit n. Past the last: ignored.
+- **MIDI LEARN** (hold **GLO** + key 14): turn a knob, move a controller, and that CC drives that
+  parameter of that track, on any channel; then the next knob. **OCT−** clears the picked one's CC; GLO +
+  14 again is done. Up to 16, kept with the settings; HOME → MIDI LEARN shows how many and clears them.
+- Pitch bend, sustain, all notes off, mod wheel, aftertouch and expression (as matrix sources).
+- **Clock** (GLO → GLOBAL CLK): INT, **USB** or **TRS**, pulse by pulse, no drift; **SYNC OUT** sends
+  clock over USB.
+- **HOME → MIDI OUT = SEQ**: the sequencer and the arp go out over USB too (each track on its channel,
+  the drums on theirs), every note ended; KEYS (default): only the keys. **MIDI IN = CLOCK** follows the
+  clock and START / STOP and ignores incoming notes. Both are settings of the FM-1, not of the project.
+- **USB audio**: the FM-1 shows up as a stereo audio input named **Jangada** (44.1 kHz, no driver).
+  HOME → USB AUDIO: the level follows MASTER, or FULL. On Linux:
+  `arecord -D hw:Jangada -f S16_LE -r 44100 -c 2 take.wav`. Since 0.9.7 the audio interface comes before
+  MIDI in the descriptors, so macOS 15 and earlier show the audio input too.
+- **In a DAW or a mixer** (1.0.1, editor protocol v8): a host reads a track's whole sound in one SysEx
+  frame and sends it back later (`F0 7D 46 4C 60 <track> F7`, [#7](https://github.com/zednaked/jangada/issues/7)),
+  sets many parameters in one frame and reads any engine's parameter names. [Nirbija](#play-it-from-a-mixer)
+  uses it (0.6.0). The protocol: [web/EDITOR_PROTOCOL.md](web/EDITOR_PROTOCOL.md).
+
+### Screen, lights and menu
+- Antialiased font (Inter Tight), icons, cards; the **CHOQUE** palette (hot pink) by default, and **NIGHT** (true black, green).
+- Menu (hold **HOME**): COLOR, SPEAKER (a low cut for the speaker), **LIGHTS** (the buttons glow
+  dimly, for playing in the dark), **KEYS** (lights the C keys, the white ones or the track's **SCALE**, its root
+  brighter), **NOTES** (sounding
+  notes light their keys), USB AUDIO, MIDI OUT, MIDI IN, NEW PROJECT, ABOUT.
+- Pages without a graph (EDIT, DIST, CHORD, GLOBAL, SYSTEM…) show their four values **large**, each knob
+  as a **circle** that grows with its value, its name and value below; the one you turn in white. The
+  shape follows what the parameter does: a **disc** (amounts), **ripples** (RES, FDBK, REV, DECAY…), a
+  **spiral** (RATE, TIME, GLIDE…), a **wave** turning stormy (SHP, DRV, FOLD…) and **interference** (MOD,
+  DTN, RATIO, PAN). Bipolar values grow from zero (below it the disc is hollow); lists show the value.
+  Note values (1/4, 1/8, 8T, 1/8D…) show as dots, as many as the notes they make in a bar.
+- **The engine on its EDIT pages**: the middle of the screen shows the engine at work, the four knobs as
+  small circles in a row on top (a turned knob shows its value in place of its name). The picture comes from the engine's own state as it plays (SCAN's masses,
+  GENDY's walking points, WALSH's wave, GRAIN's grains, each FM6 operator's level, SAMPLE's play position,
+  WHEEL's drawbars) and moves with the track's sound: it swells with the level, gets busier with the
+  brightness and is struck on an attack. **ENV**, **LFO** and **MOD 1–4** have the same row on top: the
+  envelope drawn filled with a dot where the playing voice is, the LFO's waves with a dot at its phase, and
+  the matrix slot as SRC → DST → SOUND with the source's shape as tall as its amount.
+- **Its own samples**: SAMPLE and GRAIN play **IRON** (a struck steel plate), **WIRE** (a plucked wire),
+  **TABLE** (a wavetable sweep: in GRAIN, POS walks the timbre) and **MOTOR** (a machine running), all
+  synthesized by Jangada, plus PERC and your own three slots. Presets **SCRAP BELL** and **ENGINE ROOM**.
+- **Visualiser**: on the TRACKS screen, tap **HOME**: the whole screen shows what plays. **SELECT** changes
+  the style: **OSC** (the wave with a phosphor trail), **SONAR** (the wave round a circle, a sweep a bar),
+  **VU** (a meter per track and the mix), **ESTEIRA** (each track's level scrolling by) and **MAR** (the
+  raft riding the tracks' swells). HOME again goes HOME; the keys and the layers keep working.
+- Nothing blinks hard: what can be pressed **breathes** (a slow fade), such as a locked layer's button or
+  OCT+ in a dialog.
+
+### On the site
+- **[Studio](https://zednaked.github.io/jangada/webapp/studio/)**: Jangada in the browser.
+- **[Editor](https://zednaked.github.io/jangada/webapp/editor/)** (Chrome or Edge, FM-1 on USB): every
+  parameter, the steps, the presets; the **6-OP FM** tab (the whole FM6 patch, the banks B1–B32 and B33–B64,
+  DX7 `.syx` both ways); **CHOP** (cut a recording of any length into up to 16 chops for USR1–3);
+  **Backup and restore** of everything in one `jangada-backup-DATE.json` file.
+- **[Installer](https://zednaked.github.io/jangada/)**: installs the latest release, or goes back to the
+  official firmware.
+
+### Storage and safety
+- **Autosave**: stopped and untouched for a few seconds, the project goes to flash and comes back at
+  power-on. **OCT+** held at power-on starts empty; **HOME → NEW PROJECT** clears everything.
+- Projects and presets store each value under a **stable key**: newer versions open what older ones
+  saved. Felucca's projects and presets are read and converted. Since 0.9 a value takes one byte
+  (projects "JNG2", user presets "UPB3"): what 0.8.2 saved opens, and room is left for what comes.
+- **Safe updates**: the installer refuses a damaged package; the loader checks the CRC before it lets
+  the new firmware start; **OCT−** at power-on (or two failed boots) opens the **USB rescue**, proven
+  on a real interrupted write. The boot area is never written, so an FM-1 running Jangada always has a
+  way back.
+
+## Tools
+
+| | |
+|---|---|
+| `tools/fm1_console.py status` | CPU, audio, USB, MIDI, battery |
+| `tools/fm1_console.py check` | on-device test: CPU peak, late audio, resets |
+| `tools/fm1_console.py voices` | what sounds on each track, and why (with EVOL and TENS) |
+| `tools/fm1_console.py preset E I [T]` | loads preset I of engine E on track T |
+| `tools/fm1_console.py t4 synth\|drum` | track 4 type |
+| `tools/fm1_console.py droneoff` | as holding ARP |
+| `tools/fm1_console.py color CHOQUE` | screen palette |
+| `tools/fm1_console.py g ID [VALUE]` | reads or sets a global parameter (e.g. `g 28 90` = DUST) |
+| `tools/fm1_console.py punch N\|off` | starts a punch-in effect (0–15) or stops it |
+
+## Build and test
+
+See [BUILDING.md](BUILDING.md). On Linux x86-64 the JieLi toolchain runs natively, no Docker:
+
+```
+tools/get_toolchain.sh        # the toolchain, in ~/.jieli
+tools/get_sdk_files.sh        # only the 3 AC79 SDK files the package uses
+./build.sh                    # build/felucca.fwsc
+sh tests/run_tests.sh         # every test, on the PC
+python3 tools/build_studio.py --get-zig   # the Studio (WebAssembly), once
+```
+
+- **Reproducible build**: the date comes from the last commit; two builds give the same bytes.
+- The tests cover the sound (renders of every preset with a fingerprint), health (clipping, DC, stuck
+  notes), the CPU budget, formats and compatibility, MIDI and clock, DX7 SysEx, the drones, the grit,
+  the kits, the layers and screens, the installer, the editor, the backup and the Studio (the
+  WebAssembly comes out sample for sample the same as the same C compiled on the PC).
+- **CI** on every push; a `vX.Y` tag publishes the `.fwsc` on a release and updates the site.
+
+## Next
+
+- Finer MIDI (per-channel bend range, CC1 vibrato) and the chord name on HOME.
+- More broken pianos (*The Social Network*), after PHYS's PIANO PODRE.
+- RUST, ASH and MANGUE palettes; the jangada on the boot screen.
+
+Ideas, sounds and bugs: open an [issue](https://github.com/zednaked/jangada/issues).
+
+## Credits and license
+
+Jangada is GPL-3.0-only, as Felucca is. The original work is **Leo Kuroshita's (@kurogedelic),
+Hügelton Instruments**. Parts come from other forks, with our thanks:
+
+- [Felucca 1.0](https://github.com/hugelton/Felucca): FM6, USB audio, the SPRING reverb, the look
+  (Inter Tight, Fukiai icons), the FM6 bank. From 1.1 to 1.5.1: the INSERT, MIDI LEARN, the metronome and
+  count-in, MOMENTARY, the THROWs, LFO SYNC, ENV SYNC, Program Change (renebohne's PR), the arp modes, the
+  macOS USB audio and encoder fixes.
+- [SLOOP](https://github.com/isod89/sloop-fm1) (isod89): the layers, punch FX, the master, the
+  synthesised kits, the chords, PLATE, autosave, safe updates and rescue, the lights, TRS MIDI, micro
+  timing, parameter locks and fills.
+- [Felucca [Salt]](https://github.com/ChanceTheMaker/Felucca) (Chance Roth): the Studio in the browser.
+- [Melodee](https://github.com/keremimo/melodee) (Kerem Kilic / Ellic Studio): DX7 SysEx, and how to
+  start the FM-1's second core.
+- [X0X](https://github.com/charlesvestal/fm1-x0x) (Charles Vestal): the second core, from Melodee's work
+  (AUTO, with an opt-in BOOST of the supply: see [BUILDING.md](BUILDING.md#the-second-core-auto-and-an-opt-in-boost)).
+- msfa / Dexed (Google, Pascal Gauthier): the FM6 core (Apache-2.0).
+- [gospodindilly-ops](https://github.com/gospodindilly-ops): the ideas behind ROBO, VIVO and the pictures
+  of the engines (issues #4 and #5).
+
+Going the other way: the ratchets went upstream and ship in
+[Felucca 1.0.5](https://github.com/hugelton/Felucca/releases/tag/v1.0.5) ([PR #100](https://github.com/hugelton/Felucca/pull/100)).
+
+See [README.felucca.md](README.felucca.md) and [LICENSING.md](LICENSING.md) for the full credits
+(fonts, samples, engines).
+
+M-VAVE and FM-1 are trademarks of their respective owners. Jangada is not affiliated with or endorsed
+by them, nor by Felucca.

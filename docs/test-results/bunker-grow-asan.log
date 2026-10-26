@@ -1,0 +1,2 @@
+PASS GROW: all 12 keys x 32 scales x 4 styles, sound/rhythm preservation, project roundtrip, exact undo, panel actions, single/all scope, guards, pitched-only, empty track, edge notes, live lock
+GROW checks: 3309372; peak: 4501; max voices: 5

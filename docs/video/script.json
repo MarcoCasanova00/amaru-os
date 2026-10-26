@@ -1,0 +1,74 @@
+[
+  {
+    "name": "intro",
+    "script": "Meet Bunker Evolved. A free, open-source ambient instrument for your M-VAVE F M One. Four musical layers. Sixty-four sound presets. Twenty-four complete worlds. And thirty-two scales to explore. Start with a world, press play, and let the music breathe.",
+    "index": 0,
+    "voiceDuration": 23.719184,
+    "duration": 29.8,
+    "start": 0,
+    "voiceStart": 2
+  },
+  {
+    "name": "worlds",
+    "script": "Choose a world while playback is stopped, then press octave plus to load it. Use Algorithm to choose Air, Melody, Root, or Spark. These are musical roles. Every layer can use its own synthesis engine. Home moves between the six Bunker pages.",
+    "index": 1,
+    "voiceDuration": 22.386939,
+    "duration": 28.4,
+    "start": 29.8,
+    "voiceStart": 2
+  },
+  {
+    "name": "grow",
+    "script": "For a new melody, open Grow. The four knobs choose the root note, scale, style, and target. Tune fits your notes to the scale. Soft makes small changes. Flow moves further. New reshapes the phrase over its existing rhythm. Press octave plus to apply. Press octave minus to undo the last Grow step. Your sound and mix stay intact. Grow locks the new phrase, giving you time to listen.",
+    "index": 2,
+    "voiceDuration": 30.275918,
+    "duration": 36.3,
+    "start": 58.2,
+    "voiceStart": 2
+  },
+  {
+    "name": "shape",
+    "script": "Want more control? Sound gives each layer sixteen starting points, with quick controls for colour, release, and reverb. Edit, Envelope, L F O, and Effects open the deeper tools. The step sequencer lets you change individual notes and chords. Save the complete composition in one of four project slots.",
+    "index": 3,
+    "voiceDuration": 25.312653,
+    "duration": 31.4,
+    "start": 94.5,
+    "voiceStart": 2
+  },
+  {
+    "name": "evolve",
+    "script": "To let a phrase develop by itself, open Evolve. Choose a process, its probability, and the number of loops between changes. Try Walk for gentle melodic movement, or Breath for changes in touch and rhythm probability. Octave minus locks the current phrase whenever you want to keep it.",
+    "index": 4,
+    "voiceDuration": 23.719184,
+    "duration": 29.8,
+    "start": 125.9,
+    "voiceStart": 2
+  },
+  {
+    "name": "install",
+    "script": "To install, charge your F M One and connect it directly with a USB data cable. Open the installer in desktop Chrome, close other MIDI apps, and click Detect. Stock firmware uses the same update protocol. There is no need to install Amb One first. Back up your music, choose Bunker Evolved, read the recovery guide, and start the update. Keep power and USB connected until the final firmware identity is confirmed.",
+    "index": 5,
+    "voiceDuration": 33.619592,
+    "duration": 39.7,
+    "start": 155.70000000000002,
+    "voiceStart": 2
+  },
+  {
+    "name": "rescue",
+    "script": "The recovery page includes the previous Bunker build, Amb One, and a verified original V fifteen file from M-VAVE. An interrupted transfer can be restarted if the MIDI update loader still responds. The watchdog can restart a stalled application, but it cannot repair every failed flash. A chip recovery mode may need separate tools. Firmware rollback does not restore overwritten music.",
+    "index": 6,
+    "voiceDuration": 31.373061,
+    "duration": 37.4,
+    "start": 195.40000000000003,
+    "voiceStart": 2
+  },
+  {
+    "name": "outro",
+    "script": "Bunker Evolved is built on Felucca, with gratitude to the open-source FM One community. The project owner has tested this build on real hardware. Explore the browser instrument, hear the worlds, read the guide, and download the complete source. Free to play. Free to explore. Make something that grows.",
+    "index": 7,
+    "voiceDuration": 24.372245,
+    "duration": 30.4,
+    "start": 232.80000000000004,
+    "voiceStart": 2
+  }
+]

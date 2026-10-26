@@ -1,0 +1,116 @@
+BUNKER EVOLVED 1.0 RC2 — PRÜFBERICHT
+17. Oktober 2026
+
+STATUS
+Der Nutzer meldet, dass RC1 auf seinem FM-1 hervorragend funktioniert.
+Die hier beschriebenen Änderungen in RC2 sind im C-Host und in WebAssembly
+geprüft. Eine physische RC2-Abnahme und ein echter USB-Flash durch dieses
+Projekt stehen weiterhin aus. Kein unbelegtes Versprechen einer Fehlerfreiheit.
+
+PAKET
+FM-1_7100002 / BE 1.0-RC2
+bunker-evolved-rc2.fwsc: 610090 Bytes
+SHA-256: db0b50d0ae9c3bfccee76e3b93de09fffa55389169278a0c5899dad9c79e6bb8
+WASM: 796688 Bytes
+WASM SHA-256: a79103ba50b2a75c9311e375e38affdaeebe472068602e75d5c2f5b87788c0fa
+
+ÄNDERUNGEN
+- Neue Schnellseite GROW direkt nach WORLD: Grundton, Skala, TUNE/SOFT/FLOW/NEW,
+  ausgewählte Spur oder ALL. OCT+ anwenden, OCT- letzten GROW-Schritt zurück.
+- TUNE: nur neue Tonart/Skala. SOFT/FLOW/NEW: melodische Variationen innerhalb
+  der Skala, bestehende Rhythmen, Klangparameter und Pegel bleiben bestehen.
+  NEW füllt auch eine leere Spur mit einem sparsamen Motiv.
+- Zielspuren werden für das Anhören auf LOCK gestellt. Drum-/Slice-Adressen
+  werden nicht in melodische Tonhöhen umgewandelt. Aufnahme/Chain haben Vorrang.
+- Undo prüft, ob die Phrase seitdem verändert wurde. Ein älteres Undo darf
+  keine nachfolgenden Bearbeitungen überschreiben. Ein Schritt, nicht persistent.
+- Farbige Notenkonstellationen, leuchtende Abspielmarker, Skalentöne und volle
+  Skalenbezeichnungen. Integer-Geometrie, bestehender Canvas, maximal ca. 8 Hz.
+  ANIM OFF stoppt dekorative Bewegung. Kein Audio-Zufallsgenerator fürs Display.
+- Projektformat unverändert: 114 Parameter. RC1 und RC2 lesen dieselben Projekte.
+
+BUILD: BESTANDEN
+App 527692 Bytes; Loader 6934 Bytes. .data+.bss 61156 / 73728 Bytes.
+Pool unverändert 328924 / 368640 Bytes. Ein CPU-Kern; keine experimentelle
+zweite Core-Task. Flash-RAM-Routine 916 Instruktionen ohne XIP-Aufrufe;
+Registerzugriffe weiterhin HAL-only. Das sind Speicher-/Layoutprüfungen,
+keine Messung der Echtzeitreserve auf dem Chip.
+
+GROW: BESTANDEN
+3,309,372 Assertions im GROW-Test, zusätzlich mit ASan/ausgewähltem UBSan.
+Alle 12 Grundtöne x 32 Skalen x 4 Arten. Jede Zielnote im vorgesehenen
+Tonvorrat und im Bereich 24..108. Bestehende Rhythmus-/Velocity-/Chance-Daten
+und Klangzuordnung bleiben erhalten. Speicherung/Import der Ergebnisse geprüft.
+Exakte Wiederherstellung der vorherigen Phrase samt Skalen und Generativmodi.
+Echte HOME-/Encoder-/OCT-Gesten, Einzel-/ALL-Auswahl, Aufnahme-/Chain-Sperre,
+Schutz von Drum/Slice, leere Spuren und extreme Notenwerte geprüft.
+30 Sekunden Live-Audio nach GROW: Phrase bleibt unverändert, Undo funktioniert.
+
+REGRESSIONEN: 19/19 BESTANDEN AUF RC2
+storage_test, upreset_test, input_test, midi_uart_test, scale_test, project_test,
+motion_test, detail_test, ui155_test, v156_test, fun10_test, midi_control_test,
+audio_test, persistence_test, backup_test, editor_test, robust_test,
+fm6bank_test, ui_test.
+Keine Audio-Goldenwerte für RC2 verändert. Dies ist die definierte 19-Suite-
+Prüfmenge, nicht die Behauptung, alle optionalen Upstream-Tests seien ausgeführt.
+Der zusätzliche Bunker-Smoke-Lauf für die verbundenen Panel-Funktionen und
+Bibliotheken besteht ebenfalls. Siehe Rohlogs.
+
+BELASTUNG: BESTANDEN
+3606,50 Sekunden simuliertes Audio, 322,108,942 Assertions, maximal 8 Stimmen.
+Peak 8675 / 32768, RMS 713,65. Regelmäßige Wechsel von Welten, Sounds, Skalen,
+Tempi, Motiven, GROW-Stilen und Undo, dazu alle sechs neuen Displayseiten.
+Ausgabe endlich/begrenzt, Parameter innerhalb gültiger Bereiche.
+Beschleunigter Hostlauf, kein einstündiger Gerätedauerlauf.
+
+SPEICHERPRÜFUNG: BESTANDEN IM AKTIVIERTEN UMFANG
+GROW-Kombinationstest und 1202,50 simulierte Audiosekunden des Belastungslaufs.
+107,399,922 Assertions im Audiolauf; maximal 8 Stimmen; Peak 8439 / 32768.
+Keine Meldung von ASan oder den aktivierten UBSan-Prüfungen.
+Flags: -fsanitize=address,undefined
+-fno-sanitize=signed-integer-overflow,shift,bounds,object-size,pointer-overflow
+-fno-sanitize-recover=all -ffp-contract=off
+ASAN_OPTIONS=detect_leaks=0
+Die ausgeschlossenen UBSan-Kategorien betreffen auch das Festkomma-Wrapping
+und simulierte XIP-Adressmodell der Basis; keine vollständige UB-Freiheitsbehauptung.
+
+AUDIO / WEBASSEMBLY: BESTANDEN
+C-Host und WASM: schwerer Testsong mit 88200 Stereo-Frames bitgenau gleich.
+Derselbe native Audiolauf ist außerdem bitgenau gleich mit dem gesicherten
+RC1-Render. Der neue Renderer verändert die bisherige Klangbasis nicht.
+Boot, Keys, LEDs, MIDI, Encoder, PLAY, Preset-Speichern und Wiederherstellen
+sowie absolute/relative Controller-Modi bestanden. Node-Benchmark: 13,5 ms
+für eine simulierte Sekunde; kein FM-1-CPU-Messwert.
+Die unveränderte 64-Sound-/24-Welten-Bank und ihre Hörproben stammen aus RC1;
+deren Bankprüfung ist unter docs/test-results-rc1 dokumentiert und wurde nicht
+als neue RC2-Prüfung ausgegeben.
+Sechs reale C-Displaybilder und 32 Animationsframes wurden gerendert; die
+Displayansichten wurden visuell geprüft. Kein realer Chrome-Layout-/USB-Lauf;
+die bekannte Browser-Preview-Infrastruktur ist hier nicht verfügbar.
+
+UPDATE UND RÜCKWEG: BESTANDEN IM MODELL
+Neuer Loader: vollständiger RC1 -> RC2-Wechsel und RC2 -> RC1-Rückwechsel.
+Boot-Kopf und Userbereiche bleiben erhalten, erlaubte Schreibfenster/CRC,
+fehlerhafte Pakete und Wiederholung geprüft. Kein Wechsel des Projektformats.
+Aktueller OTA-Einstieg und alter Wolf-/AMB-Einstieg mit RC2-Paket bestanden.
+Installer: 1024 Pack7-Roundtrips, begrenzte SysEx-Queue, ungültige Anfragen,
+Disconnect, fehlerhaftes ACK, Endkennung, Cleanup und Loader-Resume geprüft.
+DOM-Test: kein Auto-Flash, Identitätsabfrage ohne Schreiben, Bestätigung nötig,
+RC2-Installation und RC1-Rollback, Prüfsummenfehler abgelehnt.
+Unvollendete RC1-Vorgänge wählen anhand ihrer gespeicherten Prüfsumme wieder
+RC1 als Ziel. Original V15 bleibt auf das bekannte geprüfte Paket begrenzt.
+
+RC1-RÜCKWEG
+bunker-evolved-rc1.fwsc, FM-1_7100001, unverändert:
+eb0b0924a9da226b53f0bfcb0bfed7bb47763ab237eab03b79c8f7311d1fe6d4
+Eigenes RC1-Quellarchiv bleibt im Installer verfügbar. AMB-/Stock-Rückwege
+bleiben vorhanden; deren andere Projektformate konvertieren Bunker nicht.
+
+NOCH OFFEN
+RC2 am echten FM-1: Flash/Identität, GROW und Undo hören, Displaybewegung,
+Projekt speichern/neustarten und reale CPU-Anzeige bei dichten Klängen.
+Der vorhandene Watchdog, das Acht-Stimmen-Budget und die Überlast-Ausblendung
+bleiben aktiv. UBOOT ist weiterhin ein Chip-Modus und kein garantierter
+Chrome-Rettungsweg. Keine Stromausfälle als Test provozieren.
+
+Vollständige Quellen, Bauanleitungen und Rohlogs im Quellpaket.

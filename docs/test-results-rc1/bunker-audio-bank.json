@@ -1,0 +1,710 @@
+{
+  "sounds": [
+    {
+      "checks": 495852,
+      "hash": 1073614867,
+      "peak": 2928,
+      "rms": 440.11,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2728106560,
+      "peak": 3289,
+      "rms": 590.21,
+      "maxVoices": 4,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2693330565,
+      "peak": 1969,
+      "rms": 380.06,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3008421665,
+      "peak": 1297,
+      "rms": 211.49,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2363701049,
+      "peak": 2072,
+      "rms": 294.39,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3926465484,
+      "peak": 1901,
+      "rms": 265.12,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2380608384,
+      "peak": 2182,
+      "rms": 353.91,
+      "maxVoices": 5,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1327645858,
+      "peak": 177,
+      "rms": 18.56,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 988154219,
+      "peak": 2812,
+      "rms": 406.56,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 735008633,
+      "peak": 3883,
+      "rms": 615.82,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2304250882,
+      "peak": 6505,
+      "rms": 1181.7,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1175649844,
+      "peak": 1401,
+      "rms": 120.76,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3581555628,
+      "peak": 1256,
+      "rms": 249.57,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 552202190,
+      "peak": 1888,
+      "rms": 293.42,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1490962518,
+      "peak": 991,
+      "rms": 127.67,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1625326673,
+      "peak": 1272,
+      "rms": 194.7,
+      "maxVoices": 4,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1306300246,
+      "peak": 1749,
+      "rms": 398.14,
+      "maxVoices": 5,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 770035843,
+      "peak": 2691,
+      "rms": 659.32,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3916699797,
+      "peak": 1125,
+      "rms": 77.37,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2950886,
+      "peak": 1201,
+      "rms": 130.59,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2009200663,
+      "peak": 1472,
+      "rms": 125.27,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 4053539257,
+      "peak": 1003,
+      "rms": 63.53,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1189184053,
+      "peak": 1395,
+      "rms": 225.45,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1029037983,
+      "peak": 2899,
+      "rms": 367.52,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3333624946,
+      "peak": 5604,
+      "rms": 1202.69,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1143004067,
+      "peak": 3765,
+      "rms": 665.51,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 534067184,
+      "peak": 3144,
+      "rms": 627.27,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 524509539,
+      "peak": 1773,
+      "rms": 253.13,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 882222655,
+      "peak": 2805,
+      "rms": 661.34,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 915723953,
+      "peak": 3063,
+      "rms": 286.6,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1000120530,
+      "peak": 1335,
+      "rms": 69.86,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2878017159,
+      "peak": 1415,
+      "rms": 170.14,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2834034063,
+      "peak": 2020,
+      "rms": 444.5,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2075716499,
+      "peak": 2012,
+      "rms": 166.27,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2496910530,
+      "peak": 1144,
+      "rms": 186.25,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 723378676,
+      "peak": 1855,
+      "rms": 212.37,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1944146933,
+      "peak": 297,
+      "rms": 32.72,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 451751739,
+      "peak": 1210,
+      "rms": 167.87,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3871647486,
+      "peak": 1969,
+      "rms": 296.43,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2024252110,
+      "peak": 2382,
+      "rms": 268.88,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2668281982,
+      "peak": 2595,
+      "rms": 491.82,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1714383697,
+      "peak": 1555,
+      "rms": 352.04,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2594520137,
+      "peak": 1291,
+      "rms": 175.28,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 683380576,
+      "peak": 1786,
+      "rms": 205.55,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1814756497,
+      "peak": 751,
+      "rms": 89.23,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3952402446,
+      "peak": 1664,
+      "rms": 225.43,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3315262451,
+      "peak": 1102,
+      "rms": 167.66,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2165353957,
+      "peak": 1485,
+      "rms": 268.44,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1926698174,
+      "peak": 1044,
+      "rms": 45.46,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2143114167,
+      "peak": 927,
+      "rms": 124.97,
+      "maxVoices": 2,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3946218729,
+      "peak": 687,
+      "rms": 22.05,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 4293959330,
+      "peak": 1305,
+      "rms": 94.14,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1027535642,
+      "peak": 460,
+      "rms": 15.82,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2048928544,
+      "peak": 782,
+      "rms": 69.58,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 605569874,
+      "peak": 1429,
+      "rms": 227.98,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2820880039,
+      "peak": 2435,
+      "rms": 321.89,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 159872824,
+      "peak": 2558,
+      "rms": 372.64,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2900627167,
+      "peak": 759,
+      "rms": 55.91,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3558653189,
+      "peak": 2040,
+      "rms": 186.38,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 885884496,
+      "peak": 857,
+      "rms": 71.94,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 2466386555,
+      "peak": 1858,
+      "rms": 168.1,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3400424915,
+      "peak": 1231,
+      "rms": 104.61,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 3467188003,
+      "peak": 924,
+      "rms": 43.76,
+      "maxVoices": 1,
+      "seconds": 5.0
+    },
+    {
+      "checks": 495852,
+      "hash": 1745756692,
+      "peak": 1890,
+      "rms": 107.05,
+      "maxVoices": 1,
+      "seconds": 5.0
+    }
+  ],
+  "worlds": [
+    {
+      "checks": 1469842,
+      "hash": 3851896927,
+      "peak": 5153,
+      "rms": 841.28,
+      "maxVoices": 6,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 1825721096,
+      "peak": 3821,
+      "rms": 436.81,
+      "maxVoices": 8,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 2240350470,
+      "peak": 1875,
+      "rms": 179.51,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 667307317,
+      "peak": 2845,
+      "rms": 354.91,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 465893783,
+      "peak": 3106,
+      "rms": 335.87,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 2478046608,
+      "peak": 4773,
+      "rms": 741.44,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 1145661312,
+      "peak": 5583,
+      "rms": 995.15,
+      "maxVoices": 8,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 2631064597,
+      "peak": 3361,
+      "rms": 501.16,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 989853699,
+      "peak": 4771,
+      "rms": 387.66,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 1024875035,
+      "peak": 2996,
+      "rms": 431.9,
+      "maxVoices": 8,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 527466681,
+      "peak": 2799,
+      "rms": 360.6,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 3813771938,
+      "peak": 2984,
+      "rms": 323.35,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 4307298,
+      "peak": 7879,
+      "rms": 1241.85,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 780973957,
+      "peak": 5775,
+      "rms": 904.71,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 840929016,
+      "peak": 4221,
+      "rms": 587.27,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 3752653918,
+      "peak": 3147,
+      "rms": 472.8,
+      "maxVoices": 8,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 1740041897,
+      "peak": 5349,
+      "rms": 601.93,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 185709476,
+      "peak": 1427,
+      "rms": 142.38,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 2451271009,
+      "peak": 7625,
+      "rms": 1364.05,
+      "maxVoices": 8,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 938766311,
+      "peak": 3742,
+      "rms": 384.96,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 3161539948,
+      "peak": 2253,
+      "rms": 176.52,
+      "maxVoices": 5,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 2366008257,
+      "peak": 4085,
+      "rms": 653.48,
+      "maxVoices": 6,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 1825023213,
+      "peak": 5898,
+      "rms": 858.21,
+      "maxVoices": 7,
+      "seconds": 16.6
+    },
+    {
+      "checks": 1469842,
+      "hash": 3979629539,
+      "peak": 4450,
+      "rms": 698.62,
+      "maxVoices": 5,
+      "seconds": 16.6
+    }
+  ]
+}

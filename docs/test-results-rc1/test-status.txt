@@ -1,0 +1,129 @@
+BUNKER EVOLVED 1.0 RC1 — PRÜFBERICHT
+Stand: 17. Oktober 2026. Plattform der Prüfungen: Linux x86-64, C-Hostmodelle und Node/WebAssembly.
+
+ERGEBNIS UND GRENZE
+Die unten genannten Prüfungen wurden erfolgreich abgeschlossen. Es handelt sich
+um einen gebauten, installierbaren Release Candidate, nicht um eine auf echter
+FM-1-Hardware abgenommene Veröffentlichung. Kein USB-Port des Macs und kein FM-1
+wurde durch diese Prüfungen angesprochen. Kein Flash-Vorgang am Gerät bestätigt.
+Eine Garantie gegen Hänger, Datenverlust oder einen unterbrochenen Flash wäre
+unbegründet. Chip-Echtzeitreserve, echter DAC, USB-Audio, Dauerbetrieb und
+Hersteller-UBOOT-Wiederherstellung müssen am Gerät geprüft werden.
+
+IDENTITÄT
+Produkt: FM-1_7100001. Display: BE 1.0-RC1.
+Datei: bunker-evolved-rc1.fwsc, 610090 Bytes.
+SHA-256: eb0b0924a9da226b53f0bfcb0bfed7bb47763ab237eab03b79c8f7311d1fe6d4
+WASM: 784818 Bytes.
+WASM SHA-256: 8e20a1ad6ccbdefe039207fd27dbedbaa33db9e27b02eb43c2dac4a9a845e095
+Felucca: 5738617968a22b5d4c0d3470cfcc95559052f446.
+Felucca-Engines: c46e0086f69bdc26df1cd144dca9e683cc4531dd.
+
+1. GERÄTE-BUILD: BESTANDEN
+JieLi pi32v2, ein CPU-Kern. App 517480 Bytes, Update-Loader 6934 Bytes.
+RAM .data + .bss: 55460 / 73728 Bytes.
+Pool: 328924 / 368640 Bytes.
+Flash-RAM-Routine: 916 Instruktionen, keine Aufrufe in XIP-Code.
+Registerzugriffe auf die HAL beschränkt. Keine zweite Core-Task, kein zweiter
+Stack oder Mailbox. Statische Speicher-/Layoutgrenzen bestanden.
+Diese Zahlen sind Belegungswerte, kein CPU-Lastnachweis am Chip.
+
+2. NEUE BEDIENUNG UND GENERATIVE DATEN: BESTANDEN
+3,791,875 Prüf-Assertions im nativen Bunker-Smoke-Lauf.
+Echte Panel-Gesten erreichen Root, Klangauswahl, Klangfarbe, Motiv, Entwicklung,
+Lock, PLAY und den bestehenden EDIT-Editor. Kein Ersatz-Synthesizer im Test.
+24 Welten, 64 Klangvorgaben, 24 Motive x 32 Skalen und gültige Parameterbereiche.
+Projekt-Serialisierung mit 114 Parametern sowie Speichern/Laden der neuen Regeln.
+LOCK verändert die Phrase auch nach 1000 simulierten Schleifen nicht.
+Aufnahme besitzt Vorrang vor automatischer Notenänderung.
+
+3. KLANGBANK: BESTANDEN
+64/64 Klangvorgaben erzeugen hörbare Samples (5 Sekunden je isolierter Spur)
+und unterschiedliche PCM-Fingerprints. 24/24 Welten erzeugen unterschiedliche,
+begrenzte Samples (16 Sekunden je Welt). Höchstens 8 Stimmen.
+World-Peaks: 1427 bis 7879 bezogen auf 32768 Full Scale, vor MP3-Kompression.
+Keine Normalisierung der Hörproben. Unterschiedliche Fingerprints sind kein
+Beweis, dass jeder Klang subjektiv gleich gut oder gleich laut wahrgenommen wird.
+
+4. BELASTUNGSLAUF: BESTANDEN
+3606,50 Sekunden simuliertes Audio. 322,108,942 Assertions.
+Maximal 8 Stimmen; Peak 8351 / 32768; RMS 713,98.
+Regelmäßig wechselnde Welten, Engines/Presets, Motive, Längen, alle Skalen,
+Grundtöne, Entwicklungsmethoden und Tempi von 30 bis 180.
+Alle Ausgabe-Samples endlich und begrenzt; geprüfte Parameter gültig.
+Dies ist eine beschleunigte Stunde im Hostmodell, kein einstündiger Gerätetest.
+
+5. SPEICHERFEHLERPRÜFUNG: BESTANDEN IM GENANNTEN UMFANG
+AddressSanitizer plus ausgewählte UndefinedBehaviorSanitizer-Prüfungen.
+Smoke-Lauf und 1202,50 Sekunden simuliertes Audio mit 107,399,922 Assertions,
+maximal 8 Stimmen, Peak 8286. Keine Meldung im aktivierten Prüfumfang.
+Compilerflags:
+  -fsanitize=address,undefined
+  -fno-sanitize=signed-integer-overflow,shift,bounds,object-size,pointer-overflow
+  -fno-sanitize-recover=all
+  -ffp-contract=off
+ASAN_OPTIONS=detect_leaks=0
+Die ausgeschlossenen UBSan-Kategorien betreffen unter anderem bewusstes
+Festkomma-Wrapping und das simulierte XIP-Adressmodell der Basis. Dies ist keine
+Aussage, dass jede Form undefinierten C-Verhaltens ausgeschlossen wurde.
+
+6. VORHANDENE REGRESSIONSPRÜFUNGEN: 19/19 BESTANDEN
+storage_test, upreset_test, input_test, midi_uart_test, scale_test, project_test,
+motion_test, detail_test, ui155_test, v156_test, fun10_test, midi_control_test,
+audio_test, persistence_test, backup_test, editor_test, robust_test,
+fm6bank_test, ui_test.
+Die Erwartungen für hinzugefügte Parameter, Skalen, Palette und HOME-Ansicht
+wurden angepasst. Audio-Goldenwerte und Timing-Budgets wurden nicht umgeschrieben.
+Der originale vollständige/optionale Upstream-Testlauf ist nicht die hier
+behauptete Freigabemenge. Der genau ausgeführte Runner ist run_bunker_checks.py.
+
+7. WEBASSEMBLY: BESTANDEN
+Emscripten 4.0.23. Boot, LEDs, Tastenspiel, MIDI-Noten, Encoder, PLAY/STOP,
+User-Preset speichern und in frischer Instanz wieder laden.
+Absolute und drei relative Controller-Modi entsprechen den Panel-Detents.
+Der Zeitpunkt der ersten Detents wurde im Bildschirmvergleich angeglichen,
+weil die neue HOME-Ansicht animiert; andernfalls wird ein anderer Animationsframe
+verglichen. Keine Firmware-Funktion wurde zum Bestehen dieses Tests abgeschaltet.
+Schwerer Testsong zweimal deterministisch; 88200 Stereo-Frames bitgenau gleich
+zwischen C-Host und WASM. Node-Benchmark im aufgezeichneten Lauf: 25,9 ms für
+1 Sekunde dieses Songs auf dem Host. Das ist keine FM-1-CPU-Prozentangabe.
+Ein realer Chrome-AudioWorklet-/Layout-/USB-Durchlauf wurde hier nicht ausgeführt;
+die verfügbare Browser-Vorschau ließ sich in der Umgebung nicht starten.
+Fünf echte 240x240-C-Displaybilder wurden gerendert; die Ansicht wurde betrachtet.
+
+8. INSTALLER UND LOADER: BESTANDEN IM MODELL
+JavaScript: 1024 Pack7-Roundtrips, SysEx-Queue auf 128 begrenzt, fehlerhafte
+Frames, Null-/Überlängen-/Ausserhalb-Anfragen, USB-Abbruchmodell, fehlendes ACK,
+abweichende Endkennung, Cleanup und erneuter Einstieg in den MIDI-Loader.
+DOM-Test: kein automatisches Flashen, Verbindung nur Identitätsabfrage,
+bewusste Bestätigung nötig, Prüfsummenfehler abgelehnt, Original-Datei erst nach
+Prüfung verfügbar. DOM und MIDI sind dabei Testmodelle, kein Browser/Gerät.
+
+Alter Wolf-/AMB-Update-Einstieg mit neuem Paket getestet: Loader-Staging nur im
+vorgesehenen Bereich 0xE0000..0xE4FFF, CRC und Abbruch-Cleanup geprüft.
+Felucca-Update-Einstieg ebenfalls bestanden.
+Vollständiger neuer Loader mit alter Wolf-A3-App als Ausgangs-Flash: neue App
+geschrieben, Flash-Kopf [0,0x4000) unverändert, vorhandene Userdaten erhalten,
+keine Writes außerhalb erlaubter Fenster, Wiederholung ohne unnötige Erases,
+falsches Boardformat/Größe/CRC/Schlüssel abgelehnt.
+Der Datenerhalt im Loader bedeutet nicht, dass AMB/Wolf-Projekte im neuen
+Speicherformat lesbar sind. Späteres Speichern/Autosave kann diese ersetzen.
+
+9. SCHUTZ UND RÜCKWEG
+Bestehendes Budget: 8 gemeinsame Stimmen. Nach zwei Audio-Halbpuffern über
+85 % Auslastung blendet die Basis eine Stimme aus. Bestehender Watchdog und
+Boot-Loop-Guard bleiben erhalten. Zweiter CPU-Kern bewusst nicht mitgebaut.
+UBOOT nach wiederholtem Fehlstart ist der Chip-Modus, kein MIDI-Safe-Mode.
+OCT- und OCT+ fünf Sekunden im laufenden Gerät: UBOOT. Beim Einschalten:
+Panel-Kalibrierung. Kein garantierter Browser-Rettungsweg aus jedem Fehlerzustand.
+AMB-1 1.2 ist als geprüftes Paket im Installer enthalten; Hersteller V15 muss
+lokal ausgewählt werden und zur bekannten SHA-256 passen.
+
+10. NOCH OFFENE HARDWARE-ABNAHME
+Direktupdate von der tatsächlich installierten Firmware, Gerätekennung,
+Display/Encoder/alle Tasten, hörbare Änderung jedes Reglers, Speichern/Neustart,
+USB-MIDI und Audio-Ausgänge, reale CPU-Anzeige bei dichten Klangkombinationen,
+längerer Dauerlauf und kontrollierter Rückwechsel zu AMB-1.
+Keine absichtlich provozierten Stromausfälle während eines Flashs nötig.
+
+Quellen, Prüfprogramme, Rohlogs und JSON-Messwerte liegen im Quellpaket.

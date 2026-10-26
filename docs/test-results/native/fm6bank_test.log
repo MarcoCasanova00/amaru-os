@@ -1,0 +1,30 @@
+fm6bank: an empty flash: no bank; LIST: 32 voices, no bank, "", every voice empty                         ok
+fm6bank: a whole bank written over the editor (BEGIN, 32 WRITEs, END): rc 0, 32 voices, read back exactly ok
+fm6bank:   .. it wrote 0xE7000 (the bank) and 0xE6000 (the autosave's older copy, staged), nothing else   ok
+fm6bank:   .. the sector's tail (0xE7F00..) erased: no update record can be read there                    ok
+fm6bank:   .. the autosave still loads (its current copy untouched)                                       ok
+fm6bank:   .. LIST: the bank's name and each voice's name                                                 ok
+fm6bank:   .. after a power-on: the same bank                                                             ok
+fm6bank: a wrong CRC: rc 2, the bank stays                                                                ok
+fm6bank: WRITE without BEGIN: rc 5; a voice twice, index 32, a short record, a short END: rc 1; the bank stays ok
+fm6bank: an autosave between BEGIN and WRITE: WRITE / END answer 5; the bank and the new autosave kept    ok
+fm6bank: a second bank (3 voices): staged in the other copy, the autosave kept, read back exactly         ok
+fm6bank: an empty bank (no WRITE): valid, no voice                                                        ok
+fm6bank: no flash: BEGIN rc 4                                                                             ok
+fm6bank:   7296 cut points (bytes): 3648 the old bank, 3648 the new one, 0 anything else
+fm6bank: a power cut after any programmed byte of a transfer: the old bank or the new one, never half     ok
+fm6bank:   .. a cut during BEGIN's erase: the old bank; during the copy's erase: the new one (finished at boot) ok
+fm6bank: no bank: the knob stops at OWN (B1..B32 skipped); a B value from elsewhere is refused (SLOT back) ok
+fm6bank: SLOT B1..B32 (9..40): each loads its voice's exact record into the track                         ok
+fm6bank:   .. the card shows B12, B32                                                                     ok
+fm6bank: OWN -> B5 -> OWN: the own patch kept aside and back                                              ok
+fm6bank: a new bank: the track on B5 keeps that voice as its own (SLOT OWN)                               ok
+fm6bank: bank voices 1, 6, 32 only: the knob goes OWN B1 B6 B32 and back, the empty slots skipped         ok
+fm6bank: SET B2 (no voice there) on B6: refused, SLOT back to B6, its voice kept                          ok
+fm6bank:   .. F3 from there: the factory patch as always                                                  ok
+fm6bank: a project saved on B5 / B7: loads those voices (SLOT OWN) after the bank was replaced            ok
+fm6bank: a user preset stored on B7: loads that voice (SLOT OWN) after the bank was replaced              ok
+fm6bank: a project with a stored SLOT 9..40: its own patch, SLOT OWN (never a bank voice); F3 as before   ok
+fm6bank: a user preset with a stored SLOT 13: its patch (OWN); with none, the init voice as before        ok
+fm6bank: motion holding SLOT 9..40: plays OWN, the patch kept; a record made on B3 stores OWN             ok
+fm6bank: all ok

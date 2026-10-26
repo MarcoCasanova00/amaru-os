@@ -1,0 +1,6 @@
+PASS: identity, four-track read/write, 114 parameters and 32 scales
+PASS: all 64 sound recipes equal native bunker_sound(), all parameters
+PASS: 24 motifs × four roles equal native bunker_pattern()
+PASS: real phrase writes, readback, undo and stale-undo refusal
+PASS: all 1,536 key/scale/style combinations stay in scale and range; import validation; full step preservation
+PASS: 49337 assertions. Actual C handler used; zero explicit flash erases/writes. No physical USB or browser-render verification.

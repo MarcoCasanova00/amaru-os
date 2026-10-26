@@ -1,0 +1,5 @@
+scales: all 16 scales, 12 roots, octave/transpose ranges, bypass, drums and SNAP ok
+scales: silent keys, arp, live recording, MIDI out and held-note changes ok
+scales: QNT SEQ snaps the sequence as it plays (steps unchanged), no stuck notes over scale changes, kits never
+scales: QNT SEQ+T moves the sequence by TRN then snaps (steps unchanged, nothing held); other QNT values ignore TRN
+scales: the arp's latched / held keys follow TRN, ROOT, SCALE and QNT (#191); octave, MIDI IN, kits as before

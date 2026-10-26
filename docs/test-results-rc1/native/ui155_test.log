@@ -1,0 +1,27 @@
+ui: PAN (#199): -64..63 read -100..+100 %, +100 at the top (was +98), rising, each value its own ok
+ui:   every bipolar value the same (MOD AMT, ENV FLT); the stored range -64..63 as before ok
+ui: AUTOMATION: two locks on step 1, the second (a later parameter) selected   ok
+ui:   KNOB 3 (#199): the row stays where it is and selected while its parameter goes past the other's ok
+ui:   and back to the right: no jump either way                                ok
+ui:   the other row the same (a step's records listed in the order they were added) ok
+ui: SELECT (#188): MENU > CONTROL > SELECT, BPM by default: SELECT sets the tempo as before ok
+ui:   PAGE: a bit of its own (MENU's 1.2 flags, bit 4), kept with the settings; 0 (older settings) = BPM ok
+ui:   PAGE: SELECT steps the family's pages, a detent each, round both ways; the tempo stays ok
+ui:   PAGE: HOME -> MIXER -> CLOCK -> HOME (as HOME's taps), back too; CLOCK's KNOB 1 still the tempo ok
+ui:   PAGE: EDIT's round is the engine's pages; a family of one page stays     ok
+ui:   PAGE: GLO + SELECT is the tempo (no page); nothing with LFO held         ok
+ui:   HELP: CLOCK's hint says KNOB 1 is the tempo with PAGE                    ok
+ui: OCT- (1.5.6, #205 taken out): the octave down on the press as in 1.5.1, OCT+ up, both 0, -3 the floor ok
+ui:   OCT- held + KNOB: an ordinary turn (no default), the octave as pressed; EDIT 2's hint as EDIT 1's ok
+ui:   the menu: OCT- is the menu's as before (the setting back), the octave untouched ok
+ui: SAVE > PROJECT (#199): KNOB 2 ERASE, OCT+ asks "ERASE PROJECT B?" with its name, OCT- keeps it ok
+ui:   OCT+ again: the slot empty, the others kept; an empty slot: nothing to erase ok
+ui:   not while playing (STOP TO ERASE); LOAD and SAVE where they were; its HELP hint ok
+ui: CLEAN INIT (#190), every engine: its E1..E8 defaults, no sends, INSERT OFF, no LFO / ENV / MOD amounts, POLY, ok
+ui:   a neutral ENV (DRUM: its kit's), FM6 the init voice; LEVEL PAN and the steps kept; one undo ok
+ui:   each engine's clean sound plays a note (heard, below full scale) and ends after its release ok
+ui:   TOOLS' KNOB 2: right INIT, right again CLEAN, left back; INIT as before (the first preset, its sends) ok
+ui:   EDIT + the key after INIT (F5): the dialog "CLEAN INIT SOUND?"; TOOLS' HELP hint ok
+ui: OCT- and EUCLID (#186): OCT- cancels, OCT+ applies, OCT- + KNOB 1 is HITS; no octave ok
+ui:   FILL (GLO + E4) as before, the octave untouched; a plain OCT- after it the octave down ok
+1.5.5 ui tests passed

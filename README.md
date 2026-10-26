@@ -53,7 +53,8 @@ The track slots let you slot any engine on any track (`ANALOG → AIR`, `GRAIN �
 GPL-3.0-only (Bunker 1.0, Felucca MIT, sample CC0, fonts OFL). See
 `docs/ATTRIBUTION.md` and `LICENSE`.
 
-## Credits
+## Emergency recovery (universal FM-1 rescue)
+Hold **OCT−** while switching the FM-1 on — the device enters update mode and listens for rescue. Use `fm1_rescue.py` on Linux or `MvaveFM1Unbricker` on Windows. See [`docs/RESCUE.md`](docs/RESCUE.md). AMARU must **never** disable this handler.
 
 - Built on **Bunker Evolved 1.0** (Hügelton Instruments) — GPL-3.0-only
 - Genre concept taken from **JIANT** (GPL-3.0-only); the generator page/grammar

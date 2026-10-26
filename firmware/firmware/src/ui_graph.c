@@ -1367,7 +1367,7 @@ static void graph_browse(void)
             up_name(k, nm);
         } else {
             str_cpy(tag, eng_abbr(ENGINES[e]->name), sizeof tag);
-            str_cpy(nm, amaru_preset_name(e, k, ENGINES[e]->name, ENGINES[e]->presets[k].name), sizeof nm);
+            str_cpy(nm, amaru_preset_name(amaru_engine_index(ENGINES[e]), k, ENGINES[e]->name, ENGINES[e]->presets[k].name), sizeof nm);
         }
         if (hint >= 0) {
             pat_label((uint32_t)hint, pt, pn);
@@ -1399,7 +1399,7 @@ static void engine_sound_row(int32_t y)
         tag[0] = (char)('0' + (cur + 1u) / 10u % 10u);
         tag[1] = (char)('0' + (cur + 1u) % 10u);
         tag[2] = 0;
-        str_cpy(nm, e->npresets ? e->presets[TSEL->preset % e->npresets].name : "", sizeof nm);
+        str_cpy(nm, e->npresets ? amaru_preset_name(amaru_engine_index(e), TSEL->preset % e->npresets, e->name, e->presets[TSEL->preset % e->npresets].name) : "", sizeof nm);
     }
     list_row(y, 1, tag, T_DIM, nm, T_TEXT, fav ? 212 : 232);
     if (fav) {
@@ -1650,7 +1650,7 @@ static void trk_short_name(uint32_t c, char *b)      /* the track's sound, b hol
     if (user_of(t) < UP_SLOTS)
         up_name(user_of(t), b);
     else if (e->npresets)
-        str_cpy(b, e->presets[t->preset % e->npresets].name, 13);
+        str_cpy(b, e->npresets ? amaru_preset_name(amaru_engine_index(e), t->preset % e->npresets, e->name, e->presets[t->preset % e->npresets].name) : "-", 13);
     else
         str_cpy(b, e->name, 13);
 }

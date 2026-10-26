@@ -3,6 +3,15 @@
 #include <stdint.h>
 #include "amaru_sound_alias.h"
 
+extern const engine_t *const ENGINES[14];
+
+uint16_t amaru_engine_index(const engine_t *e)
+{
+    for (uint16_t i = 0; i < 15; i++)
+        if (ENGINES[i] == e) return i;
+    return 0;
+}
+
 typedef struct { uint16_t engine, preset; const char *name; } A;
 
 static const A AME[] = {

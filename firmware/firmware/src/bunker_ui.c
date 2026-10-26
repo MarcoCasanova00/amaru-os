@@ -3,6 +3,7 @@
  * ARP / SEQ / SAVE pages continue to edit the same tracks and same DSP.
  */
 #include "bunker_library.inc"
+#include "amaru_gen.c"
 static void bunker_ui_boot(void)
 {
     /* Reserved settings byte: migrate the display once, keep later choices. */
@@ -16,7 +17,7 @@ static uint8_t bunker_world_pick;
 static uint8_t bunker_sound_pick[4], bunker_motif_pick[4];
 static uint8_t bunker_density[4] = {4,7,2,3};
 static const char *const B_ROLES[] = {"AIR", "MELODY", "ROOT", "SPARK"};
-static const char *const B_PAGES[] = {"WORLD", "GROW", "SOUND", "MOTIF", "EVOLVE", "MIX"};
+static const char *const B_PAGES[] = {"WORLD", "GROW", "SOUND", "MOTIF", "EVOLVE", "MIX", "GEN"};
 static uint32_t bunker_tone_id(const track_t *t)
 {
     static const uint8_t ids[NENGINES] = {4,2,1,2,3,1,4,1,7,2,2,2,2
@@ -149,6 +150,7 @@ static void bunker_scene(uint32_t index)
     ui_message("WORLD READY - PLAY");
     ui.force = 1;
 }
+#include "bunker_amaru.inc"
 #include "bunker_grow.c"
 static void bunker_home_input(uint32_t oct)
 {
@@ -168,6 +170,7 @@ static void bunker_home_input(uint32_t oct)
         if (bunker_page == BP_WORLD) bunker_world_pick = (uint8_t)clamp(bunker_world_pick + s, 0, NELEM(B_WORLDS)-1);
         else if (bunker_page == BP_MOTIF) bunker_motif_pick[k] = (uint8_t)clamp(bunker_motif_pick[k] + s, 0, NELEM(B_MOTIFS)-1);
         else if (bunker_page == BP_GROW) grow.style=(uint8_t)clamp(grow.style+s,0,3);
+        else if (bunker_page == BP_GEN) amaru_genre=(uint8_t)clamp(amaru_genre+s,0,AMARU_NGENRES-1);
         else bunker_sound(k, (uint32_t)clamp(bunker_sound_pick[k] + s, 0, 15));
         ui.force = 1;
     }
@@ -201,6 +204,11 @@ static void bunker_home_input(uint32_t oct)
             static const uint8_t ids[4] = {P_BMODE,P_BAMOUNT,P_BPERIOD,P_TRANS};
             uint32_t id = ids[c]; t->p[id] = (int16_t)clamp(t->p[id]+s,TP[id].min,TP[id].max);
             motion_capture(t,id,t->p[id]); ml_knob(t,id);
+        } else if (bunker_page == BP_GEN) {
+            if (c == 0) amaru_genre = (uint8_t)clamp(amaru_genre + s, 0, AMARU_NGENRES-1);
+            if (c == 1) amaru_seed = (uint16_t)(amaru_seed + s);
+            if (c == 2) amaru_energy = (uint8_t)clamp(amaru_energy + s, 0, 100);
+            if (c == 3) amaru_form = (uint8_t)clamp(amaru_form + s, 0, AMARU_NFORMS-1);
         } else { trk[c].p[P_LEVEL] = (int16_t)clamp(trk[c].p[P_LEVEL]+s,0,127);
             motion_capture(&trk[c],P_LEVEL,trk[c].p[P_LEVEL]); ml_knob(&trk[c],P_LEVEL); }
     }
@@ -213,11 +221,14 @@ static void bunker_home_input(uint32_t oct)
         } else if (bunker_page == BP_EVOLVE) {
             if (song.rec || chain_busy()) ui_message("STOP REC / SONG FIRST");
             else { load_begin(t,UNDO_PAT); fm1_irq_off(); bunker_mutate(t,1); fm1_irq_on(); load_end(t); ui.force=1; }
+        } else if (bunker_page == BP_GEN) {
+            amaru_generate();
         } else { t->p[P_MUTE] ^= 1; ui.force=1; }
     }
     if (oct & 1u) {
         if (bunker_page == BP_GROW) bunker_grow_undo();
         else if (bunker_page == BP_EVOLVE) { t->p[P_BMODE]=0; ui_message("MOTIF LOCKED"); }
+        else if (bunker_page == BP_GEN) amaru_new_seed();
         else { t->p[P_MUTE] ^= 1; ui_message(t->p[P_MUTE] ? "TRACK MUTED" : "TRACK ON"); }
         ui.force=1;
     }

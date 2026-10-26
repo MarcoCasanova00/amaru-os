@@ -50,6 +50,10 @@ PALETTES = [
     # 1.0.2: black and white (the derived tokens are set, not blended: bw()); the old MONO is GREY (id 0)
     ("MONO",   (0, 0, 0),       (0, 0, 0),       (255, 255, 255), (255, 255, 255), (255, 255, 255)),
     ("BUNKER", (5, 6, 11), (18, 20, 32), (230, 237, 244), (184, 147, 255), (150, 245, 160)),
+    # AMARU (append-only): strict monochrome terminals. Every source colour is a tint of one hue, so the
+    # derived MID / DIM / LINE / SEL / TINT / RAISE / KEY are tints of that hue too (no contrasting accent).
+    ("GRN/BLK", (2, 10, 4), (8, 26, 12), (176, 255, 184), (64, 224, 112), (224, 255, 224)),
+    ("AMB/BLK", (12, 8, 2), (34, 24, 6), (255, 226, 170), (255, 164, 32), (255, 240, 200)),
 ]
 BW = "MONO"
 BW_GREY = (82, 82, 82)             # MONO's one mid grey (RGB565 10/20/10): DIM LINE RAISE LANE
@@ -120,6 +124,7 @@ def derive(p):
     name, *cols = p
     bg, surf, text, theme, accent = (to565(c, name == BW) for c in cols)
     mono = name == "GREY"
+    term = name in ("GRN/BLK", "AMB/BLK")      # strict monochrome terminals: no fixed-red REC exception
     d = dict(bg=bg, surf=surf, text=text, theme=theme, accent=accent,
              mid=mix(bg, text, PCT["MID"], mono), dim=mix(bg, text, PCT["DIM"], mono),
              line=mix(bg, text, PCT["LINE"], mono), sel=mix(bg, theme, PCT["SEL"], mono),
@@ -127,7 +132,7 @@ def derive(p):
              key=mix(bg, text, PCT["KEY"], mono))
     d["ink"] = bg
     d["light"] = luma(bg) > 128
-    d["rec"] = accent if mono or name == BW else to565(REC_LIGHT if d["light"] else REC_DARK)
+    d["rec"] = accent if mono or name == BW or term else to565(REC_LIGHT if d["light"] else REC_DARK)
     if name == BW:                     # src/gfx.c palette_set: set, not blended
         grey = to565(BW_GREY)
         d.update(mid=text, sel=theme, key=text, dim=grey, line=grey, raise_=grey, lane=grey, tint=bg, grid=bg)
@@ -167,6 +172,16 @@ def main():
             for k, v in d.items():
                 if k != "light" and v not in (0x0000, 0xFFFF) and not (v == to565(BW_GREY) and k in ("dim", "line", "raise_", "lane")):
                     fails.append(f"{name} is not black and white: {k} = {v:#06x}")
+        if name in ("GRN/BLK", "AMB/BLK"):   # every token is a tint of one hue; REC is not the fixed red
+            for k, v in d.items():
+                if k == "light":
+                    continue
+                r, g, b = from565(v)
+                ok = (g >= r and g >= b) if name == "GRN/BLK" else (r >= g and g >= b)
+                if not ok:
+                    fails.append(f"{name} is not monochrome: {k} = {v:#06x} ({r},{g},{b})")
+            if d["rec"] != d["accent"]:
+                fails.append(f"{name}: REC is not the accent")
         for f, b, lim, why in CHECKS:
             c = contrast(d[f], d[b])
             if c < lim:
@@ -187,6 +202,8 @@ def main():
             out.append(f'    {{"{p[0]}", ' + ", ".join(f"0x{x:04x}" for x in v) + "},")
         out += ["};", f"#define UI_NPALETTES {len(PALETTES)}u", "#define UI_GREY_INDEX 0u", "#define UI_BUNKER_INDEX 10u",
                 f"#define UI_BW_INDEX {names.index(BW)}u          /* MONO: black and white (src/gfx.c palette_set) */",
+                f"#define UI_TERM_GREEN_INDEX {names.index('GRN/BLK')}u",
+                f"#define UI_TERM_AMBER_INDEX {names.index('AMB/BLK')}u",
                 f"#define UI_BW_GREY 0x{to565(BW_GREY):04x}u          /* MONO's one grey: DIM LINE RAISE LANE */",
                 f"#define UI_PAL_TAG {PAL_TAG}u          /* stored id = UI_PAL_TAG + index; below 20: an old id */"]
         out += [f"#define UI_{k}_PCT {v}" for k, v in PCT.items()] + [f"#define UI_RAISE_PCT {RAISE_PCT}   /* SURF -> TEXT */"]

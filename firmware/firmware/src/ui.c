@@ -7,7 +7,7 @@
 static int project_save(uint32_t slot);
 static void bunker_home_input(uint32_t oct);
 static void bunker_draw(void);
-enum { BP_WORLD, BP_GROW, BP_SOUND, BP_MOTIF, BP_EVOLVE, BP_MIX, BP_COUNT };
+enum { BP_WORLD, BP_GROW, BP_SOUND, BP_MOTIF, BP_EVOLVE, BP_MIX, BP_GEN, BP_COUNT };
 static uint8_t bunker_page;
 static void panel_setup(void);
 static void project_load(uint32_t slot);

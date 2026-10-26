@@ -1586,11 +1586,13 @@ static int test_display_preferences(void)
                  settings.palette == 6 && T_BG == UI_PALETTES[6].bg && ux.light && ui.menu == 1 && !song.octave &&
                  memcmp(before, host_screen, sizeof before) && !memcmp(sounds, trk, sizeof sounds));
     turn(EN_K1, 1);
-    bad += check("COLOR KNOB 1 steps on to HI-CON, NIGHT (#50: true black), MONO (1.0.2: black and white), then BUNKER and GREY",
+    bad += check("COLOR KNOB 1 steps on to HI-CON, NIGHT (#50: true black), MONO, BUNKER, GRN/BLK, AMB/BLK, GREY",
                  settings.palette == 7 && (turn(EN_K1, 1), settings.palette == 8u) && T_BG == 0u &&
                  str_eq(UI_PALETTES[8].name, "NIGHT") && (turn(EN_K1, 1), settings.palette == UI_BW_INDEX) &&
                  str_eq(UI_PALETTES[UI_BW_INDEX].name, "MONO") && T_BG == 0u && T_TEXT == 0xFFFFu &&
                  (turn(EN_K1, 1), settings.palette == UI_BUNKER_INDEX) &&
+                 (turn(EN_K1, 1), settings.palette == UI_TERM_GREEN_INDEX) &&
+                 (turn(EN_K1, 1), settings.palette == UI_TERM_AMBER_INDEX) &&
                  (turn(EN_K1, 1), settings.palette == UI_GREY_INDEX) && str_eq(UI_PALETTES[UI_GREY_INDEX].name, "GREY"));
     settings.lowcut = 2;
     ui.menu_sel = MI_LOWCUT;
@@ -9834,6 +9836,105 @@ static int test_edit_quick_actions(void)
     return bad;
 }
 
+
+/* AMARU: GEN applies a whole deterministic four-layer piece to Bunker's real tracks, and the result still
+ * works with the existing phrase tools. Not a renderer test; the layout lint lives in ui_render.c. */
+static int amaru_kick_quarters(const track_t *t)
+{
+    int n = 0;
+    for (uint32_t i = 0; i < 16u; i++)
+        if ((t->step[i].hit & AMARU_L_KICK) && !(i & 3u)) n++;
+    return n;
+}
+static int amaru_kick_offquarter(const track_t *t)
+{
+    int n = 0;
+    for (uint32_t i = 0; i < 16u; i++)
+        if ((t->step[i].hit & AMARU_L_KICK) && (i & 3u)) n++;
+    return n;
+}
+static int test_amaru_gen(void)
+{
+    int bad = 0;
+    static step_t snap[NTRK][NSTEP];
+    amaru_plan_t want;
+    uint32_t k, i;
+    ui_power_on();
+    ui_home_view = HV_BUNKER;
+    bunker_page = BP_GEN;
+    amaru_genre = AMARU_JUNGLE;
+    amaru_seed = 0x1234u;
+    amaru_energy = 76u;
+    amaru_form = AMARU_PARTS;
+    amaru_plan(&want, amaru_genre, amaru_seed, amaru_energy, amaru_form);
+    amaru_generate();
+    bad += check("AMARU GEN: message names the genre and form", msg_is("JUNGLE PARTS"));
+    bad += check("AMARU GEN: BPM and swing follow the plan", song.g[G_BPM] == want.bpm && song.g[G_SWING] == want.swing);
+    int same = 1;
+    for (k = 0; k < NTRK; k++) {
+        track_t *t = &trk[k];
+        same &= t->eng_req == want.sound[k].engine && t->preset == want.sound[k].preset;
+        same &= t->p[P_SLEN] == want.steps && t->p[P_ROOT] == want.root && t->p[P_SCALE] == want.scale;
+        same &= t->seq_active != 0;
+        for (i = 0; i < want.steps; i++) {
+            const amaru_step_t *s = &want.step[k][i];
+            same &= t->step[i].n == s->n && t->step[i].time == s->time && t->step[i].hit == s->hit;
+            for (uint32_t j = 0; j < s->n && j < 4u; j++)
+                same &= t->step[i].note[j] == s->note[j];
+        }
+        for (; i < NSTEP; i++) same &= t->step[i].n == 0 && t->step[i].hit == 0;
+        memcpy(snap[k], t->step, sizeof t->step);
+    }
+    bad += check("AMARU GEN: engines, presets, root, scale and every step match the planner", same);
+    bad += check("AMARU GEN: PARTS writes 32 steps", trk[0].p[P_SLEN] == 32 && trk[3].p[P_SLEN] == 32);
+    bad += check("AMARU GEN: JUNGLE is broken, not four-on-the-floor",
+                 amaru_kick_quarters(&trk[AMARU_SPARK]) < 4 && amaru_kick_offquarter(&trk[AMARU_SPARK]) > 0);
+    int all_notes = 1;
+    for (k = 0; k < AMARU_TRACKS; k++)
+        for (i = 0; i < want.steps; i++)
+            for (uint32_t j = 0; j < trk[k].step[i].n && j < 4u; j++)
+                all_notes &= trk[k].step[i].note[j] >= 12 && trk[k].step[i].note[j] <= 108;
+    bad += check("AMARU GEN: every generated note is playable", all_notes);
+    amaru_generate();
+    int stable = 1;
+    for (k = 0; k < NTRK; k++) stable &= !memcmp(snap[k], trk[k].step, sizeof trk[k].step);
+    bad += check("AMARU GEN: the same seed regenerates the same piece", stable);
+    amaru_new_seed();
+    amaru_generate();
+    int differs = 0;
+    for (k = 0; k < NTRK; k++) differs |= memcmp(snap[k], trk[k].step, sizeof trk[k].step) != 0;
+    bad += check("AMARU GEN: OCT- changes the seed and OCT+ generates a different piece", differs);
+    song.sel = AMARU_AIR;
+    bunker_page = BP_GROW;
+    grow.root = (uint8_t)trk[AMARU_AIR].p[P_ROOT];
+    grow.scale = (uint8_t)trk[AMARU_AIR].p[P_SCALE];
+    grow.style = 3;
+    grow.all = 0;
+    grow.valid = 0;
+    memcpy(snap[AMARU_AIR], trk[AMARU_AIR].step, sizeof trk[AMARU_AIR].step);
+    bunker_grow_apply();
+    bad += check("AMARU GEN: GROW accepts the generated AIR phrase", grow.valid &&
+                 memcmp(snap[AMARU_AIR], trk[AMARU_AIR].step, sizeof snap[AMARU_AIR]) != 0);
+    bunker_grow_undo();
+    bad += check("AMARU GEN: GROW undo restores the generated AIR phrase",
+                 !memcmp(snap[AMARU_AIR], trk[AMARU_AIR].step, sizeof snap[AMARU_AIR]));
+    uint32_t before = bunker_changes[AMARU_AIR];
+    bunker_mutate(&trk[AMARU_AIR], 1);
+    bad += check("AMARU GEN: EVOLVE can mutate the generated AIR phrase", bunker_changes[AMARU_AIR] == before + 1u);
+    ui.home = 1;
+    ui_home_view = HV_BUNKER;
+    bunker_page = BP_GEN;
+    ui.force = 1;
+    frame();
+    static uint16_t gen_px[240u * 240u];
+    memcpy(gen_px, host_screen, sizeof gen_px);
+    bunker_page = BP_WORLD;
+    ui.force = 1;
+    frame();
+    bad += check("AMARU GEN: the GEN page is drawn and differs from WORLD", memcmp(gen_px, host_screen, sizeof host_screen) != 0);
+    return bad;
+}
+
 int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -9921,6 +10022,7 @@ int main(void)
     bad += test_fx_map_columns();
     bad += test_help();
     bad += test_no_flash();
+    bad += test_amaru_gen();
 #if FELUCCA_FM4
     bad += test_fm_charts();                        /* (DIGITAL's charts: built with FELUCCA_FM4=1 only) */
 #else

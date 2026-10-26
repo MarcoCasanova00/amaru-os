@@ -81,6 +81,11 @@ static void bunker_draw(void)
         labels[0]="MODE";labels[1]="CHANCE";labels[2]="LOOPS";labels[3]="TRANS";
         str_cpy(val[0],N_BMODE[t->p[P_BMODE]],24);fmt_int(val[1],t->p[P_BAMOUNT]);
         fmt_int(val[2],t->p[P_BPERIOD]);fmt_int(val[3],t->p[P_TRANS]);
+    } else if(bunker_page==BP_GEN) {
+        labels[0]="GENRE";labels[1]="SEED";labels[2]="ENERGY";labels[3]="FORM";
+        str_cpy(val[0],amaru_genre_name(amaru_genre),24);
+        fmt_int(val[1],amaru_seed);fmt_int(val[2],amaru_energy);
+        str_cpy(val[3],amaru_form_name(amaru_form),24);
     } else for(uint32_t c=0;c<4u;c++){labels[c]=B_ROLES[c];fmt_int(val[c],trk[c].p[P_LEVEL]);}
     cv_begin(240,26,T_BG);
     cv_text(6,3,&AF_S,"BUNKER",T_THEME);cv_text(74,3,&AF_S,B_PAGES[bunker_page],T_TEXT);
@@ -102,11 +107,18 @@ static void bunker_draw(void)
         const char *caption=grow.style==0 ? "FIT NOTES TO YOUR SCALE" : grow.style==1 ? "SMALL STEPS, SAME RHYTHM" : grow.style==2 ? "LET THE MELODY WANDER" : "A FRESH MELODIC PHRASE";
         cv_text_fit(6,21,&AF_S,caption,T_MID,T_BG,228);
     } else {
-        const char *title=bunker_page==BP_WORLD ? B_WORLDS[bunker_world_pick].name : bunker_page==BP_SOUND ? bunker_sound_name(k) : bunker_page==BP_MOTIF ? B_MOTIFS[bunker_motif_pick[k]].name : proj_name;
+        const char *title=bunker_page==BP_WORLD ? B_WORLDS[bunker_world_pick].name : bunker_page==BP_SOUND ? bunker_sound_name(k) : bunker_page==BP_MOTIF ? B_MOTIFS[bunker_motif_pick[k]].name : bunker_page==BP_GEN ? amaru_genre_name(amaru_genre) : proj_name;
         cv_text_fit(6,0,&AF_M,title,T_TEXT,T_BG,228);
-        str_cpy(b,N_NOTE[t->p[P_ROOT]],48);uint32_t n=(uint32_t)str_len(b);b[n++]=' ';str_cpy(b+n,B_SCALE_LONG[clamp(t->p[P_SCALE],0,31)],48-n);
-        cv_text_fit(6,21,&AF_S,b,T_MID,T_BG,170);
-        cv_text_r(233,21,&AF_S,N_BMODE[t->p[P_BMODE]],T_ACCENT,T_BG);
+        if(bunker_page==BP_GEN) {
+            str_cpy(b,"FORM ",48);uint32_t n=(uint32_t)str_len(b);str_cpy(b+n,amaru_form_name(amaru_form),48-n);
+            n=(uint32_t)str_len(b);b[n++]=' ';b[n++]=' ';b[n++]=' ';str_cpy(b+n,"BPM ",48-n);
+            n=(uint32_t)str_len(b);fmt_int(b+n,amaru_bpm);
+            cv_text_fit(6,21,&AF_S,b,T_MID,T_BG,170);
+        } else {
+            str_cpy(b,N_NOTE[t->p[P_ROOT]],48);uint32_t n=(uint32_t)str_len(b);b[n++]=' ';str_cpy(b+n,B_SCALE_LONG[clamp(t->p[P_SCALE],0,31)],48-n);
+            cv_text_fit(6,21,&AF_S,b,T_MID,T_BG,170);
+        }
+        cv_text_r(233,21,&AF_S,bunker_page==BP_GEN ? "4 LAYERS" : N_BMODE[t->p[P_BMODE]],T_ACCENT,T_BG);
     }
     bunker_garden();cv_blit(0,80);
     cv_begin(240,40,T_BG);
@@ -121,7 +133,7 @@ static void bunker_draw(void)
         cv_text_on(12,21,&AF_S,"OCT+ GROW",T_INK,T_ACCENT);
         cv_text_on(129,21,&AF_S,"OCT- UNDO",grow.valid ? T_TEXT : T_DIM,T_SURF);
     } else {
-        const char *hint=bunker_page==BP_WORLD ? "OCT+ LOAD  /  HOME: GROW" : bunker_page==BP_SOUND ? "EDIT: SYNTH / OCT-: MUTE" : bunker_page==BP_MOTIF ? "OCT+ APPLY / SEQ: EDIT" : bunker_page==BP_EVOLVE ? "OCT+ MUTATE / OCT- LOCK" : "K1-4 LEVEL / OCT- MUTE";
+        const char *hint=bunker_page==BP_WORLD ? "OCT+ LOAD  /  HOME: GROW" : bunker_page==BP_SOUND ? "EDIT: SYNTH / OCT-: MUTE" : bunker_page==BP_MOTIF ? "OCT+ APPLY / SEQ: EDIT" : bunker_page==BP_EVOLVE ? "OCT+ MUTATE / OCT- LOCK" : bunker_page==BP_GEN ? "OCT+ GENERATE / OCT- NEW SEED" : "K1-4 LEVEL / OCT- MUTE";
         cv_text_fit(6,21,&AF_S,hint,T_TEXT,T_BG,228);
     }
     cv_blit(0,200);

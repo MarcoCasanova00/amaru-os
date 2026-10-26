@@ -25,6 +25,9 @@ static int gray(uint16_t c) { return channel(c, 0) == channel(c, 2) && channel(c
 /* MONO's blends: R = B, G within 2 of 2 R (blended per channel, the 5-6-5 rounding) */
 static int neutral(uint16_t c)
 { return channel(c, 0) == channel(c, 2) && (int)channel(c, 1) - 2 * (int)channel(c, 0) >= -2 && (int)channel(c, 1) - 2 * (int)channel(c, 0) <= 2; }
+/* RGB565 channel values are not comparable directly (5-6-5); expand to 8 bits first. */
+static void rgb8(uint16_t c, unsigned *r, unsigned *g, unsigned *b)
+{ *r = channel(c, 0) * 255u / 31u; *g = channel(c, 1) * 255u / 63u; *b = channel(c, 2) * 255u / 31u; }
 static double luminance(uint16_t color)
 {
     const double weight[] = {0.2126, 0.7152, 0.0722};
@@ -47,8 +50,10 @@ int main(int argc, char **argv)
     static const uint8_t pd[] = {0x08, 0xf0};
     const aafont_t probe = {1, 1, 'A', 'A', 0, 0, pg, pd, 0, 0, 0};
     double worst = 100;
-    assert(NPALETTES == 10u && !strcmp(UI_PALETTES[0].name, "GREY") && !strcmp(UI_PALETTES[7].name, "HI-CON") &&
-           !strcmp(UI_PALETTES[8].name, "NIGHT") && !strcmp(UI_PALETTES[9].name, "MONO") && UI_BW_INDEX == 9u);
+    assert(NPALETTES == 13u && !strcmp(UI_PALETTES[0].name, "GREY") && !strcmp(UI_PALETTES[7].name, "HI-CON") &&
+           !strcmp(UI_PALETTES[8].name, "NIGHT") && !strcmp(UI_PALETTES[9].name, "MONO") && UI_BW_INDEX == 9u &&
+           !strcmp(UI_PALETTES[10].name, "BUNKER") && !strcmp(UI_PALETTES[11].name, "GRN/BLK") &&
+           !strcmp(UI_PALETTES[12].name, "AMB/BLK") && UI_TERM_GREEN_INDEX == 11u && UI_TERM_AMBER_INDEX == 12u);
     /* (#50, 1.0.2: appended, the ids stay; GREY is the MONO of 1.0.1, id 0) */
     for (unsigned st = ST_FLAT; st <= ST_LINE; st++) {   /* MONO: every token black or white, in FLAT and LINE */
         uint16_t *tok = &ux.bg;
@@ -71,6 +76,15 @@ int main(int argc, char **argv)
         palette_set(p);
         if (p == UI_GREY_INDEX)
             for (unsigned i = 0; i < 14; i++) assert(gray(tok[i]));      /* every token, derived ones too (RAISE, KEY the last) */
+        if (p == UI_TERM_GREEN_INDEX || p == UI_TERM_AMBER_INDEX) {
+            for (unsigned i = 0; i < 16; i++) {                         /* strict monochrome: all tokens one hue */
+                unsigned r, g, b;
+                rgb8(tok[i], &r, &g, &b);
+                if (p == UI_TERM_GREEN_INDEX) assert(g >= r && g >= b);
+                else assert(r >= g && g >= b);
+            }
+            assert(T_REC == T_ACCENT);                                  /* no fixed-red REC in a terminal theme */
+        }
         /* text and the things read on the screen; the generator checks the same (tools/gen_ui_palettes.py) */
         struct { uint16_t fg, bg; double min; } c[] = {
             {T_TEXT, T_BG, 12.0}, {T_TEXT, T_SURF, 9.0}, {T_MID, T_BG, 5.0}, {T_MID, T_SURF, 4.0},
@@ -89,7 +103,8 @@ int main(int argc, char **argv)
         printf("%-7s text %.1f:1, labels %.1f:1, values %.1f:1, selection %.1f:1\n", UI_PALETTES[p].name,
                contrast(T_TEXT, T_BG), contrast(T_MID, T_BG), contrast(T_THEME, T_BG), contrast(T_INK, T_SEL));
         assert((p == 6u) == ux.light);                         /* PAPER is the light one */
-        assert(T_REC == (p == UI_GREY_INDEX || p == UI_BW_INDEX ? T_ACCENT : ux.light ? UI_REC_LIGHT : UI_REC_DARK));
+        assert(T_REC == (p == UI_GREY_INDEX || p == UI_BW_INDEX || p == UI_TERM_GREEN_INDEX ||
+                         p == UI_TERM_AMBER_INDEX ? T_ACCENT : ux.light ? UI_REC_LIGHT : UI_REC_DARK));
         /* the blend: transparent, solid and an edge between the two, on two backgrounds */
         for (unsigned b = 0; b < 2; b++) {
             uint16_t under = b ? T_SEL : T_BG, ink = b ? T_INK : T_THEME;

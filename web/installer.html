@@ -1,11 +1,19 @@
 <!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>AMARU OS — WebMIDI Device-side Flash Question</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b}  </style><div class=card><h1>AMARU OS — WebMIDI page (still pre-Indiana)</h1>
-<p><b<|message|>Test/flash direct-byte WebMIDI path cannot be offered safely today.</b></p>
-<p>I'm following Felucca's loader protocol live in <code>firmware/firmware/src/ota.c</code>: the device itself <i>pulls</i> firmware via
-its OTA session driven by the host; the host only replies to chunks, guarded by the <b<|message|>board-size and 0x11 handshake</b>.  I created the logic to
-attempt a send, but I can't eyeball-verify every instruction against real silicon — sending wrong fragments during a
-loader attempt can leave the FM-1 in update mode. <i<|message|>That is not a brick</i>, but it is a bad user experience, and it's why I
-still only ship the verifier + THUB install page instead of a local byte stresser.</p>
-<p>If you insist on a self-hosted WebMIDI pass, give explicit written OK that you assume all risk, and I will ship one in
-the next build with the resume+rescue hot-path.</p>
-<p><a href="https://thefirmwarehub.com/" class=btn>Open The Firmware Hub (allowed production path)</a></p></div>
+<title>AMARU OS – Installation Guardrail</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}.status{font-family:monospace;font-size:12px;color:#9cff9b;white-space:pre-wrap}  </style>
+<div class=card><h1>AMARU OS — Install via The Firmware Hub</h1>
+<p>No WebMIDI byte writer is shipped with AMARU OS. Flashing <b<|message|>runs ONLY through The Firmware Hub's audited flasher</b> to preserve the full loader sequencing from Felucca/Bunker (OTA loader @ 0xE0000, commit-on-success, rescue via OCT−).</p>
+<p<|message|>Test the file <b<|message|>locally</b> with <code>install.html</code>, then drag the pack to the hub for a real flash. μP-level bytes only go through the hub's validated surface.</p>
+<input type=file id=f accept=".fwsc"><div class=status id=s>no file (still verify here before hub)</div>
+<div class=status id=o></div><script>
+const expected={identity:'FM-1_7100002',size:610090,sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase()};
+document.getElementById('f').addEventListener('change', async e => {
+  const buf=await e.target.files[0].arrayBuffer(); const v=new DataView(buf);
+  let L=v.getUint8(0), i=1, ident=''; while(i<1+L){ident+=String.fromCharCode(v.getUint8(i++));}
+  const sha=await sha256(buf);
+  const ok = ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
+  document.getElementById('s').textContent = ok ? '✅ verified — you may proceed to hub for real flash' : '⚠️  mismatch — stop, do not flash';
+  document.getElementById('s').style.color = ok ? '#7cff5b' : '#ff5b5b';
+  document.getElementById('o').textContent = `identity=${ident} size=${buf.byteLength} sha=${sha}\nexpected=${expected.identity} ${expected.size} ${expected.sha256}`;
+});
+async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+</script><p><a href="https://thefirmwarehub.com/" class=btn>Open The Firmware Hub (audited WebMIDI installer)</a></p></div>

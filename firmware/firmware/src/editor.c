@@ -352,6 +352,8 @@ static int ed_flash_stop(void)
 #include "editor_backup.c"
 #include "editor_fm6.c"
 #include "editor_menu.c"
+#include "amaru_sound_alias.h"
+#include "amaru_sound_alias.c"
 #include "editor_learn.c"                    /* 1.5: MIDI LEARN's map (cmds 78, 79) */
 #include "editor_palette.c"                  /* 1.6: CUSTOM, the user's palette (cmds 80, 81) */
 
@@ -597,7 +599,7 @@ static void ed_handle(const uint8_t *f, uint32_t n)   /* f: the bytes between F0
         ed_b(a[0]);
         ed_b(ENGINES[a[0]]->npresets);
         for (i = 0; i < ENGINES[a[0]]->npresets; i++)
-            ed_str(ENGINES[a[0]]->presets[i].name, 12);
+            ed_str(amaru_preset_name(a[0], i, ENGINES[a[0]]->name, ENGINES[a[0]]->presets[i].name), 12);
         for (i = 0; i < 2u; i++)                           /* then the two edit-page titles */
             ed_str(ENGINES[a[0]]->page_title[i], 8);
         break;

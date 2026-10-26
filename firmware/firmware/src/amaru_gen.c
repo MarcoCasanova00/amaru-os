@@ -69,13 +69,13 @@ static const genre_def_t GENRES[AMARU_NGENRES] = {
       { ASND("HARDTEKK PAD", E_ANALOG, 3, 66, 12, 55, 20, 25, 45, 25, AMV_POLY),
         ASND("HARDTEKK STAB", E_ANALOG, 6, 76, 0, 32, 8, 20, 35, 40, AMV_POLY),
         ASND("HARDTEKK BASS", E_ANALOG, 2, 52, 0, 26, 0, 5, 12, 35, AMV_MONO),
-        ASND("HARDTEKK DRUMS", E_DRUM, 2, 64, 0, 24, 0, 10, 18, 0, AMV_POLY) } },
+        ASND("HARDTEKK DRUMS", E_DRUM, 2, 64, 0, 24, 0, 10, 18, 90, AMV_POLY) } },
 
     { "ACID CORE", 165, 180, 3, SC_PHRY, 82, 0,
       "x...x...x...x...", "....x.......x...", "................", "xxxxxxxxxxxxxxxx", "......x.......x.", "..x.....x.....x.",
       BASS_ACID, PAD_STAB, LEAD_ACID, 0,
       { ASND("ACID MIST", E_NOISE, 0, 72, 35, 90, 20, 28, 80, 0, AMV_POLY),
-        ASND("CORE 303", E_ANALOG, 4, 88, 0, 34, 20, 30, 35, 45, AMV_MONO),
+        ASND("CORE 303", E_ANALOG, 4, 88, 0, 96, 20, 30, 35, 60, AMV_MONO),
         ASND("CORE BASS", E_ANALOG, 4, 58, 0, 34, 12, 20, 22, 35, AMV_MONO),
         ASND("CORE DRUMS", E_DRUM, 0, 64, 0, 26, 0, 12, 20, 0, AMV_POLY) } },
 

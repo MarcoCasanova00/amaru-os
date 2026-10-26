@@ -1,4 +1,6 @@
-# AMARU OS / BUNKER ADVANCED
+# AMARU OS / Based on Bunker Advanced
+
+Amaru OS, the revolution of hard genres for live performances
 
 <p align="center">
   <img src="firmware/web/emu/logos/logo-splash.png" alt="AMARU OS splash — green monochrome, your logo and “by Marco Casanova”">

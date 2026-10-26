@@ -5,6 +5,8 @@
 - **Current source:** AMARU `2c441ff` (docs/recipe placeholders clarification); JIANT reference `2f16bec`.
 - **Immediate next session:** rework AMARU GEN into a JIANT-style music-theory generator on the existing four tracks, without changing sounds.
 
+> **Next session:** read `handoff2.md` for the current state, then `session-2026-10-26/` (`README.md`, `SESSION.md`, `TRANSCRIPT.md`) for the full session context.
+
 ## 1. Goal for the next session
 
 Make AMARU’s GEN produce JIANT-like random songs using only the existing four AMARU layers:

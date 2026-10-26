@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -eu
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/amaru-hostasm.XXXXXX")
+trap 'rm -rf "$tmp"' EXIT HUP INT TERM
+out="$tmp/in.s"
+cat >"$out" <<'MAC'
+.macro csync
+	nop
+.endm
+.macro ssync
+	nop
+.endm
+.macro cli
+.endm
+.macro sti
+.endm
+.macro flushinv a
+.endm
+MAC
+args=()
+for a in "$@"; do
+	case "$a" in
+	*.s) cat "$a" >>"$out" ;;
+	*) args+=("$a") ;;
+	esac
+done
+"${REAL_AS:-/usr/bin/as}" "${args[@]}" "$out"

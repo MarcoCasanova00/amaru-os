@@ -1,0 +1,809 @@
+diff --git a/firmware/firmware/src/category.c b/firmware/firmware/src/category.c
+index 72412f6..88618d5 100644
+--- a/firmware/firmware/src/category.c
++++ b/firmware/firmware/src/category.c
+@@ -21,7 +21,7 @@ static uint32_t cat_of_engine(uint32_t e) { return e == 10u || e == 13u ? CAT_DR
+ static const char *const PRESET_CAT[16] = {
+     "LPBPBKLBULLP",              /* 0 ANALOG: SAW LEAD, SOFT PAD, SQR BASS, PWM STR, ACID, SINE KEY, RAVE, SUB BASS,
+                                   * PLUCK, BRASS, WIND, STRINGS */
+-    "",                          /* 1 DIGITAL (retired) */
++    "KUBLKPUK",                  /* 1 DIGITAL: E.PIANO, BELL, BASS, BRASS, ORGAN, PAD, MARIMBA, FUNK KEY */
+     "LKPLUU",                    /* 2 PHASE: BRASS, ORGAN, STRING, RESO, BELL, WIRE */
+     "LBLLL",                     /* 3 LOFI: PULSE LD, WAVE BASS, ARP 8BIT, WAVE LEAD, STEP LEAD */
+     "KKLL",                      /* 4 SAMPLE: PIANO, (PIANO: the retired TRANH's alias), FLUTE, SAX */
+diff --git a/firmware/firmware/src/core.h b/firmware/firmware/src/core.h
+index ef967b7..bf17a80 100644
+--- a/firmware/firmware/src/core.h
++++ b/firmware/firmware/src/core.h
+@@ -14,11 +14,10 @@
+ #define NSTEP 64
+ #define HALF_FRAMES 128          /* I2S half buffer: 2.9 ms at 44.1 kHz (a key waits 0..1 half, then plays 1 half later) */
+ #ifndef FELUCCA_SLICE
+-#define FELUCCA_SLICE 1          /* the SLICE engine (eng_slice.c), engine 13; FELUCCA_SLICE=0 builds without it */
++#define FELUCCA_SLICE 0          /* the SLICE engine (eng_slice.c), engine 13; retired from the AMARU build */
+ #endif
+ #ifndef FELUCCA_FM4
+-#define FELUCCA_FM4 0            /* the DIGITAL engine (eng_digital.c, four-operator FM): kept in the tree, not built
+-                                  * by default; replaced by FM6, its sounds convert (fm4_convert.c) */
++#define FELUCCA_FM4 1            /* the DIGITAL engine (eng_digital.c, four-operator FM), engine 1: active */
+ #endif
+ #ifndef FELUCCA_CPU2
+ #define FELUCCA_CPU2 0           /* the second core (src/felucca.c): 1 = built in, MENU > 2ND CORE ON lets it render
+@@ -28,10 +27,32 @@
+                                             * second core (mod.c, voice.c SPREAD, eng_formant.c): one each with two cores,
+                                             * one for all with one, as up to 1.6 */
+ #define C1_PI(t) ((uint32_t)((t) - trk) % C1_NP)   /* a part's copy */
+-#define NENGINES (13 + FELUCCA_SLICE)   /* SLICE (13) comes last: the other engines keep their numbers */
+-#define ENGI_DIGITAL 1u          /* reserved without FELUCCA_FM4: never selectable (eng_ok), its sounds load as FM6 */
+-#define NENG_SHOWN (NENGINES - !FELUCCA_FM4)   /* the engines one can pick: PRESETS, the EDIT layer, the editor,
+-                                                * in the display order of engines.c ENGINE_ORDER */
++#define NENGINES 14u             /* append-only: every stored index keeps its engine number */
++#define ENGI_DIGITAL 1u          /* DIGITAL (four-operator FM): active in AMARU */
++#define ENGI_ANALOG 0u
++#define ENGI_PHYS 9u
++#define ENGI_DRUM 10u
++#define ENGI_FM6 12u
++#define NENG_SHOWN 4u            /* ANALOG DIGITAL FM6 DRUM: PRESETS, the EDIT layer, the editor */
++/* AMARU's four active engines; every other number is retired (silent, never selectable). */
++#define ENG_ACTIVE_MASK ((1u << ENGI_ANALOG) | (1u << ENGI_DIGITAL) | (1u << ENGI_DRUM) | (1u << ENGI_FM6))
++static int eng_active(uint32_t e) { return e < 32u && ((ENG_ACTIVE_MASK >> e) & 1u); }
++/* the active engine an old sound of e loads as: WHEEL / GRAIN -> DIGITAL, SLICE -> DRUM, the rest -> ANALOG.
++ * PHYS MODEL DRUM and SAMPLE PERC migrate first (drum_from_phys / drum_from_perc). */
++static uint32_t eng_fallback(uint32_t e)
++{
++    if (eng_active(e))
++        return e;
++    switch (e) {
++    case 7u:                     /* WHEEL */
++    case 8u:                     /* GRAIN */
++        return ENGI_DIGITAL;
++    case 13u:                    /* SLICE */
++        return ENGI_DRUM;
++    default:
++        return ENGI_ANALOG;
++    }
++}
+ #define UP_SLOTS 32u             /* user presets (upreset.c) */
+ 
+ /* ------------------------------------------------------- parameters --- */
+@@ -106,9 +127,6 @@ static void params_by_count(int16_t *out, const int16_t *in, uint32_t np, const
+         out[P_E0 + i] = in[nc + i];
+ }
+ 
+-/* engine indices the stores name (engines.c ENGINES[]: append-only) */
+-#define ENGI_PHYS 9u
+-#define ENGI_DRUM 10u
+ /* PHYS MODEL DRUM (MODEL 4, before 1.0) -> the DRUM engine, its E values in place: {MODEL, TUNE, TONE, DECY,
+  * SNAP, ACC, KICK 0..127, PERC 0..127} -> {KIT, TUNE, TONE, DECY, SNAP, ACC, KICK 0..1, DRV 0}. 1 = it was one
+  * (its engine is ENGI_DRUM now); projects (project.c) and user presets (upreset.c) */
+diff --git a/firmware/firmware/src/engines.c b/firmware/firmware/src/engines.c
+index 583206e..300ad50 100644
+--- a/firmware/firmware/src/engines.c
++++ b/firmware/firmware/src/engines.c
+@@ -41,28 +41,50 @@ static uint8_t eng_mem_owner[NPART];       /* engine index + 1 whose state is in
+ #include "eng_slice.c"
+ #endif
+ 
+-/* the editor protocol, user presets and projects store these indices: append, never reorder */
++/* a retired engine's slot: no sound, no presets, nothing to edit. Its source stays in the tree, but the table
++ * does not point at it; old sounds migrate to an active engine before they reach a track. */
++static void retired_note_on(struct track *t, voice_t *v) { (void)t; (void)v; }
++static void retired_render(struct track *t, voice_t *v, int32_t *out, uint32_t n, const vmod_t *m)
++{
++    (void)t; (void)v; (void)out; (void)n; (void)m;
++}
++static const preset_t RETIRED_PRESET = {"-", {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0}, 0, 0, {0, 0, 0, 0}, 0};
++#define RETIRED_EDIT { {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0}, \
++                       {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0}, \
++                       {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0}, \
++                       {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0} }
++static const engine_t ENG_RETIRED = {
++    .name = "-",
++    .page_title = {"-", "-"},
++    .edit = RETIRED_EDIT,
++    .presets = &RETIRED_PRESET,
++    .npresets = 0,
++    .knob = {P_E0, P_E1, P_E2, P_REL},
++    .note_on = retired_note_on,
++    .render = retired_render,
++};
++
++/* the editor protocol, user presets and projects store these indices: append, never reorder. AMARU keeps four:
++ * ANALOG (0), DIGITAL (1), DRUM (10), FM6 (12); the others are silent placeholders. */
+ static const engine_t *const ENGINES[NENGINES] = {
+     &ENG_ANALOG,                 /* 0 */
+ #if FELUCCA_FM4
+     &ENG_DIGITAL,                /* 1 (ENGI_DIGITAL) */
+ #else
+-    &ENG_FM4_GONE,               /* 1: reserved (DIGITAL, retired: its sounds convert to FM6, fm4_convert.c) */
++    &ENG_FM4_GONE,               /* 1: DIGITAL's DSP is off in this build */
+ #endif
+-    &ENG_PHASE,                  /* 2 */
+-    &ENG_LOFI,                   /* 3 */
+-    &ENG_SAMPLE,                 /* 4 */
+-    &ENG_FORMANT,                /* 5 VOICE (eng_formant.c: "voice" is a sounding note in voice.c) */
+-    &ENG_TRIO,                   /* 6 */
+-    &ENG_WHEEL,                  /* 7 */
+-    &ENG_GRAIN,                  /* 8 */
+-    &ENG_PHYS,                   /* 9 (ENGI_PHYS) */
++    &ENG_RETIRED,                /* 2 PHASE (retired) */
++    &ENG_RETIRED,                /* 3 LOFI (retired) */
++    &ENG_RETIRED,                /* 4 SAMPLE (retired) */
++    &ENG_RETIRED,                /* 5 VOICE (retired) */
++    &ENG_RETIRED,                /* 6 TRIO (retired) */
++    &ENG_RETIRED,                /* 7 WHEEL (retired) */
++    &ENG_RETIRED,                /* 8 GRAIN (retired) */
++    &ENG_RETIRED,                /* 9 PHYS (retired) */
+     &ENG_DRUM,                   /* 10 (ENGI_DRUM) */
+-    &ENG_NOISE,                  /* 11 */
++    &ENG_RETIRED,                /* 11 NOISE (retired) */
+     &ENG_FM6,                    /* 12 (ENGI_FM6) */
+-#if FELUCCA_SLICE
+-    &ENG_SLICE,                  /* 13 (FELUCCA_SLICE=0 builds without it) */
+-#endif
++    &ENG_RETIRED,                /* 13 SLICE (retired) */
+ };
+ 
+ /* a track's engine number as an index (the audio paths: a compare, cheaper than % NENGINES; a bad number: 0) */
+@@ -108,32 +130,24 @@ static const char *snd_missing(const track_t *t, uint32_t *code)
+     return smp_set_missing(si) ? SMP_ALL_NAMES[si] : 0;
+ }
+ 
+-/* the order the engines are shown in (PRESETS browsing and its ENG knob, the EDIT layer's keys, the editor's list):
+- * engine indices, never DIGITAL's reserved 1 (with FELUCCA_FM4 it follows FM6). The indices stay as they are (the
+- * stores and the protocol hold them); only this table orders them */
++/* the order the engines are shown in (PRESETS browsing and its ENG knob, the EDIT layer's keys, the editor's list).
++ * The indices stay as they are (the stores and the protocol hold them); only this table orders them. */
+ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
+-    0,                           /* ANALOG */
+-    12,                          /* FM6 */
+-#if FELUCCA_FM4
+-    1,                           /* DIGITAL */
+-#endif
+-    2, 3, 4, 5, 6, 7, 8, 9,      /* PHASE LOFI SAMPLE VOICE TRIO WHEEL GRAIN PHYS */
+-    11,                          /* NOISE */
+-#if FELUCCA_SLICE
+-    13,                          /* SLICE */
+-#endif
+-    10,                          /* DRUM */
++    ENGI_ANALOG,                 /* 0 ANALOG */
++    ENGI_DIGITAL,                /* 1 DIGITAL */
++    ENGI_FM6,                    /* 12 FM6 */
++    ENGI_DRUM,                   /* 10 DRUM */
+ };
+ 
+-/* the engines one can pick (engine 1 only with FELUCCA_FM4), in ENGINE_ORDER: eng_ok(e), the n-th of them
+- * eng_vis(n), e's place among them eng_rank(e), the next / previous one eng_step(e, dir) (wraps) */
+-static int eng_ok(uint32_t e) { return e < NENGINES && (FELUCCA_FM4 || e != ENGI_DIGITAL); }
++/* the engines one can pick, in ENGINE_ORDER: eng_ok(e), the n-th of them eng_vis(n), e's place among them
++ * eng_rank(e), the next / previous one eng_step(e, dir) (wraps) */
++static int eng_ok(uint32_t e) { return eng_active(e); }
+ static uint32_t eng_vis(uint32_t n) { return ENGINE_ORDER[n % NENG_SHOWN]; }
+ static uint32_t eng_rank(uint32_t e)
+ {
+     uint32_t n;
+     if (!eng_ok(e))
+-        e = ENGI_FM6;                            /* (DIGITAL without FELUCCA_FM4: its sounds play as FM6) */
++        e = eng_fallback(e);                     /* (an old retired sound: the active engine it loads as) */
+     for (n = 0; n < NENG_SHOWN && ENGINE_ORDER[n] != e; n++)
+         ;
+     return n < NENG_SHOWN ? n : 0u;
+@@ -186,7 +200,8 @@ static const struct {
+ #undef T_
+ #define NPATTERNS (sizeof PATTERNS / sizeof PATTERNS[0])
+ 
+-/* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are): bass, pad, lead, drums */
+-static const uint8_t TRK_DEF[NPART][3] = {{0, 4, 0}, {ENGI_FM6, 4, 0}, {3, 0, 0}, {ENGI_DRUM, 0, 0}}; /* ANALOG ACID,
+-                                                                       * FM6 PAD (was DIGITAL PAD), LOFI PULSE LD, DRUM KIT */
++/* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are):
++ * ANALOG ACID, DIGITAL FM BASS, FM6 PAD, DRUM KIT */
++static const uint8_t TRK_DEF[NPART][3] = {{ENGI_ANALOG, 4, 0}, {ENGI_DIGITAL, 2, 0},
++                                          {ENGI_FM6, 4, 0}, {ENGI_DRUM, 0, 0}};
+ static uint32_t trk_def_engine(uint32_t i) { return TRK_DEF[i % NPART][0]; }
+diff --git a/firmware/firmware/src/fx.c b/firmware/firmware/src/fx.c
+index 347d809..2fc61b3 100644
+--- a/firmware/firmware/src/fx.c
++++ b/firmware/firmware/src/fx.c
+@@ -864,12 +864,7 @@ static __attribute__((noinline)) void mix_spread(track_t *t, int32_t *b, uint32_
+  * when built, nothing when retired. An estimate: it only steers the split, the sound does not depend on it */
+ #if FELUCCA_CPU2
+ static uint16_t part_cost[NTRK];                        /* the last block's, per part */
+-static const uint16_t ENG_VCOST[NENGINES] = {163, FELUCCA_FM4 ? 181 : 0, 162, 67, 70, 174, 144, 143, 189, 309, 113, 134,
+-                                             181,
+-#if FELUCCA_SLICE
+-                                             129
+-#endif
+-};
++static const uint16_t ENG_VCOST[NENGINES] = {163, FELUCCA_FM4 ? 181 : 0, 0, 0, 0, 0, 0, 0, 0, 0, 113, 0, 181, 0};
+ #endif
+ 
+ /* one synth part into the dry mix and the sends of sm (mx[0]; mx[1] on the second core); a part with no voice sounding costs
+diff --git a/firmware/firmware/src/midi_control.c b/firmware/firmware/src/midi_control.c
+index 364efa4..10341e3 100644
+--- a/firmware/firmware/src/midi_control.c
++++ b/firmware/firmware/src/midi_control.c
+@@ -219,12 +219,8 @@ static const uint8_t MIDI_CC_MAP[][2] = {
+ };
+ /* per engine (ENGINES[] order): CC74's E index + 1 in the high nibble, CC71's in the low one, 0 = none */
+ static const uint8_t MIDI_CC_ENG[NENGINES] = {
+-    0x56, 0x00, 0x30, 0x80, 0x50, 0x07, 0x67, 0x00,   /* ANALOG CUT RES, -, PHASE DCW, LOFI TONE, SAMPLE CUT, VOICE Q,
+-                                                       * TRIO CUT RES, WHEEL - */
+-    0x80, 0x30, 0x30, 0x34, 0x30,                     /* GRAIN TONE, PHYS BRIT, DRUM TONE, NOISE FREQ RES, FM6 MLVL */
+-#if FELUCCA_SLICE
+-    0x80,                                             /* SLICE TONE */
+-#endif
++    0x56, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,   /* ANALOG CUT RES, DIGITAL -, retired */
++    0x00, 0x00, 0x30, 0x00, 0x30, 0x00,               /* retired, DRUM TONE, retired, FM6 MLVL, retired */
+ };
+ /* a CC sets parameter id of track t as a knob would: 0..127 over its range */
+ static void midi_cc_set(track_t *t, uint32_t id, uint32_t value)
+diff --git a/firmware/firmware/src/params.c b/firmware/firmware/src/params.c
+index 0904b8b..c1aa6f8 100644
+--- a/firmware/firmware/src/params.c
++++ b/firmware/firmware/src/params.c
+@@ -71,12 +71,9 @@ static const char *const N_IRATE[] = {"689", "919", "1.1k", "1.4k", "1.8k", "2.2
+ static const char *const N_MSRC[] = {"OFF", "LFO", "ENV", "VEL", "KEY", "RAND", "MODW", "AT", "EXPR", "S&H", "SLEW"};
+ static const char *const N_MDST[] = {"OFF", "PITCH", "CUT", "SHP", "AMP", "PAN", "DIST", "CHO", "DLY", "REV", "RATE",
+                                      "VIB", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "DEPTH", "VEL", "TIME"};
+-static const char *const N_ENGNAME[] = {"ANALOG", FELUCCA_FM4 ? "DIGITAL" : "-", "PHASE", "LOFI", "SAMPLE", "VOICE", "TRIO", "WHEEL", "GRAIN", "PHYS",
+-                                             "DRUM", "NOISE", "FM6",
+-#if FELUCCA_SLICE
+-                                             "SLICE",
+-#endif
+-};
++/* the four active engines; retired numbers stay ("-") so G_ENGSEL keeps its fixed 14 values */
++static const char *const N_ENGNAME[] = {"ANALOG", "DIGITAL", "-", "-", "-", "-", "-", "-", "-", "-",
++                                        "DRUM", "-", "FM6", "-"};
+ 
+ #define PD(l, f, mn, mx, df) {l, f, mn, mx, df, 0, 0}
+ #define PE(l, n, df) {l, F_ENUM, 0, (int16_t)(sizeof(n) / sizeof(n[0]) - 1), df, n, 0}
+diff --git a/firmware/firmware/src/project.c b/firmware/firmware/src/project.c
+index c972d6e..3366b31 100644
+--- a/firmware/firmware/src/project.c
++++ b/firmware/firmware/src/project.c
+@@ -385,6 +385,41 @@ static void proj_perc(project_t *q)
+     q->sum = proj_sum(q);
+ }
+ 
++/* a retired engine's track -> an active one: PHYS MODEL DRUM and SAMPLE PERC keep their moved values (their
++ * migrations ran first), the rest take the fallback engine's EDIT defaults. The steps stay. Idempotent */
++static void proj_retired(project_t *q)
++{
++    uint32_t k, i, n, hit = 0;
++    for (k = 0; k < NTRK; k++) {
++        proj_trk_t *d = &q->t[k];
++        uint32_t target;
++        if (eng_active(d->engine))
++            continue;
++        if (drum_from_phys(d->engine, &d->p[P_E0]) || drum_from_perc(d->engine, &d->p[P_E0]))
++            target = ENGI_DRUM;
++        else {
++            target = eng_fallback(d->engine);
++            for (i = 0; i < 8u; i++)
++                d->p[P_E0 + i] = param_desc_of(target, P_E0 + i)->def;
++        }
++        d->engine = (uint8_t)target;
++        d->preset = 0;
++        hit |= 1u << k;
++    }
++    if (!hit)
++        return;
++    for (i = n = 0; i < q->motion.count && i < MOTION_MAX; i++) {
++        const motion_event_t *e = &q->motion.event[i];
++        if (((hit >> (e->place >> 6)) & 1u) && MOTION_ID(e) >= P_E0)
++            continue;
++        q->motion.event[n++] = *e;
++    }
++    for (i = n; i < q->motion.count && i < MOTION_MAX; i++)
++        memset(&q->motion.event[i], 0, sizeof q->motion.event[i]);
++    q->motion.count = (uint8_t)n;
++    q->sum = proj_sum(q);
++}
++
+ /* a format 4 project (n bytes in *v4) -> slot q as format 6 */
+ static int proj_from_v4(project_t *q, const project_v4_t *v4, int n)
+ {
+@@ -503,6 +538,7 @@ static int proj_import(project_t *q, const void *b, int n)
+         return 0;
+     proj_fm4(q);
+     proj_perc(q);
++    proj_retired(q);
+     return 1;
+ }
+ static int proj_import_any(project_t *q, const void *b, int n)
+@@ -522,6 +558,7 @@ static int proj_import_any(project_t *q, const void *b, int n)
+         memcpy(q, b, sizeof *q);
+         proj_drums_to_part(q);
+         proj_phys(q);
++        proj_retired(q);
+         return 1;
+     }
+     if (!proj_import_old(q, b, n))
+@@ -1062,6 +1099,7 @@ static int project_restore_runtime(const project_t *input)
+     proj_phys(p);                                       /* .. before PHYS lost DUST and DRUM */
+     proj_fm4(p);                                        /* .. that had DIGITAL tracks */
+     proj_perc(p);                                       /* .. or SAMPLE PERC tracks */
++    proj_retired(p);                                    /* .. or any other retired engine */
+     transport_req = 2;
+     panic_req = (1u << NTRK) - 1u;
+     fm1_irq_off();                                      /* the audio ISR must not see half a project */
+diff --git a/firmware/firmware/src/ui.c b/firmware/firmware/src/ui.c
+index ecdc88f..ecb9ba9 100644
+--- a/firmware/firmware/src/ui.c
++++ b/firmware/firmware/src/ui.c
+@@ -1346,8 +1346,13 @@ static void set_engine_of(track_t *t, uint32_t ei);
+ /* preset pi of the engine the track asked for: the sound only (not the steps, not param_kept) */
+ static void apply_preset_to(track_t *t, uint32_t pi)
+ {
+-    const engine_t *e = ENGINES[t->eng_req % NENGINES];
++    const engine_t *e;
+     uint32_t i;
++    if (!eng_ok(t->eng_req % NENGINES)) {               /* an old retired engine: load its fallback first */
++        set_engine_of(t, eng_fallback(t->eng_req));
++        return;
++    }
++    e = ENGINES[t->eng_req % NENGINES];
+ #if !FELUCCA_FM4
+     if (t->eng_req % NENGINES == ENGI_DIGITAL) {
+         fm4_load_preset(t, pi);
+@@ -1394,8 +1399,10 @@ static void apply_preset_to(track_t *t, uint32_t pi)
+  * its values or the new one with its own (voice.c engine_block), never one with the other's */
+ static void set_engine_of(track_t *t, uint32_t ei)
+ {
+-    const engine_t *e = ENGINES[ei % NENGINES];
++    const engine_t *e;
+     uint32_t i;
++    ei = eng_fallback(ei % NENGINES);                   /* retired numbers never reach a track */
++    e = ENGINES[ei];
+ #if !FELUCCA_FM4
+     if (ei % NENGINES == ENGI_DIGITAL) {             /* DIGITAL (retired): its first preset, as FM6 */
+         fm4_load_preset(t, 0);
+diff --git a/firmware/firmware/src/upreset.c b/firmware/firmware/src/upreset.c
+index 4766bf6..8666bf0 100644
+--- a/firmware/firmware/src/upreset.c
++++ b/firmware/firmware/src/upreset.c
+@@ -130,6 +130,15 @@ static void up_migrate(up_rec_t *r)
+     if (drum_from_phys(r->engine, e) || drum_from_perc(r->engine, e)) {   /* (SAMPLE PERC: see the top) */
+         r->engine = ENGI_DRUM;
+         for (k = 0; k < 8u; k++) up_set_value(r, r->np - 8u + k, e[k]);
++    } else if (!eng_active(r->engine)) {               /* any other retired engine: its fallback, fresh EDIT */
++        uint32_t target = eng_fallback(r->engine);
++        r->engine = (uint8_t)target;
++        for (k = 0; k < 8u; k++)
++#ifdef UP_HOST
++            up_set_value(r, r->np - 8u + k, 0);
++#else
++            up_set_value(r, r->np - 8u + k, param_desc_of(target, P_E0 + k)->def);
++#endif
+     }
+ }
+ 
+diff --git a/firmware/tests/project_test.c b/firmware/tests/project_test.c
+index 0ffb433..3b59a56 100644
+--- a/firmware/tests/project_test.c
++++ b/firmware/tests/project_test.c
+@@ -108,11 +108,13 @@ static void to_v4(project_v4_t *v, const project_t *q)
+ 
+ /* track t of the converted project has the old values where they belong; drum: track 4 was the drum part,
+  * lvl / rev: its level and reverb send (the old globals) */
++static uint32_t old_target(uint32_t e) { return eng_active(e) ? e : eng_fallback(e); }
+ static int track_ok(const proj_trk_t *n, const proj_trk_v2_t *o, uint32_t t, int drum, int16_t lvl, int16_t rev)
+ {
+-    uint32_t k;
++    uint32_t k, target = drum ? ENGI_DRUM : old_target(o->engine);
++    int migrated = !drum && !eng_active(o->engine);
+     int ok = (drum ? n->engine == ENGI_DRUM && n->preset == PROJ_DEF_KEEP && steps_grid_same(n->step, o->step)
+-                   : n->engine == o->engine && n->preset == o->preset && steps_same(n->step, o->step));
++                   : n->engine == target && n->preset == (migrated ? 0u : o->preset) && steps_same(n->step, o->step));
+     for (k = 0; k <= P_DETUNE; k++)
+         ok &= n->p[k] == (drum && k == P_LEVEL ? lvl : drum && k == P_REV ? rev : oldv(t, k));
+     ok &= n->p[P_SLCR] == 0 && n->p[P_SLPAT] == TP[P_SLPAT].def && n->p[P_SLRATE] == TP[P_SLRATE].def &&
+@@ -120,7 +122,7 @@ static int track_ok(const proj_trk_t *n, const proj_trk_v2_t *o, uint32_t t, int
+     for (k = P_M1SRC; k <= P_M4AMT; k++)
+         ok &= n->p[k] == 0;                     /* every matrix slot OFF */
+     for (k = 0; k < 8u; k++)
+-        ok &= n->p[P_E0 + k] == oldv(t, 45u + k);
++        ok &= n->p[P_E0 + k] == (migrated ? param_desc_of(target, P_E0 + k)->def : oldv(t, 45u + k));
+     return ok;
+ }
+ 
+@@ -144,14 +146,15 @@ static void fill_v3_track(proj_trk_v3_t *d, uint32_t t)
+ }
+ static int track_v3_ok(const proj_trk_t *n, const proj_trk_v3_t *o, uint32_t t)
+ {
+-    uint32_t k;
+-    int ok = n->engine == o->engine && n->preset == o->preset && steps_same(n->step, o->step);
++    uint32_t k, target = old_target(o->engine);
++    int migrated = !eng_active(o->engine);
++    int ok = n->engine == target && n->preset == (migrated ? 0u : o->preset) && steps_same(n->step, o->step);
+     for (k = 0; k <= P_SLDEPTH; k++)
+         ok &= n->p[k] == oldv3(t, k);           /* up to the SLICER: the same ids */
+     for (k = P_M1SRC; k <= P_M4AMT; k++)
+         ok &= n->p[k] == TP[k].def && TP[k].def == 0;
+     for (k = 0; k < 8u; k++)
+-        ok &= n->p[P_E0 + k] == oldv3(t, 49u + k);
++        ok &= n->p[P_E0 + k] == (migrated ? param_desc_of(target, P_E0 + k)->def : oldv3(t, 49u + k));
+     return ok;
+ }
+ 
+@@ -203,9 +206,9 @@ int main(void)
+         ok &= track_ok(&q.t[t], &v2.t[t], t, t == 3u, 127, 127);   /* (G_DRLVL / G_DRREV 525 / 526: 127) */
+     bad += check("FUN2 -> FUN6: every parameter mapped, SLICER and matrix OFF (4 tracks)", ok);
+ 
+-    bad += check("FUN2 -> FUN6: engine bytes kept (WHEEL 7, ANALOG 0, TRIO 6)",
+-                 q.t[0].engine == 7 && q.t[1].engine == 0 && q.t[2].engine == 6 &&
+-                 str_eq(ENGINES[7]->name, "WHEEL") && str_eq(ENGINES[6]->name, "TRIO") && NENGINES > 8);
++    bad += check("FUN2 -> FUN6: WHEEL -> DIGITAL, ANALOG kept, TRIO -> ANALOG",
++                 q.t[0].engine == ENGI_DIGITAL && q.t[1].engine == ENGI_ANALOG && q.t[2].engine == ENGI_ANALOG &&
++                 NENGINES == 14u);
+     bad += check("FUN2 -> FUN6: the drum track -> part 4, DRUM (its kit on load), steps kept (lanes as hits)",
+                  q.parts == NPART && q.t[3].engine == ENGI_DRUM && str_eq(ENGINES[ENGI_DRUM]->name, "DRUM") &&
+                  TRK_DEF[3][0] == ENGI_DRUM && q.t[3].preset == PROJ_DEF_KEEP &&
+@@ -248,9 +251,9 @@ int main(void)
+          steps_grid_same(q2.t[3].step, v3.t[0].step) && !memcmp(&q2.t[0], &q.t[0], sizeof q.t[0]);
+     bad += check("FUN3 before 1.0: the drum track -> part 4 (LEVEL / REV from G_DRLVL / G_DRREV)", ok);
+ 
+-    /* a FUN6 round trip: stored as is (a matrix slot set; an engine added since: SLICE, 8; a DRUM track with
+-     * notes on its lanes stays so: only an older format is converted) */
+-    q.t[1].engine = 8;
++    /* a FUN6 round trip: stored as is (a matrix slot set; an active engine; a DRUM track with notes on its
++     * lanes stays so: only an older format or a retired engine is converted) */
++    q.t[1].engine = ENGI_DIGITAL;
+     q.t[2].p[P_M2SRC] = 6;
+     q.t[2].p[P_M2DST] = 11;
+     q.t[2].p[P_M2AMT] = -17;
+@@ -258,10 +261,10 @@ int main(void)
+     q.t[0].step[0] = (step_t){{36, 42, 0, 0}, 2, ST_NOTE, 0, 96, 1u << DV_SNARE, 1u << DV_SNARE};
+     q.sum = proj_sum(&q);
+     memcpy(&buf, &q, sizeof q);
+-    bad += check("FUN6 -> FUN6: as stored (a matrix slot, engine 8, a DRUM step with notes and hits)",
+-                 proj_import(&q2, &buf, (int)sizeof q) && !memcmp(&q, &q2, sizeof q) && q2.t[1].engine == 8 &&
++    bad += check("FUN6 -> FUN6: as stored (a matrix slot, DIGITAL, a DRUM step with notes and hits)",
++                 proj_import(&q2, &buf, (int)sizeof q) && !memcmp(&q, &q2, sizeof q) && q2.t[1].engine == ENGI_DIGITAL &&
+                  q2.t[2].p[P_M2AMT] == -17 && q2.t[0].step[0].n == 2u && q2.t[0].step[0].hit == 1u << DV_SNARE);
+-    q.t[0].engine = 3;
++    q.t[0].engine = ENGI_DIGITAL;
+     q.t[0].step[0] = q.t[0].step[1];
+     q.sum = proj_sum(&q);
+ 
+@@ -391,8 +394,12 @@ int main(void)
+              q2.t[0].p[P_E0] == 2 && q2.t[0].p[P_E6] == 1 && q2.t[0].p[P_E7] == 0;
+         for (i = 1; i < 6u; i++)
+             ok &= q2.t[0].p[P_E0 + i] == E0[i];         /* TUNE TONE DECY SNAP ACC in place */
+-        ok &= q2.t[1].engine == ENGI_PHYS && !memcmp(q2.t[1].p, q.t[1].p, sizeof q.t[1].p);
+-        ok &= q2.t[3].engine == ENGI_PHYS && !memcmp(q2.t[3].p, q.t[3].p, sizeof q.t[3].p);
++        ok &= q2.t[1].engine == ENGI_ANALOG && q2.t[3].engine == ENGI_ANALOG;
++        for (i = 0; i < P_E0; i++)
++            ok &= q2.t[1].p[i] == q.t[1].p[i] && q2.t[3].p[i] == q.t[3].p[i];
++        for (i = 0; i < 8u; i++)
++            ok &= q2.t[1].p[P_E0 + i] == param_desc_of(ENGI_ANALOG, P_E0 + i)->def &&
++                  q2.t[3].p[P_E0 + i] == param_desc_of(ENGI_ANALOG, P_E0 + i)->def;
+         ok &= q2.t[2].engine == ENGI_DRUM;              /* the old DRUM KIT: DRUM's DRUM KIT */
+         for (i = 0; i < 8u; i++)
+             ok &= q2.t[2].p[P_E0 + i] == dk->e[i];
+@@ -400,7 +407,7 @@ int main(void)
+               q2.t[0].p[P_LEVEL] == q.t[0].p[P_LEVEL];
+         ok &= q2.t[0].step[0].n == 0 && q2.t[0].step[0].hit == ((1u << DV_KICK) | (1u << DV_HATC));   /* the grid */
+         ok &= !memcmp(q2.t[1].step, q.t[1].step, sizeof q.t[1].step);   /* (PHYS: as they were) */
+-        bad += check("FUN4 phys 1: PHYS MODEL DRUM -> DRUM engine (its lane notes as hits), MEMB kept", ok);
++        bad += check("FUN4 phys 1: PHYS MODEL DRUM -> DRUM; other PHYS -> ANALOG", ok);
+         memcpy(&buf, &q2, sizeof q2);
+         bad += check("FUN6 after it: imported again, as it is", proj_import(&q, &buf, (int)sizeof q2) &&
+                                                                 !memcmp(&q, &q2, sizeof q));
+@@ -409,9 +416,10 @@ int main(void)
+         q.sum = proj_sum(&q);
+         to_v4(&v4, &q);
+         memcpy(&buf, &v4, sizeof v4);
+-        ok = proj_import(&q2, &buf, (int)sizeof v4) && q2.phys == PROJ_PHYS && q2.t[1].engine == ENGI_PHYS &&
+-             q2.t[1].p[P_E0] == PM_MODAL && q2.t[1].p[P_E6] == 64;
+-        bad += check("FUN4 phys 0: PHYS DUST -> MODAL bowed", ok);
++        ok = proj_import(&q2, &buf, (int)sizeof v4) && q2.phys == PROJ_PHYS && q2.t[1].engine == ENGI_ANALOG;
++        for (i = 0; i < 8u; i++)
++            ok &= q2.t[1].p[P_E0 + i] == param_desc_of(ENGI_ANALOG, P_E0 + i)->def;
++        bad += check("FUN4 phys 0: retired PHYS -> ANALOG", ok);
+     }
+ 
+     {   /* the FUN7 name: the reserved tail's last 12 bytes, covered by the hash; zero = no name */
+@@ -659,22 +667,24 @@ int main(void)
+         a.t[2].preset = 4;
+         a.t[2].step[0] = (step_t){{36, 42, 0, 0}, 2, ST_NOTE, SF_ACCENT, 100, 0, 0};
+         a.t[2].step[4] = (step_t){{38, 49, 0, 0}, 2, ST_NOTE, 0, 90, 0, 0};
+-        a.t[0].p[P_E0] = 2;                             /* track 1: FLUTE stays */
++        a.t[0].p[P_E0] = 2;                             /* track 1: FLUTE, another SAMPLE set -> ANALOG */
+         a.motion.count = 3;
+         a.motion.event[0] = (motion_event_t){2u << 6 | 3u, P_E4, 20};          /* track 3: CUT: goes */
+         a.motion.event[1] = (motion_event_t){2u << 6 | 5u, P_REV, 60};         /* track 3: a send: stays */
+-        a.motion.event[2] = (motion_event_t){0u << 6 | 3u, P_E4, 70};          /* track 1: stays */
++        a.motion.event[2] = (motion_event_t){0u << 6 | 3u, P_E4, 70};          /* track 1: retired: goes */
+         a.sum = proj_sum(&a);
+ #define PERC_OK(c) ((c).t[2].engine == ENGI_DRUM && (c).t[2].preset == 0u && !memcmp(&(c).t[2].p[P_E0], KIT, sizeof KIT) && \
+                     !memcmp((c).t[2].p, a.t[2].p, P_E0 * sizeof(int16_t)) && \
+                     !memcmp((c).t[2].step, a.t[2].step, sizeof a.t[2].step) && \
+-                    (c).t[0].engine == ENGI_SAMPLE && (c).t[0].p[P_E0] == 2 && (c).t[1].engine == ENGI_SAMPLE)
++                    (c).t[0].engine == ENGI_ANALOG && (c).t[1].engine == ENGI_ANALOG && \
++                    (c).t[0].p[P_E0] == param_desc_of(ENGI_ANALOG, P_E0)->def && \
++                    (c).t[1].p[P_E0] == param_desc_of(ENGI_ANALOG, P_E0)->def)
+         ok = proj_pack(&st, &a) && proj_import(&c, &st, sizeof st);
+-        bad += check("FUN8 with a SAMPLE PERC track: DRUM's kit, the rest of the sound and the steps kept", ok && PERC_OK(c) &&
++        bad += check("FUN8 with SAMPLE PERC: DRUM kit; other SAMPLE -> ANALOG", ok && PERC_OK(c) &&
+                      str_eq(ENGINES[ENGI_DRUM]->presets[0].name, "DRUM KIT") &&
+                      !memcmp(ENGINES[ENGI_DRUM]->presets[0].e, (int8_t[8])DRUM_KIT_E, 8));
+-        bad += check("  its motion on CUT goes; a send's and the other track's stay",
+-                     c.motion.count == 2u && c.motion.event[0].param == P_REV && c.motion.event[1].place == 3u &&
++        bad += check("  motion on the retired tracks' EDIT values goes; a send's stays",
++                     c.motion.count == 1u && c.motion.event[0].param == P_REV && c.motion.event[0].place == (2u << 6 | 5u) &&
+                      motion_valid(&c.motion) && proj_ok(&c));
+         bad += check("  imported again: as it is (DRUM now)", proj_import(&d, &c, sizeof c) && !memcmp(&d, &c, sizeof d));
+         memset(&a.motion, 0, sizeof a.motion);
+@@ -682,7 +692,7 @@ int main(void)
+         to_v4(&w4, &a);
+         memcpy(&buf, &w4, sizeof w4);
+         ok = proj_import(&c, &buf, (int)sizeof w4) && PERC_OK(c);
+-        bad += check("FUN4 with a SAMPLE PERC track: DRUM's kit, the same", ok);
++        bad += check("FUN4 with SAMPLE PERC: DRUM kit; other SAMPLE -> ANALOG", ok);
+ #undef PERC_OK
+     }
+     printf("%s\n", bad ? "PROJECT FORMAT TEST FAILED" : "project format test passed");
+diff --git a/firmware/tests/song_probe.h b/firmware/tests/song_probe.h
+index a361885..fcf9cff 100644
+--- a/firmware/tests/song_probe.h
++++ b/firmware/tests/song_probe.h
+@@ -10,7 +10,7 @@
+ #else
+ #define PROBE_ROW(s, r) ((chain_row_t){s, r})
+ #endif
+-#define SONG_PROBE_GOLDEN 0x676A420Du              /* the firmware before lanes (bddbbd8), 11026 blocks */
++#define SONG_PROBE_GOLDEN 0x9662420Du              /* AMARU power-on defaults, 11026 blocks */
+ #define SONG_PROBE_BLOCKS 11026u
+ static uint32_t song_probe_mix(uint32_t h, uint32_t v) { return (h ^ v) * 16777619u; }
+ static uint32_t song_probe(uint32_t *blocks)
+diff --git a/firmware/tests/ui_test.c b/firmware/tests/ui_test.c
+index 4d303f2..d7d8f3c 100644
+--- a/firmware/tests/ui_test.c
++++ b/firmware/tests/ui_test.c
+@@ -489,34 +489,6 @@ static int test_sound_loads(void)
+     project_load(1);
+     bad += check("a project load drops the copy and takes none", undo.trk == 0 && undo_depth == 0);
+     ui_power_on();
+-    bad += check("SAMPLE factory browsing has four melodic presets and no PERC",
+-                 ENGINES[4]->npresets == 4u && str_eq(ENGINES[4]->presets[0].name, "PIANO") &&
+-                 str_eq(ENGINES[4]->presets[3].name, "SAX"));
+-    {   /* TRANH (SET 1, preset 1) is gone: both are PIANO aliases, kept for old data, never offered */
+-        const param_desc_t *sd = &ENGINES[4]->edit[0];
+-        uint32_t all, pos, k, e, pos0, shown = 0;
+-        set_engine_of(TSEL, 4);
+-        pos0 = preset_all_pos(&all);
+-        TSEL->preset = 1;
+-        TSEL->p[P_E0] = 1;
+-        pos = preset_all_pos(&all);
+-        for (k = 0; k < all; k++)
+-            if (preset_all_at(k, &e) == 4u)
+-                shown++;
+-        e = preset_all_at(pos0 + 1u, &k);
+-        apply_preset_to(TSEL, 1);
+-        bad += check("SAMPLE: old SET 1 / preset 1 (TRANH) play PIANO; browsing and knobs skip them",
+-                     SMP_SETS[1].z0 == SMP_SETS[0].z0 && SMP_SETS[1].nz == SMP_SETS[0].nz && pos == pos0 &&
+-                     shown == 3u && e == 4u && k == 2u && TSEL->preset == 0u && TSEL->p[P_E0] == 0 &&
+-                     str_eq(sd->names[1], "PIANO") && enum_step(sd, 0, 1) == 2 && enum_step(sd, 2, 1) == 0 &&
+-                     enum_step(sd, 1, 2) == 2 && enum_orig(sd, 1) == 0 && enum_orig(sd, 5) == 5 &&
+-                     enum_orig(&ENGINES[8]->edit[0], 1) == 0);
+-        bad += check("SAMPLE / GRAIN SET 4 (PERC, retired): a PIANO alias, knobs skip it, USR1..3 stay 5..7",
+-                     str_eq(sd->names[SMP_SET_PERC], "PIANO") && enum_orig(sd, SMP_SET_PERC) == 0 &&
+-                     enum_step(sd, 3, 4) == 5 && enum_step(sd, 5, 4) == 3 && str_eq(sd->names[5], "USR1") &&
+-                     str_eq(sd->names[7], "USR3") && sd->max == 7 &&
+-                     enum_orig(&ENGINES[8]->edit[0], SMP_SET_PERC) == 0 && SMP_SETS[SMP_SET_PERC].z0 == SMP_SETS[0].z0);
+-    }
+     host_legacy_sample_perc(t);                /* SAMPLE PERC (SET 4, retired after 1.0.2): every load gives DRUM */
+     t->preset = 4;                             /* a project written before the factory removal */
+     my_steps(t);
+@@ -555,10 +527,10 @@ static int test_sound_loads(void)
+     set_engine_of(t, 0);
+     apply_preset_to(t, SMP_SET_PERC);             /* (engine 0: an ANALOG preset 4, not PERC) */
+     bad += check("factory preset 4 of another engine stays that engine's", t->eng_req == 0u && t->preset == 4u);
+-    set_engine_of(t, ENGI_SAMPLE);
+-    apply_preset_to(t, SMP_SET_PERC);             /* SAMPLE preset 4 (once PERC): the editor's PRESET, a favourite */
+-    bad += check("SAMPLE preset 4 (once PERC): DRUM's kit", t->eng_req == ENGI_DRUM && t->preset == 0u && perc_kit(t) &&
+-                 gm_hits_play(t));
++    set_engine_of(t, ENGI_SAMPLE);                /* retired: its fallback */
++    apply_preset_to(t, SMP_SET_PERC);             /* (the fallback engine's preset 4) */
++    bad += check("SAMPLE is retired: a track asking for it gets ANALOG", t->eng_req == ENGI_ANALOG &&
++                 t->preset == SMP_SET_PERC);
+     ui_power_on();
+     host_legacy_sample_perc(&trk[3]);
+     my_steps(&trk[3]);
+@@ -1440,7 +1412,7 @@ static int test_categories(void)
+             n += preset_cat(e, k) == CAT_BASS;
+     bad += check("  KNOB 4: ALL, FAV, then BASS: the list holds the factory basses only, the sound not loaded",
+                  list_mode() == 2u && str_eq(list_name(list_mode()), "BASS") && !favorites.filter && ui_lcat == CAT_BASS &&
+-                 total == n && n >= 6u && pos == total && TSEL->eng_req == 0u && TSEL->preset == 0u);
++                 total == n && n >= 5u && pos == total && TSEL->eng_req == 0u && TSEL->preset == 0u);
+     ok = 1;
+     for (i = 0; i < total; i++) {
+         turn(EN_PRESET, 1);
+@@ -2043,7 +2015,7 @@ static int test_mono_screens(void)
+     int bad = 0, ok;
+     uint32_t e, n = 0, nb = 0;
+     ok = mono_screens(UI_GREY_INDEX, screen_gray, &n);
+-    bad += check("GREY: every pixel of every page, HOME, menu, ABOUT, dialog and countdown is gray", ok && n > 200u);
++    bad += check("GREY: every pixel of every page, HOME, menu, ABOUT, dialog and countdown is gray", ok && n > 50u);
+     ok = mono_screens(UI_BW_INDEX, screen_neutral, &nb);
+     bad += check("MONO (black and white): every pixel of every page, HOME, menu, ABOUT, dialog and countdown is neutral",
+                  ok && nb == n);
+@@ -3653,6 +3625,10 @@ static int test_edit_cycle(void)
+ static int test_sample_alert(void)
+ {
+     const char *nf = MSG_NO_SAMPLE;
++    if (!eng_ok(ENGI_SAMPLE)) {                     /* SAMPLE and GRAIN retired: no such alerts */
++        printf("ui: missing sample: SAMPLE/GRAIN retired, skipped\n");
++        return 0;
++    }
+     int bad = 0, ok, seen;
+     uint32_t i;
+     char b[48];
+@@ -4033,17 +4009,17 @@ static int test_quick_layers(void)
+     my_steps(TSEL); TSEL->p[P_SLCR] = SL_STUT; song.playing = 1;
+     before = *TSEL;
+     sync_reload = 0;
+-    lay_combo(B_EDIT, white(eng_rank(2)));             /* (the keys: the engines one can pick, engines.c eng_vis) */
+-    ok = TSEL->eng_req == 2u && TSEL->preset == 0u && ui.layer == LAYER_EDIT && sync_reload && !gates();
+-    key_up(white(eng_rank(2))); frame();
++    lay_combo(B_EDIT, white(2));                        /* (the keys: the engines one can pick, engines.c eng_vis) */
++    ok = TSEL->eng_req == eng_vis(2) && TSEL->preset == 0u && ui.layer == LAYER_EDIT && sync_reload && !gates();
++    key_up(white(2)); frame();
+     key_down(white(1)); key_up(white(1)); frame();
+-    ok &= TSEL->eng_req == ENGI_FM6;                    /* (G3: FM6, second in ENGINE_ORDER) */
++    ok &= TSEL->eng_req == ENGI_DIGITAL;                /* (G3: DIGITAL, second in ENGINE_ORDER) */
+     key_down(white(NENG_SHOWN - 1u)); key_up(white(NENG_SHOWN - 1u)); frame();
+     ok &= TSEL->eng_req == ENGI_DRUM;                   /* (the last key: DRUM) */
+     ok &= !memcmp(TSEL->step, before.step, sizeof before.step) && TSEL->p[P_SLEN] == before.p[P_SLEN] &&
+           TSEL->p[P_SLCR] == SL_STUT;
+     btn_up(B_EDIT); frame();
+-    bad += check("EDIT + white key n: the n-th engine shown (FM6 2nd, DRUM last), while playing; steps, LEN, SLICER stay", ok);
++    bad += check("EDIT + white key n: the n-th engine shown (DIGITAL 2nd, FM6 3rd, DRUM last), while playing; steps, LEN, SLICER stay", ok);
+     hold(B_SAVE);
+     bad += check("  SAVE held: UNDO back to before the layer's loads, the steps untouched",
+                  TSEL->eng_req == 0u && TSEL->preset == before.preset && !memcmp(TSEL->step, before.step, sizeof before.step));
+@@ -4059,9 +4035,9 @@ static int test_quick_layers(void)
+     bad += check("  every engine one can pick has its white key from F3 (NENG_SHOWN, not a fixed count; never DIGITAL)",
+                  ok && a == NENG_SHOWN);
+     set_engine_of(TSEL, 0);
+-    lay_combo(B_EDIT, white(eng_rank(3))); key_up(white(eng_rank(3))); frame();
++    lay_combo(B_EDIT, white(3)); key_up(white(3)); frame();
+     turn(EN_K2, 1);
+-    ok = TSEL->eng_req == 3u && TSEL->preset == 1u;
++    ok = TSEL->eng_req == eng_vis(3) && TSEL->preset == 1u;
+     turn(EN_K3, 1);
+     ok &= preset_favorite();
+     oct_back();
+@@ -4072,7 +4048,7 @@ static int test_quick_layers(void)
+     ok = TSEL->eng_req == eng_step(0, 1);
+     btn_up(B_EDIT); frame();
+     bad += check("  KNOB 1: the next engine", ok);
+-    {                                                   /* #124: SAMPLE's alias (1 = PIANO) is not a stop on KNOB 2 */
++    if (eng_ok(ENGI_SAMPLE)) {                          /* #124: SAMPLE's alias (1 = PIANO) is not a stop on KNOB 2 */
+         uint32_t tot, n, c0, c1, c2, seen = 0, alias = 0;
+         set_engine_of(TSEL, ENGI_SAMPLE); go_home(); frame();
+         eng_list_pos(&tot);
+@@ -7895,9 +7871,9 @@ static int test_browse_no_pattern(void)
+             }
+         }
+     }
+-    if (!ok || loads < 200u || pat_hints <= 10u) printf("  ok %d loads %u hints %u\n", ok, loads, pat_hints);
++    if (!ok || loads < 100u || pat_hints <= 10u) printf("  ok %d loads %u hints %u\n", ok, loads, pat_hints);
+     bad += check("#51 every sound browsed (HOME, PRESETS; stopped, playing): no step, ARP off, nothing held, no start",
+-                 ok && loads >= 200u && pat_hints > 10u);
++                 ok && loads >= 100u && pat_hints > 10u);
+     return bad;
+ }
+ 
+@@ -9084,7 +9060,7 @@ static int test_fm6_ops(void)
+     uint8_t before[FP_SIZE + 1u], v[FP_SIZE + 1u], mine[FP_SIZE + 1u];
+     fm6_snd_t s0, s1;
+     ui_power_on();
+-    song.sel = 1;                                    /* T2: FM6 PAD (SLOT F5) */
++    song.sel = 2;                                    /* T3: FM6 PAD (SLOT F5) */
+     tr = song.sel;
+     bad += check("FM6 ops: FM6's EDIT cycle EDIT 1 EDIT 2 OPERATOR OP ENV OPERATOR 2 VOICE VOICE 2 EDIT 1",
+                  TSEL->eng_req == ENGI_FM6 && engine_cycle(CYC_F, NELEM(CYC_F)));
+@@ -9098,7 +9074,7 @@ static int test_fm6_ops(void)
+           fm6_patch[tr][at] == before[at] - 7u && slot_own() && fop_op == 2u;
+     bad += check("FM6 ops: OPERATOR KNOB 4 on OP 3: its LEVEL byte only; F5 -> SLOT OWN", ok);
+     hold(B_SAVE);
+-    ok = !memcmp(before, fm6_patch[tr], FP_SIZE) && TSEL->p[P_E7] == 4 && fm6_slot[tr] == 4u && msg_is("UNDO/REDO T2");
++    ok = !memcmp(before, fm6_patch[tr], FP_SIZE) && TSEL->p[P_E7] == 4 && fm6_slot[tr] == 4u && msg_is("UNDO/REDO T3");
+     hold(B_SAVE);
+     ok &= fm6_patch[tr][3u * FP_OP + FP_OL] == before[3u * FP_OP + FP_OL] - 7u && slot_own();
+     frames(1600);
+@@ -9223,7 +9199,7 @@ static int test_fm6_ops(void)
+     song.sel = 0;                                    /* T1 ANALOG: no operator page */
+     for (f = 0; f < NPAGES; f++)
+         if (PAGES[f].graph >= GR_FMOP && PAGES[f].graph <= GR_FMENV) ok &= !page_visible(f);
+-    song.sel = 1;
++    song.sel = 2;
+     go_title("OPERATOR"); frame();
+     song.rec = 2u; song.playing = 1;
+     f = motion.count;
+diff --git a/firmware/tests/upreset_test.c b/firmware/tests/upreset_test.c
+index 1db771c..ebc375f 100644
+--- a/firmware/tests/upreset_test.c
++++ b/firmware/tests/upreset_test.c
+@@ -60,9 +60,9 @@ int main(void)
+     int16_t v[P_COUNT], def[P_COUNT];
+     memset(nor, 0xFF, sizeof nor);
+ 
+-    n = put_frame(a, 5, 2, "Bass One", -40);
++    n = put_frame(a, 5, ENGI_ANALOG, "Bass One", -40);
+     bad += check("UP_PUT frame < 640 bytes", 5u + n + 1u < 640u);
+-    bad += check("UP_PUT parses", up_parse(a, n, &r, &slot) == 0 && slot == 5u && r.engine == 2u &&
++    bad += check("UP_PUT parses", up_parse(a, n, &r, &slot) == 0 && slot == 5u && r.engine == ENGI_ANALOG &&
+                                       up_valid(&r) && !memcmp(r.name, "Bass One", 8) && !r.name[8]);
+     ok = 1;
+     for (i = 0; i < P_COUNT; i++)
+@@ -86,7 +86,7 @@ int main(void)
+     bad += check("UP_PUT slot 32 -> args", up_parse(a, n, &r, &slot) == 1);
+     n = put_frame(a, 0, NENGINES, "X", 0);
+     bad += check("UP_PUT bad engine -> args", up_parse(a, n, &r, &slot) == 1);
+-    n = put_frame(a, 3, ENGI_DIGITAL, "OLD FM", 0);   /* (DIGITAL, retired: a record keeps it, its load converts) */
++    n = put_frame(a, 3, ENGI_DIGITAL, "OLD FM", 0);   /* (DIGITAL: a record keeps it) */
+     bad += check("UP_PUT engine 1 (DIGITAL): kept as it is", up_parse(a, n, &r, &slot) == 0 && slot == 3u &&
+                                                         r.engine == ENGI_DIGITAL && up_valid(&r));
+     up_migrate(&r);
+@@ -201,12 +201,15 @@ int main(void)
+         st_save(OBJ_UPRESET0 + 1, &up_bank[1], sizeof up_bank[1]);
+         memset(up_bank, 0, sizeof up_bank);
+         up_bank_check(1, st_load(OBJ_UPRESET0 + 1, &up_bank[1], sizeof up_bank[1]));
+-        ok = up_used(16) && up_rec(16)->engine == ENGI_DRUM && up_used(17) && up_rec(17)->engine == ENGI_PHYS &&
+-             !memcmp(up_rec(17)->p, m.p, sizeof m.p) && up_used(18) && up_rec(18)->engine == ENGI_DRUM &&
+-             up_rec(16)->ver == UP_VER;
++        ok = up_used(16) && up_rec(16)->engine == ENGI_DRUM && up_used(17) && up_rec(17)->engine == ENGI_ANALOG &&
++             up_used(18) && up_rec(18)->engine == ENGI_DRUM && up_rec(16)->ver == UP_VER;
+         for (k = 0; k < 8u; k++)
+             ok &= up_value(up_rec(16), P_E0 + k) == NEW[k] && up_value(up_rec(18), o.np - 8u + k) == NEW[k];
+-        bad += check("bank load: PHYS DRUM -> DRUM engine, MEMB kept", ok);
++        for (k = 0; k < P_E0; k++)
++            ok &= up_value(up_rec(17), k) == up_value(&m, k);
++        for (k = 0; k < 8u; k++)
++            ok &= up_value(up_rec(17), P_E0 + k) == 0;
++        bad += check("bank load: PHYS DRUM -> DRUM, other PHYS -> ANALOG", ok);
+         n = put_frame(a, 3, ENGI_PHYS, "Old kit", 0);
+         for (k = 0; k < 8u; k++) {                          /* E0..E7 of the frame: OLD */
+             uint32_t at = 3u + 7u + 1u + 2u * (P_E0 + k), u = (uint32_t)(OLD[k] + 8192);
+@@ -220,7 +223,7 @@ int main(void)
+     }
+ 
+     /* SAMPLE SET 4 (PERC, the GM kit, retired after 1.0.2) -> the DRUM engine with its default kit: from flash (an
+-     * older layout too), by UP_PUT; the rest of the sound and the pattern as stored; another SET stays SAMPLE */
++     * older layout too), by UP_PUT; the rest of the sound and the pattern as stored; another SET -> ANALOG */
+     {
+         static const int16_t KIT[8] = DRUM_KIT_E;
+         up_rec_t d = r, m = r, o = r, before;
+@@ -229,7 +232,7 @@ int main(void)
+         o.np = P_COUNT - 2u;                                /* an older layout: E0 at np - 8 */
+         for (k = 0; k < 8u; k++) {
+             up_set_value(&d, P_E0 + k, (int16_t)(k ? 30 + k : SMP_SET_PERC));
+-            up_set_value(&m, P_E0 + k, (int16_t)(k ? 30 + k : 2));   /* FLUTE: stays SAMPLE */
++            up_set_value(&m, P_E0 + k, (int16_t)(k ? 30 + k : 2));   /* FLUTE: another SAMPLE set */
+             up_set_value(&o, o.np - 8u + k, (int16_t)(k ? 30 + k : SMP_SET_PERC));
+         }
+         *up_rec(19) = d;
+@@ -238,14 +241,16 @@ int main(void)
+         st_save(OBJ_UPRESET0 + 1, &up_bank[1], sizeof up_bank[1]);
+         memset(up_bank, 0, sizeof up_bank);
+         up_bank_check(1, st_load(OBJ_UPRESET0 + 1, &up_bank[1], sizeof up_bank[1]));
+-        ok = up_used(19) && up_rec(19)->engine == ENGI_DRUM && up_used(20) && up_rec(20)->engine == ENGI_SAMPLE &&
+-             !memcmp(up_rec(20)->p, m.p, sizeof m.p) && up_used(21) && up_rec(21)->engine == ENGI_DRUM &&
++        ok = up_used(19) && up_rec(19)->engine == ENGI_DRUM && up_used(20) && up_rec(20)->engine == ENGI_ANALOG &&
++             up_used(21) && up_rec(21)->engine == ENGI_DRUM &&
+              !memcmp(up_rec(19)->note, d.note, sizeof d.note) && !memcmp(up_rec(19)->flags, d.flags, sizeof d.flags);
+         for (k = 0; k < 8u; k++)
+             ok &= up_value(up_rec(19), P_E0 + k) == KIT[k] && up_value(up_rec(21), o.np - 8u + k) == KIT[k];
+         for (k = 0; k < P_E0; k++)
+-            ok &= up_value(up_rec(19), k) == up_value(&d, k);
+-        bad += check("bank load: SAMPLE PERC -> DRUM kit, FLUTE kept", ok);
++            ok &= up_value(up_rec(19), k) == up_value(&d, k) && up_value(up_rec(20), k) == up_value(&m, k);
++        for (k = 0; k < 8u; k++)
++            ok &= up_value(up_rec(20), P_E0 + k) == 0;
++        bad += check("bank load: SAMPLE PERC -> DRUM kit, other SAMPLE -> ANALOG", ok);
+         before = *up_rec(19);
+         up_migrate(up_rec(19));
+         bad += check("  migrated again: as it is", !memcmp(up_rec(19), &before, sizeof before));

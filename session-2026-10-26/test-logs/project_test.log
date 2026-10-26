@@ -1,0 +1,56 @@
+layout: SLICER after DETUNE, then the matrix just before P_E0 ok
+FUN10 fits one flash object, the retained cache in NOINIT    ok
+FUN2 image is 2552 bytes (as stored)                         ok
+FUN2 -> FUN6: converted, valid format 5 slot                 ok
+FUN2 -> FUN6: globals (id 24, the old drum channel: ROOM) and selected track ok
+FUN2 -> FUN6: every parameter mapped, SLICER and matrix OFF (4 tracks) ok
+FUN2 -> FUN6: WHEEL -> DIGITAL, ANALOG kept, TRIO -> ANALOG  ok
+FUN2 -> FUN6: the drum track -> part 4, DRUM (its kit on load), steps kept (lanes as hits) ok
+FUN3 image is 2584 bytes (as stored)                         ok
+FUN3 -> FUN6: every parameter kept, the matrix OFF, steps, globals (24: ROOM) ok
+FUN3 before 1.0: the drum track -> part 4 (LEVEL / REV from G_DRLVL / G_DRREV) ok
+FUN6 -> FUN6: as stored (a matrix slot, DIGITAL, a DRUM step with notes and hits) ok
+FUN5 -> FUN6: sounds, grid and reserved lane bytes kept, no chain ok
+FUN5: damaged checksum refused                               ok
+FUN6: chain round trip                                       ok
+FUN6: invalid row refused even with a correct checksum       ok
+FUN4 image is 2680 bytes (as stored)                         ok
+FUN4 -> FUN6: parameters, engines, globals; steps as they were, no hits ok
+FUN4 -> FUN6: a DRUM track's lane notes -> hits (accents too), a low tom / crash kept ok
+FUN3 with a bad checksum: refused                            ok
+FUN6 size with a FUN3 magic: refused                         ok
+FUN2 with a bad checksum: refused                            ok
+FUN2 with a wrong length: refused                            ok
+FUN6 size with a FUN2 magic: refused                         ok
+FUN1 -> FUN6: track 1 mapped, tracks 2..4 defaults           ok
+FUN4 phys 1: PHYS MODEL DRUM -> DRUM; other PHYS -> ANALOG   ok
+FUN6 after it: imported again, as it is                      ok
+FUN4 phys 0: retired PHYS -> ANALOG                          ok
+FUN10 name at the end of the reserved tail, the FM6 patches before it, after the data (4 spare; 3 for MIDI) ok
+FUN7 no name: the tail all zero (as firmware before wrote it) ok
+FUN7 of before names (zero tail): loads, no name             ok
+FUN7 name round trip (upper case, 0-padded)                  ok
+FUN7 name of 12 characters (no terminator)                   ok
+FUN7 name byte changed: the hash refuses the project         ok
+FUN7 name with a byte outside 32..126: the project loads, no name ok
+FUN6..FUN1 imports: no name                                  ok
+FUN10: the four FM6 patches round trip (bytes at PROJ_FM6_OFF) ok
+FUN10: a patch byte changed: the hash refuses it             ok
+FUN10 round trip: locks on a lane level (P_LN2) and an engine value (P_E5) kept ok
+FUN8 of 1.0.x (91 parameters): lane levels 100 %, E0..E7 at P_E0, patches and name kept ok
+  its motion: E3 (86 then) at P_E3, REV kept                 ok
+  a lock on its E5 (88 then): at P_E5, still a lock          ok
+  one byte short: refused                                    ok
+  in a retained (longer) slot: loads                         ok
+FUN7 -> FUN10: the music and name kept, every track the init patch ok
+FUN7 REVERB TYPE above SPRING (an old drum channel): ROOM    ok
+FUN7 one byte short: refused                                 ok
+a retained 3840-byte slot holding a FUN7 record loads it     ok
+a retained slot of garbage is empty                          ok
+FUN8: a patch byte above 127 cannot be packed                ok
+FUN8: a step out of range packs inside it (note, velocity 127; accents on hits): it loads ok
+FUN8 with SAMPLE PERC: DRUM kit; other SAMPLE -> ANALOG      ok
+  motion on the retired tracks' EDIT values goes; a send's stays ok
+  imported again: as it is (DRUM now)                        ok
+FUN4 with SAMPLE PERC: DRUM kit; other SAMPLE -> ANALOG      ok
+project format test passed

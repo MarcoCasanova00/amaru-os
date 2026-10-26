@@ -94,3 +94,20 @@ brand assets are imported.
 AMARU OS is **GPL-3.0-only**. Bunker's vendored components retain their own
 licenses (Felucca-Engines MIT, msfa Apache-2.0, CC0 samples, OFL fonts).
 See [`LICENSE`](LICENSE) and [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md).
+
+## AMARU OS · Firmware Hub submission card (working copy)
+
+| Field | Value |
+|-------|-------|
+| Title | AMARU OS / Bunker Advanced Alpha (0.1a) |
+| Device | M-VAVE FM-1 |
+| Type | Custom firmware (GPL-3.0-only) |
+| Source | https://github.com/MarcoCasanova00/amaru-os (open source) |
+| Status | Tested by maintainer on one FM-1 (in-browser emulator + real hardware). |
+| Install (browser) | Chrome/Edge WebMIDI via [`https://marcocasanova00.github.io/amaru-os/`](https://marcocasanova00.github.io/amaru-os/) |
+| Install (manual) | `build/felucca.fwsc` (610,090 B — identity `FM-1_7100002`), via Jieli package loader (`ota.bin` 6,934 B). |
+| Documentation | `README.md`, `docs/QUICKSTART.md`, `docs/ATTRIBUTION.md`, `docs/AMARU-ANALYSIS.md` |
+| Safety | Real device validated on one FM-1; no brick reported. Flash size verified by tooling; tested gates green (hal-only, single core, margin checks). Only original artwork used (logo splash, logos/). |
+| Licence | GPL-3.0-only on top of Bunker 1.0 (Felucca, msfa, CC0, OFL). |
+
+*Submit once the hardware-validation phase signs the 9-question gate. See `HANDOFF.md`.*

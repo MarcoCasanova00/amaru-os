@@ -1,19 +1,19 @@
 <!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>AMARU OS – Firmware Hub Web Installer Guide</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}  .step{margin:8px 0;padding-left:18px}</style>
-<div class=card><h1>AMARU OS – Web Installation (browser-side, safest route)</h1>
-<p>The WebMIDI byte-scrubber that ZVENS uses to flash <b>.fwsc</b> packages lives in <a href="https://thefirmwarehub.com/">The Firm ware Hub</a>. AMARU only ships the verifier locally (no byte streamer), to keep the offline path brick-free.</p>
-<h2>Why not a local WebMIDI sender here?</h2><ul>
-<li>The FM-1's loader expects an exact bootstrap sequence (Felucca's <code>F0 22 24 35 7F F7</code> OTA handshake + 0xE0000 staging) that's device-specific. Wrong bytes can leave the FM-1 in update mode.</li>
-<li>The hub tool obeys the protocol and resumes on disconnect; a custom sender here would re-flash and risk half-written flash.</li>
-<li>AMARU only alters FM-sys parameters + visual UI; it does not rely on a custom loader. Use the hub's tool box for the actual flash.</li>
-</ul>
-<h2>Safe install via The Firmware Hub (recommended)</h2>
-<ol>
-<li>Open https://thefirmwarehub.com/ in Chrome/Edge, press <b>Connect FM-1</b>, then press <b>Install</b> under AMARU's card.</li>
-<li>Hub loads the signed .fwsc, checks identity <code>FM-1_7100002</code> + SHA-256, then writes via the chip bootloader track.</li>
-<li>If the install stops: press <b>Install</b> again; it resumes. Or use hub's rescue (OCT− at power-on).</li>
-</ol>
-<h2>Already flashed on your own FM-1?</h2>
-<p<|message|>Keep a USB Flash of stock <b>V15</b> around — the recovery button (OCT− on power-on) stays intact regardless of firmware.</p>
-<p><a href="https://thefirmwarehub.com/" class=btn>➜ Open The Firmware Hub</a></p>
-</div>
+<title>AMARU OS – Installation (WebMIDI verification + pointer)</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b}  </style>
+<div class=card><h1>AMARU OS — Web Installer Checkpoint</h1>
+<p>This page performs <b>local-only</b> identity / size / SHA-256 verification, then links to <a href="https://thefirmwarehub.com/">The Firmware Hub</a>, whose
+WebMIDI installer is the only chip-level driver we treat as safe for AMARU packages.</p>
+<p><b>No byte streamer is exposed locally.</b> The firmware–flash path (Felucca's loader at <code>0xE0000</code>) requires OTA sequencing; mistakes brick the device.
+If you are not comfortable flashing, use the hub's audited installer (Chrome / Edge, WebMIDI).</p><input type=file id=f accept=".fwsc"><div class=status id=s>no file selected.</div>
+<div class=status id=o></div><script>
+const expected={identity:'FM-1_7100002',size:610090,sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase()};
+document.getElementById('f').addEventListener('change', async e => {
+  const buf=await e.target.files[0].arrayBuffer(); const v=new DataView(buf);
+  let L=v.getUint8(0), i=1, ident=''; while(i<1+L){ident+=String.fromCharCode(v.getUint8(i++));}
+  const sha=await sha256(buf);
+  const ok = ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
+  document.getElementById('s').textContent = ok ? '✅ VERIFIED — safe to guide to hub flash' : '⚠️  MISMATCH — do not proceed';
+  document.getElementById('s').style.color = ok ? '#7cff5b' : '#ff5b5b';
+  document.getElementById('o').textContent = `identity=${ident} size=${buf.byteLength} sha=${sha}\nexpected=${expected.identity} ${expected.size} ${expected.sha256}`;
+});
+async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}

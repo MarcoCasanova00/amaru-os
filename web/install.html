@@ -1,6 +1,7 @@
 <!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>AMARU OS - WebMIDI Installer</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#7cff5b;color:#0b100a;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600;margin-right:8px}.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b;white-space:pre-wrap}</style>
 <div class=card><h1>AMARU OS - WebMIDI Installer (AprilOS-style)</h1>
+<div style="color:#ff5b5b;font-weight:900;font-size:18px;margin:12px 0;padding:12px;border:2px solid #ff5b5b;background:#2a0a0a">REMINDER: ROLL BACK TO STOCK V15 BEFORE YOU DO THIS (OCT- on power-on for rescue)</div>
 <p>Install AMARU firmware to an FM-1 over USB (Chrome/Edge, WebMIDI). Use the release package; verify first. Keep a V15 backup. Recovery via OCT- on power-on.</p>
 <input type=file id=f accept=".fwsc,.fw,.bin"><div class=status id=s>no file selected.</div>
 <button id=c>Connect device (WebMIDI)</button><button id=x disabled>Flash loaded package</button>
@@ -28,7 +29,7 @@ document.getElementById('c').onclick=async()=>{
 function onmsg(e){ if(e.data[0]===0xF0) console.log('sysex in', e.data.length); }
 document.getElementById('x').onclick=async()=>{
   if(!buf||!mo){alert('connect & load first');return;}
-  if(!confirm('Flash AMARU firmware now? Backup V15 first. Recovery via OCT- on power-on.')) return;
+  if(!confirm('ROLLBACK CHECK: Did you roll back to stock V15 firmware before?\nOnly continue if YES. Flash AMARU now?')) return;
   const total=buf.byteLength; const chunk=512; let off=0;
   const cmd=mo;
   cmd.send([0xF0,0x22,0x24,0x35,0x7F,0xF7]); await sleep(80);

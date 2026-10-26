@@ -1,43 +1,48 @@
 <!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>AMARU OS – Package Safety Checker</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}
-.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}
-button{background:#7cff5b;color:#0b100a;border:none;padding:8px 12px;border-radius:4px;cursor:pointer}
-.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b} pre{white-space:pre-wrap;word-break:break-all}</style>
-<div class=card><h1>AMARU OS — Package Safety Checker (pre-install)</h1><p>
-This tool does <b>not</b> flash firmware. It verifies a released AMARU <code>.fwsc</code>
-package against the recorded identity/size/SHA-256 before any external site writes to your FM-1.
-It is the last sanity step before installing at <a href="https://thefirmwarehub.com/">The Firmware Hub</a> or via WebMIDI.
-</p><input type=file id=f accept=".fwsc"><div class=status id=s>no file selected.</div>
-<pre id=o></pre><script>
-const expected = { identity:'FM-1_7100002', size:610090,
- sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase() };
-document.getElementById('f').addEventListener('change', async e => {
-  const s=document.getElementById('s'), o=document.getElementById('o');
-  const file=e.target.files[0]; if(!file){ s.textContent='no file'; return; }
-  s.textContent='checking...';
-  const buf=await file.arrayBuffer();
-  const view=new DataView(buf);
-  // Identity stored in first 12 bytes as length-prefixed ASCII string
-  let identLen=view.getUint8(0);
-  let ident='';
-  for(let i=1;i<1+identLen;i++) ident += String.fromCharCode(view.getUint8(i));
-  s.textContent=`identity: ${ident} ; size: ${buf.byteLength} bytes`;
+<title>AMARU OS - WebMIDI Installer</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#7cff5b;color:#0b100a;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600;margin-right:8px}.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b;white-space:pre-wrap}</style>
+<div class=card><h1>AMARU OS - WebMIDI Installer (AprilOS-style)</h1>
+<p>Install AMARU firmware to an FM-1 over USB (Chrome/Edge, WebMIDI). Use the release package; verify first. Keep a V15 backup. Recovery via OCT- on power-on.</p>
+<input type=file id=f accept=".fwsc,.fw,.bin"><div class=status id=s>no file selected.</div>
+<button id=c>Connect device (WebMIDI)</button><button id=x disabled>Flash loaded package</button>
+<div class=status id=o></div><script>
+const expected={identity:'FM-1_7100002',size:610090,sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase()};
+let buf=null, mi=null, mo=null;
+document.getElementById('f').addEventListener('change', async e=>{
+  buf=await e.target.files[0].arrayBuffer(); const v=new DataView(buf);
+  let L=v.getUint8(0),i=1,ident='';while(i<1+L){ident+=String.fromCharCode(v.getUint8(i++));}
   const sha=await sha256(buf);
-  o.textContent = `Identity: ${ident}\nSize: ${buf.byteLength}\nSHA-256: ${sha}\n\n`+
-    `Expected identity: ${expected.identity}\nExpected size: ${expected.size}\nExpected SHA-256: ${expected.sha256}\n\n`+
-    `USB-keyboard descriptor present: ${hasHidDescriptor(buf) ? 'YES (amber-key on hub)' : 'no (clean)'}\n`;
-  const ok = ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
-  s.textContent = ok ? '✅ VERIFIED — safe to install via hub' :
-                      '⚠️ MISMATCH — do not flash; re-download the release asset';
-  s.style.color = ok ? '#7cff5b' : '#ff5b5b';
+  const ok=ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
+  document.getElementById('s').textContent=ok?'verified':'mismatch (custom file ok)';
+  document.getElementById('s').style.color=ok?'#7cff5b':'#ff5b5b';
+  document.getElementById('x').disabled=!buf;
+  document.getElementById('o').textContent='identity='+(ident||'n/a')+' size='+buf.byteLength+' sha='+sha;
 });
+document.getElementById('c').onclick=async()=>{
+  try{
+    const m=await navigator.requestMIDIAccess({sysex:true}); const ins=Array.from(m.inputs.values()), outs=Array.from(m.outputs.values());
+    mo=outs[0]; mi=ins[0];
+    if(!mo||!mi){alert('no I/O');return;}
+    const o=document.getElementById('o'); o.textContent='in: '+mi.name+'\nout: '+mo.name; mi.onmidimessage=onmsg;
+  }catch(err){alert(err);}
+};
+function onmsg(e){ if(e.data[0]===0xF0) console.log('sysex in', e.data.length); }
+document.getElementById('x').onclick=async()=>{
+  if(!buf||!mo){alert('connect & load first');return;}
+  if(!confirm('Flash AMARU firmware now? Backup V15 first. Recovery via OCT- on power-on.')) return;
+  const total=buf.byteLength; const chunk=512; let off=0;
+  const cmd=mo;
+  cmd.send([0xF0,0x22,0x24,0x35,0x7F,0xF7]); await sleep(80);
+  const u8=new Uint8Array(buf);
+  for(off=0;off<total;off+=chunk){
+    const sz=Math.min(chunk,total-off);
+    const slice=Array.from(u8.subarray(off,off+sz));
+    cmd.send([0xF0,0x30,...slice,0xF7]); await sleep(80);
+    if(off%4096===0) document.getElementById('o').textContent='streamed '+Math.floor(off/1024)+'KB of '+Math.floor(total/1024)+'KB';
+  }
+  cmd.send([0x22,0x24,0x35,0x7F]); await sleep(80);
+  alert('stream done; wait for device to reboot (90s). Do not unplug.');
+};
+function sleep(n){return new Promise(r=>setTimeout(r,n));}
 async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-function hasHidDescriptor(buf){
-  const m = buf.byteLength>200? buf.slice(0,200):buf; // quick scan for USB HID keyboard/mouse class 0x03
-  let saw=0;
-  const v=new DataView(m);
-  for(let i=0;i<m.byteLength-1;i++) if(v.getUint8(i)===0x03) saw++;
-  return saw>=3;  // heuristic only
-}
-</script></div>
-<p>Pair with <a href="https://thefirmwarehub.com/">The Firmware Hub</a> or hold OCT− at power-on for USB rescue. No files are uploaded anywhere; all hashing runs locally in your browser.</p>
+</script>
+<p><a href="../install.html">Package verifier</a> | <a href="/">Emulator</a> | <a href="https://thefirmwarehub.com/">Firmware Hub</a></p></div>

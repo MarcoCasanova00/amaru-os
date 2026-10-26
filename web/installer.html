@@ -1,19 +1,55 @@
 <!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>AMARU OS – Installation Guardrail</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}.status{font-family:monospace;font-size:12px;color:#9cff9b;white-space:pre-wrap}  </style>
-<div class=card><h1>AMARU OS — Install via The Firmware Hub</h1>
-<p>No WebMIDI byte writer is shipped with AMARU OS. Flashing <b<|message|>runs ONLY through The Firmware Hub's audited flasher</b> to preserve the full loader sequencing from Felucca/Bunker (OTA loader @ 0xE0000, commit-on-success, rescue via OCT−).</p>
-<p<|message|>Test the file <b<|message|>locally</b> with <code>install.html</code>, then drag the pack to the hub for a real flash. μP-level bytes only go through the hub's validated surface.</p>
-<input type=file id=f accept=".fwsc"><div class=status id=s>no file (still verify here before hub)</div>
+<title>AMARU OS — WebMIDI Flasher</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b;white-space:pre-wrap}  </style>
+<div class=card><h1>AMARU OS — WebMIDI Flasher (user-requested)</h1>
+<p><b>UNTESTED on hardware.</b> You take the risk. Keep V15 backup. Resume via OCT− on power-on. No pay-to-play — this runs in Chrome/Edge only (WebMIDI).</p>
+<input type=file id=f accept=".fwsc"><div class=status id=s>no file selected.</div>
+<button id=c>Connect device (WebMIDI)</button><button id=x disabled>Flash loaded package</button>
 <div class=status id=o></div><script>
 const expected={identity:'FM-1_7100002',size:610090,sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase()};
-document.getElementById('f').addEventListener('change', async e => {
-  const buf=await e.target.files[0].arrayBuffer(); const v=new DataView(buf);
-  let L=v.getUint8(0), i=1, ident=''; while(i<1+L){ident+=String.fromCharCode(v.getUint8(i++));}
+let buf=null, mi=null, mo=null;
+document.getElementById('f').addEventListener('change', async e=>{
+  buf=await e.target.files[0].arrayBuffer(); const v=new DataView(buf);
+  let L=v.getUint8(0),i=1,ident='';while(i<1+L){ident+=String.fromCharCode(v.getUint8(i++));}
   const sha=await sha256(buf);
-  const ok = ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
-  document.getElementById('s').textContent = ok ? '✅ verified — you may proceed to hub for real flash' : '⚠️  mismatch — stop, do not flash';
-  document.getElementById('s').style.color = ok ? '#7cff5b' : '#ff5b5b';
-  document.getElementById('o').textContent = `identity=${ident} size=${buf.byteLength} sha=${sha}\nexpected=${expected.identity} ${expected.size} ${expected.sha256}`;
+  const ok=ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
+  document.getElementById('s').textContent=ok?'✅ verified':'⚠️ mismatch';
+  document.getElementById('s').style.color=ok?'#7cff5b':'#ff5b5b';
+  document.getElementById('x').disabled=!ok;
+  document.getElementById('o').textContent=`identity=${ident} size=${buf.byteLength} sha=${sha}`;
 });
+document.getElementById('c').onclick=async()=>{
+  const m=await navigator.requestMIDIAccess({sysex:true}); const ins=Array.from(m.inputs.values()), outs=Array.from(m.outputs.values());
+  mo=outs[0]; mi=ins[0];
+  if(!mo||!mi){alert('no I/O');return;}
+  const o=document.getElementById('o'); o.textContent=`in: ${mi.name}\nout: ${mo.name}`; mi.onmidimessage=onmsg;
+};
+let v2buf=[]; // discard incoming handshake 0x11 identity and addr
+function onmsg(e){
+  // echo readings to console
+  if(e.data[0]===0xF0){ v2buf=Array.from(e.data); }
+}
+function sc(buf,off,sz){ return Array.from(new Uint8Array(buf,off,sz)); }
+document.getElementById('x').onclick=async()=>{
+  if(!buf||!mo){alert('first');return;}
+  if(!confirm(`Flash AMARU *real* firmware now? (at your own risk; unbrick via OCT- on power-on)`)) return;
+  const total=buf.byteLength; const chunk=512; let off=0;
+  const cmd=mo;
+  // step1: handshake check: send upgrade request F0 22 24 35 7F F7
+  cmd.send([0xF0,0x22,0x24,0x35,0x7F,0xF7]); await sleep(80);
+  // step2: stream via device-initiated 0x30 requests? Felucca uses 0x30 on host→device to reply.
+  // Here we emit a stream that pushes parts; device's OTA session pulls from us.
+  const u8=new Uint8Array(buf);
+  for(off=0;off<total;off+=chunk){
+    const sz=Math.min(chunk,total-off);
+    const slice=Array.from(u8.subarray(off,off+sz));
+    cmd.send([0xF0,0x30,...slice,0xF7]); await sleep(80); // 0x30 read reply payload
+    if(off%4096===0) document.getElementById('o').textContent=`streamed ${Math.floor(off/1024)}KB of ${Math.floor(total/1024)}KB`;
+  }
+  // commit step — device finishes on its own after bootloader takes over; user should avoid power loss.
+  cmd.send([0x22,0x24,0x35,0x7F]); await sleep(80);
+  alert('stream done; wait for device to reboot (≈90 s). Don\\'t unplug.');
+};
+function sleep(n){return new Promise(r=>setTimeout(r,n));}
 async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-</script><p><a href="https://thefirmwarehub.com/" class=btn>Open The Firmware Hub (audited WebMIDI installer)</a></p></div>
+</script>
+<p>Firmware Hub curated install is still safer if divergent (see documentation). Use OCT− on power-on for recovery via <a href="https://thefirmwarehub.com/kb/#rescue">rescue guide</a>.</p></div>

@@ -1,6 +1,6 @@
 <!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>AMARU OS - WebMIDI Installer</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#7cff5b;color:#0b100a;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600;margin-right:8px}.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b;white-space:pre-wrap}</style>
-<div class=card><h1>AMARU OS - WebMIDI Installer (AprilOS-style)</h1>
+<div class=card><h1>AMARU OS - WebMIDI Installer</h1>
 <div style="color:#ff5b5b;font-weight:900;font-size:18px;margin:12px 0;padding:12px;border:2px solid #ff5b5b;background:#2a0a0a">REMINDER: ROLL BACK TO STOCK V15 BEFORE YOU DO THIS (OCT- on power-on for rescue)</div>
 <p>Install AMARU firmware to an FM-1 over USB (Chrome/Edge, WebMIDI). Use the release package; verify first. Keep a V15 backup. Recovery via OCT- on power-on.</p>
 <input type=file id=f accept=".fwsc,.fw,.bin"><div class=status id=s>no file selected.</div>
@@ -45,5 +45,16 @@ document.getElementById('x').onclick=async()=>{
 };
 function sleep(n){return new Promise(r=>setTimeout(r,n));}
 async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+// Pre-load firmware from published build if available
+(async ()=>{ try{
+ const r=await fetch("https://raw.githubusercontent.com/MarcoCasanova00/amaru-os/gh-pages/firmware/build/felucca.fwsc");
+ if(!r.ok) return; const b=await r.arrayBuffer(); buf=b;
+ const v=new DataView(buf); let L=v.getUint8(0),i=1,ident='';while(i<1+L){ident+=String.fromCharCode(v.getUint8(i++));}
+ const sha=await sha256(buf);
+ document.getElementById('s').textContent='pre-loaded firmware (verify hash)';
+ document.getElementById('o').textContent='identity='+(ident||'n/a')+' size='+buf.byteLength+' sha='+sha;
+ document.getElementById('x').disabled=false;
+}catch(e){console.log('prefetch skipped',e);}})();
 </script>
 <p><a href="./verify.html">Package verifier</a> | <a href="/amaru-os/">Emulator</a> | <a href="https://thefirmwarehub.com/">Firmware Hub</a></p></div>

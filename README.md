@@ -2,6 +2,8 @@
 
 Amaru OS, the revolution of hard genres for live performances
 
+> "It's still a rough and rugged firmware" — we in the scene are rough and rugged.
+
 <p align="center">
   <img src="firmware/web/emu/logos/logo-splash.png" alt="AMARU OS splash — green monochrome, your logo and “by Marco Casanova”">
 </p>

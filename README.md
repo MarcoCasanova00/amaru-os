@@ -1,6 +1,8 @@
 # AMARU OS / BUNKER ADVANCED
 
-![AMARU OS splash — green monochrome, your logo and “by Marco Casanova”](firmware/web/emu/logos/logo-splash.png)
+<p align="center">
+  <img src="firmware/web/emu/logos/logo-splash.png" alt="AMARU OS splash — green monochrome, your logo and “by Marco Casanova”">
+</p>
 
 **AMARU OS** is an open-source custom firmware for the M-VAVE FM-1 synthesiser. It is
 a **four-track** generative engine for hard genres (tekno, acid, hardcore, jungle,

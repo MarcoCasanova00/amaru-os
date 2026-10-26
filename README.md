@@ -17,35 +17,8 @@ engines, storage and recovery — and adds:
   blooms, psy swarms, tomb drones) through Bunker's own engines — no binaries imported.
 
 > ⚠️ **This is an alpha. It has never been flashed on real FM-1 hardware.**
-> Do not flash it onto anyone else's device yet. See [`docs/AMARU-ANALYSIS.md`](docs/AMARU-ANALYSIS.md)
+> Do not flash it yet. See [`docs/AMARU-ANALYSIS.md`](docs/AMARU-ANALYSIS.md)
 > for the engineering record and the 9-question release gate.
-
-## Hardware status / flashing
-
-The firmware is a clean build of the Bunker Evolved AC79 toolchain and packages as a
-real `FM-1_7100002` release (`firmware/build/felucca.fwsc`):
-
-```
-image 535 260 B; RAM .data+.bss 61 204 B of 73 728; pool 328 924 B of 368 640
-loader  firmware/build/loader/ota.bin  6 934 B   (the stock Jieli OT loader)
-register access: hal/ only · single core · no second-core code
-```
-
-**What is verified** (on the host/emulator): the full build, the build-system
-safety assertions above, and the WASM host tests (`boot → splash → buttons → keys →
-SAVE sector round-trip → PLAY sequence → 88 200 frames bit-for-bit with the `cc` build).
-
-**What is _not_ verified**: real-power-on, the SPL/bootloader handoff, real flash
-erase/write timing and electrical behaviour — exactly the paths that turn a build
-into a brick. The update path itself uses the FM-1's stock staging + commit-on-success
-loader with a board-size gate, so the package is *no more dangerous than a Bunker
-Evolved release of this same build*; it is simply not hardware-validated yet.
-
-**If you own an FM-1 and want to be the first tester:** keep the stock bootloader
-recovery reachable, flash only this board, and do a `SAVE` after a minute of idle
-first to confirm flash writes work before exploring. Report back before anyone
-else's hardware is put at risk. This will stay "alpha / do not distribute" until a
-hardware test signs it off.
 
 ## Try it in the browser
 

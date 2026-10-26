@@ -1,0 +1,19 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>AMARU OS – Firmware Hub Web Installer Guide</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}.btn{background:#ff5b5b;color:#fff;border:none;padding:10px 14px;border-radius:4px;cursor:pointer;font-weight:600}  .step{margin:8px 0;padding-left:18px}</style>
+<div class=card><h1>AMARU OS – Web Installation (browser-side, safest route)</h1>
+<p>The WebMIDI byte-scrubber that ZVENS uses to flash <b>.fwsc</b> packages lives in <a href="https://thefirmwarehub.com/">The Firm ware Hub</a>. AMARU only ships the verifier locally (no byte streamer), to keep the offline path brick-free.</p>
+<h2>Why not a local WebMIDI sender here?</h2><ul>
+<li>The FM-1's loader expects an exact bootstrap sequence (Felucca's <code>F0 22 24 35 7F F7</code> OTA handshake + 0xE0000 staging) that's device-specific. Wrong bytes can leave the FM-1 in update mode.</li>
+<li>The hub tool obeys the protocol and resumes on disconnect; a custom sender here would re-flash and risk half-written flash.</li>
+<li>AMARU only alters FM-sys parameters + visual UI; it does not rely on a custom loader. Use the hub's tool box for the actual flash.</li>
+</ul>
+<h2>Safe install via The Firmware Hub (recommended)</h2>
+<ol>
+<li>Open https://thefirmwarehub.com/ in Chrome/Edge, press <b>Connect FM-1</b>, then press <b>Install</b> under AMARU's card.</li>
+<li>Hub loads the signed .fwsc, checks identity <code>FM-1_7100002</code> + SHA-256, then writes via the chip bootloader track.</li>
+<li>If the install stops: press <b>Install</b> again; it resumes. Or use hub's rescue (OCT− at power-on).</li>
+</ol>
+<h2>Already flashed on your own FM-1?</h2>
+<p<|message|>Keep a USB Flash of stock <b>V15</b> around — the recovery button (OCT− on power-on) stays intact regardless of firmware.</p>
+<p><a href="https://thefirmwarehub.com/" class=btn>➜ Open The Firmware Hub</a></p>
+</div>

@@ -12,7 +12,9 @@
 #define GOY 11                                       /* graphs drawn on a 100 px scale sit at y 11..111 */
 /* the height ADSR and LFO are drawn on: 100 px, or (MENU > LARGE's strip: draw_graph) the strip's ~ 56 */
 static int32_t graph_ht = 100;
-#include "ui_fm6op.c"                                /* EDIT > OPERATOR, OP ENV, OPERATOR 2: FM6's operators (their charts below) */
+#include "ui_fm6op.c"
+#include "amaru_sound_alias.h"
+#include "amaru_sound_alias.c"                                /* EDIT > OPERATOR, OP ENV, OPERATOR 2: FM6's operators (their charts below) */
 
 /* Matches voice.c: attack is linear, decay and release are exponential
  * (env += (target - env) * k each tick, ~99 % after the set time). Time
@@ -1365,7 +1367,7 @@ static void graph_browse(void)
             up_name(k, nm);
         } else {
             str_cpy(tag, eng_abbr(ENGINES[e]->name), sizeof tag);
-            str_cpy(nm, ENGINES[e]->presets[k].name, sizeof nm);
+            str_cpy(nm, amaru_preset_name(e, k, ENGINES[e]->name, ENGINES[e]->presets[k].name), sizeof nm);
         }
         if (hint >= 0) {
             pat_label((uint32_t)hint, pt, pn);

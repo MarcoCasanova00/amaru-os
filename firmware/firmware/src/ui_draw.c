@@ -13,6 +13,8 @@ static void draw_menu(void);
 static int name_on(void);                              /* NAME (ui_name.c) */
 static uint64_t lock_held(void);                       /* parameter locks: the steps held on STEP (ui_input.c) */
 static void name_draw(void);
+#include "amaru_sound_alias.h"
+#include "amaru_sound_alias.c"
 #include "ui_help.c"                                   /* 1.5: HELP's hints (draw_foot, ui_layer.c draw_layer) */
 
 /* --------------------------------------------------------- drawing --- */
@@ -811,7 +813,7 @@ static void sound_name(const track_t *t, char *b)
     if (user_of(t) < UP_SLOTS)
         up_name(user_of(t), b);
     else if (e->npresets)
-        str_cpy(b, e->presets[t->preset % e->npresets].name, 16);
+        str_cpy(b, amaru_preset_name((uint16_t)(t->eng_req % NENGINES), t->preset % e->npresets, e->name, e->presets[t->preset % e->npresets].name), 16);
 }
 
 static void draw_foot(void)

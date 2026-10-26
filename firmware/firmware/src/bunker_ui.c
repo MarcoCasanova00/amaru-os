@@ -9,7 +9,7 @@ static void bunker_ui_boot(void)
     /* Reserved settings byte: migrate the display once, keep later choices. */
     if (favorites.factory[15][13] != 0xB1u) {
         favorites.factory[15][13] = 0xB1u;
-        ui_home_view = HV_BUNKER; settings.palette = UI_BUNKER_INDEX; palette_apply();
+        ui_home_view = HV_BUNKER; settings.palette = UI_TERM_GREEN_INDEX; palette_apply();
     }
 }
 

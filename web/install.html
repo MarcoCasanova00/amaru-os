@@ -1,0 +1,43 @@
+<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>AMARU OS – Package Safety Checker</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}
+.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}
+button{background:#7cff5b;color:#0b100a;border:none;padding:8px 12px;border-radius:4px;cursor:pointer}
+.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b} pre{white-space:pre-wrap;word-break:break-all}</style>
+<div class=card><h1>AMARU OS — Package Safety Checker (pre-install)</h1><p>
+This tool does <b>not</b> flash firmware. It verifies a released AMARU <code>.fwsc</code>
+package against the recorded identity/size/SHA-256 before any external site writes to your FM-1.
+It is the last sanity step before installing at <a href="https://thefirmwarehub.com/">The Firmware Hub</a> or via WebMIDI.
+</p><input type=file id=f accept=".fwsc"><div class=status id=s>no file selected.</div>
+<pre id=o></pre><script>
+const expected = { identity:'FM-1_7100002', size:610090,
+ sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase() };
+document.getElementById('f').addEventListener('change', async e => {
+  const s=document.getElementById('s'), o=document.getElementById('o');
+  const file=e.target.files[0]; if(!file){ s.textContent='no file'; return; }
+  s.textContent='checking...';
+  const buf=await file.arrayBuffer();
+  const view=new DataView(buf);
+  // Identity stored in first 12 bytes as length-prefixed ASCII string
+  let identLen=view.getUint8(0);
+  let ident='';
+  for(let i=1;i<1+identLen;i++) ident += String.fromCharCode(view.getUint8(i));
+  s.textContent=`identity: ${ident} ; size: ${buf.byteLength} bytes`;
+  const sha=await sha256(buf);
+  o.textContent = `Identity: ${ident}\nSize: ${buf.byteLength}\nSHA-256: ${sha}\n\n`+
+    `Expected identity: ${expected.identity}\nExpected size: ${expected.size}\nExpected SHA-256: ${expected.sha256}\n\n`+
+    `USB-keyboard descriptor present: ${hasHidDescriptor(buf) ? 'YES (amber-key on hub)' : 'no (clean)'}\n`;
+  const ok = ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
+  s.textContent = ok ? '✅ VERIFIED — safe to install via hub' :
+                      '⚠️ MISMATCH — do not flash; re-download the release asset';
+  s.style.color = ok ? '#7cff5b' : '#ff5b5b';
+});
+async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+function hasHidDescriptor(buf){
+  const m = buf.byteLength>200? buf.slice(0,200):buf; // quick scan for USB HID keyboard/mouse class 0x03
+  let saw=0;
+  const v=new DataView(m);
+  for(let i=0;i<m.byteLength-1;i++) if(v.getUint8(i)===0x03) saw++;
+  return saw>=3;  // heuristic only
+}
+</script></div>
+<p>Pair with <a href="https://thefirmwarehub.com/">The Firmware Hub</a> or hold OCT− at power-on for USB rescue. No files are uploaded anywhere; all hashing runs locally in your browser.</p>

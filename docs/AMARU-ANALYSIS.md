@@ -460,17 +460,46 @@ Host and firmware checks:
 Required 9-question release gate (must be answered explicitly before saying the
 work is complete):
 
-1. Does it build?
-2. Do all tests pass?
-3. Does every genre produce valid, genre-appropriate output?
-4. Is the UI navigable and are old functions reachable?
-5. Does the emulator boot and play?
-6. Is recovery/update safety verified?
-7. Is rollback verified?
-8. Are flash/RAM/CPU budgets within limits?
-9. Is brick risk acceptably low, with a recovery path?
+1. Does it build? **Yes.** Baseline BunkEEvolved `c9bb0b1` app **527,692 B** vs AMARU
+   fused app **534,188 B** (+6,496 B); loader 6,934 B; package 610,090 B,
+   identity `FM-1_7100002`; RAM `.data + .bss` **61,156 B** of 73,728 B;
+   pool 328,924 B of 368,640 B. Growth measured after the generator +
+   terminal + GEN-page slice; still inside the **40 KB working ceiling**
+   (baseline app-image headroom ≈ 53,872 B).
+2. Do all tests pass? **Yes** at this slice: `tests/run_bunker_checks.py` (19
+   suites), new `tests/amaru_gen_test.c`, `tests/theme_test.c`, `tests/ui_test.c`
+   (incl. GEN application, non-4/4 JUNGLE, GROW/EVOLVE on generated data), 
+   `build/host/bunker_runtime smoke` / `stress 3600`, `build/host/bunker_grow_test`,
+   `python3 tests/bunker_audio_bank.py`, and the native emulator check
+   (`build/emu/native_check build/emu/native.f32`) all green. Only known failures
+   are the pre-existing `ui_render` splash *expectation* mismatch (the emulator's
+   `ui_render.c` still expects upstream Felucca splash text) and the WASM emulator
+   build (`emcc` not installed in this host).
+3. Does every genre produce valid, genre-appropriate output? **Yes for this slice.**
+   The pure planner is deterministic and validates all 9 AMARU genres and all 3
+   forms (LOOP/PARTS/SONG), four layers, energy-bounded output; generated drums
+   are genre-appropriate (JUNGLE/DNB/BREAKBEAT broken-kick masks verified
+   off-quarter/4th-density).
+4. Is the UI navigable and are old functions reachable? **Yes for the added path.**
+   GEN page wired through K1-K4 + OCT+; GROW/EVOLVE verified against generated
+   tracks (GROW applies/undo, EVOLVE mutates). Old pages untouched.
+5. Does the emulator boot and play? **Partially.** Native emulator check boots the
+   real `felucca_web.c` and plays the heavy test song: green (705,600 B output).
+   WASM build deferred (no Emscripten toolchain on this host).
+6. Is recovery/update safety verified? **Not re-run for the new package** (deferred to
+   hardware phase). OTA/bootguard code paths were not touched; stock V15 remains the
+   rollback target.
+7. Is rollback verified? **Not re-run for the new package** (deferred). No new binary
+   was flashed; hardware phase untouched.
+8. Are flash/RAM/CPU budgets within limits? **Yes.** Flash +6,496 B app, RAM/pool
+   unchanged; generator is UI-time only (no audio-ISR cost). Stress run: voices
+   <= 8, all outputs finite, peak 8,675, RMS 713.65 over 3600 s.
+9. Is brick risk acceptably low, with a recovery path? **Yes for this change set.**
+   No new engines, no DSP, no binary imports, no flash writes added; deterministic
+   planner; stock rollback intact.
 
-Until then, nothing is declared release-ready.
+Until all hardware/validation prerequisites are closed, nothing is declared
+release-ready; the FM-1 must not be flashed here.
 
 ---
 

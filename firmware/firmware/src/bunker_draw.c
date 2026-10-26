@@ -88,7 +88,7 @@ static void bunker_draw(void)
         str_cpy(val[3],amaru_form_name(amaru_form),24);
     } else for(uint32_t c=0;c<4u;c++){labels[c]=B_ROLES[c];fmt_int(val[c],trk[c].p[P_LEVEL]);}
     cv_begin(240,26,T_BG);
-    cv_text(6,3,&AF_S,"BUNKER",T_THEME);cv_text(74,3,&AF_S,B_PAGES[bunker_page],T_TEXT);
+    cv_text(6,3,&AF_S,"AMARU",T_THEME);cv_text(70,3,&AF_S,B_PAGES[bunker_page],T_TEXT);
     for(uint32_t p=0;p<BP_COUNT;p++)cv_rect(145+(int)p*7,7,p==bunker_page ? 4 : 2,p==bunker_page ? 4 : 2,p==bunker_page ? T_ACCENT : T_DIM);
     cv_text(198,3,&AF_S,song.playing ? "PLAY" : "STOP",song.playing ? T_ACCENT : T_MID);
     cv_rect(0,24,240,1,T_LINE);cv_blit(0,0);

@@ -212,7 +212,7 @@ static void fm1_main(void)
         settings_save();
     }
     if (!autosave_boot(boot_clean)) bunker_scene(0);                /* (1.2) the last session's music, under the splash */
-    for (ms = 0; ms < 400u; ms += 10u) {      /* the splash; the pot followed (MIDI IN plays under it) */
+    for (ms = 0; ms < 500u; ms += 10u) {      /* the splash (0.5 s); the pot followed (MIDI IN plays under it) */
         fm1_delay_ms(10);
         master_poll();
     }

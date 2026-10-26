@@ -16,6 +16,7 @@ static void bunker_ui_boot(void)
 static uint8_t bunker_world_pick;
 static uint8_t bunker_sound_pick[4], bunker_motif_pick[4];
 static uint8_t bunker_density[4] = {4,7,2,3};
+static amaru_sound_t amaru_last[AMARU_TRACKS];     /* the GEN page's last recipe per track (its name, until edited away) */
 static const char *const B_ROLES[] = {"AIR", "MELODY", "ROOT", "SPARK"};
 static const char *const B_PAGES[] = {"WORLD", "GROW", "SOUND", "MOTIF", "EVOLVE", "MIX", "GEN"};
 static uint32_t bunker_tone_id(const track_t *t)
@@ -27,9 +28,21 @@ static uint32_t bunker_tone_id(const track_t *t)
     };
     return P_E0 + ids[t->eng_req % NENGINES];
 }
+static int amaru_tone_match(const track_t *t, uint32_t tone)
+{
+    uint32_t id = bunker_tone_id(t);
+    const param_desc_t *d = &ENGINES[t->eng_req % NENGINES]->edit[id - P_E0];
+    return t->p[id] == (int16_t)(d->min + (int32_t)tone * (d->max - d->min) / 127);
+}
 static const char *bunker_sound_name(uint32_t k)
 {
     const track_t *t = &trk[k];
+    if (amaru_last[k].name && t->eng_req == amaru_last[k].engine && t->preset == amaru_last[k].preset &&
+        amaru_tone_match(t, amaru_last[k].tone) && t->p[P_ATK] == amaru_last[k].atk &&
+        t->p[P_REL] == amaru_last[k].rel && t->p[P_CHOR] == amaru_last[k].chor &&
+        t->p[P_DLY] == amaru_last[k].dly && t->p[P_REV] == amaru_last[k].rev &&
+        t->p[P_DIST] == amaru_last[k].dist)
+        return amaru_last[k].name;    /* the GEN page's recipe, until a knob edits it away */
     for (uint32_t i=0;i<16u;i++) {
         const bunker_sound_t *s=&B_SOUNDS[k][i];
         if(t->eng_req!=s->engine || t->preset!=s->preset) continue;

@@ -15,6 +15,18 @@ redistribution rights are not verified and their binary footprint is too large.
 
 ## ⏭ Next
 
+- [ ] **Rebrand the look (AMARU identity, not a Bunker Evolved clone)**
+  - The screen still looks like Bunker Evolved: same page chrome, header,
+    fonts and layout. We do not want to publish a mere clone wearing a splash.
+  - Rebrand: AMARU's own terminal identity — page chrome and header, keycap /
+    label treatment, own icon set (item below), and the original Marco
+    Casanova artwork from `firmware/web/emu/logos/` (the acid faces) as AMARU
+    motifs on the splash and menus.
+  - Hard rule: keep the Bunker Evolved workflow and every function
+    (WORLD / GROW / SOUND / MOTIF / EVOLVE / MIX / GEN) — extend, never remove.
+  - Gate: a first-time user must recognise AMARU within 5 seconds while
+    navigation stays exactly as it is today.
+
 - [ ] **Macintosh-style icons (AMARU-original, monochrome)**
   - Design a small set of 1980s-Mac-style glyphs ourselves in the AMARU monochrome
     style (no import of `thomasareed/Classic-Mac-icons`, and **no import of

@@ -51,6 +51,7 @@ static void amaru_apply_plan(const amaru_plan_t *p)
         track_defaults(t);
         fm1_irq_on();
         amaru_sound_apply(t, &p->sound[k]);
+        amaru_last[k] = p->sound[k];    /* the SOUND page shows the recipe's name until it is edited */
         fm1_irq_off();
         t->p[P_SLEN] = p->steps;
         t->p[P_SDIV] = 2;                 /* 1/16 */

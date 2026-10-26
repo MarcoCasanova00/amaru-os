@@ -46,4 +46,4 @@ document.getElementById('x').onclick=async()=>{
 function sleep(n){return new Promise(r=>setTimeout(r,n));}
 async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 </script>
-<p><a href="../install.html">Package verifier</a> | <a href="/">Emulator</a> | <a href="https://thefirmwarehub.com/">Firmware Hub</a></p></div>
+<p><a href="./verify.html">Package verifier</a> | <a href="/amaru-os/">Emulator</a> | <a href="https://thefirmwarehub.com/">Firmware Hub</a></p></div>

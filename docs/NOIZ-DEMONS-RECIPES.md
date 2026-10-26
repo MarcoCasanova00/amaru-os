@@ -1,7 +1,9 @@
 # AMARU OS — Draft recipes inspired by NOIZ DEMONS (GPL-3.0, concepts only)
 
-NOTARY: Concept inspirations, NOT binary/data copies. Values are AMARU-derived
-parameters (Tone, ATK, REL, CHOR, DLY, REV, DIST, VOICE) only.
+NOTARY: Concept inspirations only, NOT binary or parameter copies from NOIZ DEMONS.
+The values listed are **AMARU-derived symbolic placeholders** (the spirit without the numbers).
+They are suggested new recipe slots with Aztec/Maya/Inca-inspired names — no
+sourced constants are claimed. Diff actual numbers only after internal study.
 
 Initial M-elody recipes added in `amaru_gen.c` (recipe names appended):
   - TRIBE:  "TUPAC REVERB BLOOM" (synth, mid tone, release 120, chor 60, rev 92)

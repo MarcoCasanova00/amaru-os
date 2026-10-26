@@ -25,6 +25,14 @@ The track sound name shows the recipe's source at a glance:
 `HYPOGEUM CHANT`, `ORACLE CHOIR`, `SILBURY WAIL`, `SILBURY MOUND`, `SKARA HEARTH`,
 `MYC PUNCHY`, `MYC BLOWN` — the Carnac / Mycelium-inspired timbres.
 
+## Genre character notes (from JIANT theory / r/tekno references)
+
+- **TRIBE / MENTAL / HARDTEKK / ACIDCORE** — drums mapped to tribal / mental / hard / acid patterns (JIANT drum map family). The dark groove comes from off-beat hats (`..x...x...x...x.`) and the skank-style bass (`BASS_TRIBE`: off-beat root + fifth). Mental tekno uses `PAD_NOISE` (Carnac's dark noise hearth) + `LEAD_SIREN` for its hypnotic atmosphere.
+- **JUNGLE / DnB / BREAKBEAT** — broken drum grammar (not four-on-the-floor). JIANT `DM_DNB` map (`X.........8.....` BD + `6.5.6.5.6.5.6.5.` CH) gives the off-beat skitter; the snare's anticipation ghost (`X..3`) creates the roll feel. The bass is a two-step reese (`BASS_SUB` with `DNB` rule: root at 0 and off-beat at 10).
+- **TECHNO / PSYTRANCE** — 4-on-the-floor kicks with driven/stabbed/chorded layers.
+
+The generator is deterministic: same SEED + same settings produces the exact same 64-step plan (4 bars in SONG form). The build-system's static checks (HAL-only access, RAM/flash margins) pass; real-hardware validation is still pending.
+
 ## Themes
 The screen is strictly monochrome. MENU → DISPLAY → STYLE cycles:
 - **1** green on black (default)

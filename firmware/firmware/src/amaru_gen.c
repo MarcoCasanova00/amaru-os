@@ -63,7 +63,7 @@ static const genre_def_t GENRES[AMARU_NGENRES] = {
         ASND("MYC PUNCHY", E_DRUM, 3, 64, 0, 30, 0, 12, 14, 96, AMV_POLY) } },          /* Mycelium PUNCHY: drive 96, tight tail */
 
     { "MENTAL TEKNO", 158, 178, 9, SC_PHRY, 64, 0,
-      "x...x...x...x...", "........x.......", "................", "..x...x...x...x.", "......x.......x.", "..x.....x.....x.",
+      "x...x...x...x...", "....x.......x...", "................", "..x...x...x...x.", "......x.......x.", "..x.....x.....x.",
       BASS_ROLL, PAD_NOISE, LEAD_SIREN, 0,
       { ASND("SKARA HEARTH", E_GRAIN, 0, 58, 70, 112, 35, 35, 100, 0, AMV_POLY),         /* Carnac 4: the hearth's dark noise, far reverb */
         ASND("MENTAL SIREN", E_PHASE, 3, 82, 8, 78, 20, 45, 60, 18, AMV_MONO),
@@ -95,7 +95,7 @@ static const genre_def_t GENRES[AMARU_NGENRES] = {
         ASND("JUNGLE DRUMS", E_DRUM, 0, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) } },
 
     { "DRUM & BASS", 172, 178, 7, SC_MIN, 78, 0,
-      "x.........x.....", "....x.......x...", "................", "x.x.x.x.x.x.x.x.", "......x.......x.", "..x.....x.....x.",
+      "x.........x.....", "....x.......x...", "................", ".x.x.x.x.x.x.x.x.", "......x.......x.", "..x.....x.....x.",
       BASS_SUB, PAD_DRONE, LEAD_ARP, 1,
       { ASND("DNB PAD", E_FM6, 4, 60, 55, 110, 28, 30, 88, 0, AMV_POLY),
         ASND("DNB REESE", E_PHASE, 3, 80, 0, 55, 18, 36, 45, 18, AMV_MONO),

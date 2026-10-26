@@ -1,5 +1,0 @@
-Unmodified AMB-1 1.2 by Charles Vestal. GPL-3.0-only.
-Release: https://github.com/charlesvestal/fm1-amb/releases/tag/v1.2
-Corresponding source: AMB-1-v1.2-Source.tar.gz (GitHub tag v1.2 archive).
-Binary SHA-256: 7372e07e845bfad8ec3797963b4312563addc6451dae35bdadc0ba92b73875d0
-Source archive SHA-256: 6fe966ca9ceda3aa00b991e808c7779a61a0ed0a60b3116ca2156e573b0b2275

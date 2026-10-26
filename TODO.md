@@ -10,6 +10,9 @@ redistribution rights are not verified and their binary footprint is too large.
 - Deterministic 9-genre / 4-layer generator (`amaru_gen.c`, GEN page).
 - Three strict monochrome terminal themes (green/black, black/white, amber/black).
 - `GEN` page wired to K1–K4 + OCT+/OCT-; GROW/EVOLVE proven on generated tracks.
+- **Seed cycling:** OCT+ advances the seed and plays a new song per press; OCT- resets to base. Status line shows the seed so it is reproducible.
+- Recipe names now identify their source — `HYPOGEUM CHANT`, `ORACLE CHOIR`, `SKARA HEARTH`, `SILBURY WAIL`, `SILBURY MOUND`, `MYC PUNCHY`, `MYC BLOWN` — visible on the SOUND page title until the sound is edited.
+- AMARU visual identity: splash logo (0.5 s, by MarcoCasanova00), `AMARU` header, green terminal default, original artwork in `firmware/web/emu/logos/`, `docs/QUICKSTART.md` quick-start.
 - Host tests green; native WASM matches wasm bit-for-bit.
 - `main`, `alpha`, `gh-pages` pushed; GitHub Pages enabled.
 

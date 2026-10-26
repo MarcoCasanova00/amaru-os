@@ -235,14 +235,18 @@ static void bunker_home_input(uint32_t oct)
             if (song.rec || chain_busy()) ui_message("STOP REC / SONG FIRST");
             else { load_begin(t,UNDO_PAT); fm1_irq_off(); bunker_mutate(t,1); fm1_irq_on(); load_end(t); ui.force=1; }
         } else if (bunker_page == BP_GEN) {
-            amaru_generate();
+            amaru_new_seed();       /* advance the seed ... */
+            amaru_generate();       /* ... and play the new song (one press = a new take) */
         } else { t->p[P_MUTE] ^= 1; ui.force=1; }
     }
     if (oct & 1u) {
         if (bunker_page == BP_GROW) bunker_grow_undo();
         else if (bunker_page == BP_EVOLVE) { t->p[P_BMODE]=0; ui_message("MOTIF LOCKED"); }
-        else if (bunker_page == BP_GEN) amaru_new_seed();
-        else { t->p[P_MUTE] ^= 1; ui_message(t->p[P_MUTE] ? "TRACK MUTED" : "TRACK ON"); }
+        else if (bunker_page == BP_GEN) {   /* OCT-: back to the base seed and play it */
+            amaru_seed = 0x4D41u;           /* AMARU's default seed */
+            amaru_generate();
+            ui_message("RESET SEED");
+        } else { t->p[P_MUTE] ^= 1; ui_message(t->p[P_MUTE] ? "TRACK MUTED" : "TRACK ON"); }
         ui.force=1;
     }
 }

@@ -102,11 +102,16 @@ static void amaru_generate(void)
     amaru_bpm = p.bpm;
     amaru_apply_plan(&p);
     if (!song.playing && !song.rec && !chain_busy()) {
-        char b[40];
+        char b[48];
         str_cpy(b, amaru_genre_name(p.genre), sizeof b);
         uint32_t n = (uint32_t)str_len(b);
         b[n++] = ' ';
         str_cpy(b + n, amaru_form_name(p.form), sizeof b - n);
+        n = (uint32_t)str_len(b);
+        b[n++] = ' '; str_cpy(b + n, "SEED", sizeof b - n);
+        n = (uint32_t)str_len(b);
+        b[n++] = ' ';
+        fmt_int(b + n, p.seed);
         ui_message(b);
     }
 }
@@ -114,6 +119,5 @@ static void amaru_generate(void)
 static void amaru_new_seed(void)
 {
     amaru_seed = (uint16_t)(amaru_seed * 1665u + 10139u + amaru_genre * 257u);
-    ui_message("NEW SEED - OCT+ GEN");
-    ui.force = 1;
+    /* the caller's message carries the new take / seed reset feedback */
 }

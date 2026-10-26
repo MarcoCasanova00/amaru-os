@@ -7,6 +7,8 @@ It is built on **Bunker Evolved 1.0** — reusing its four-track sequencer, synt
 engines, storage and recovery — and adds:
 
 - A deterministic `GEN` page: `GENRE` / `SEED` / `ENERGY` / `FORM` (LOOP / PARTS / SONG).
+  Turn OCT+ to advance the seed and play a new song; OCT- resets the seed and plays it.
+  The recipe names identify the sound: `HYPOGEUM CHANT`, `SILBURY WAIL`, `MYC PUNCHY`… (Carnac/Mycelium source shapes).
 - Nine first-class genres: tribe tekno, mental tekno, hardtekk, acidcore,
   jungle, drum & bass, breakbeat tekno, techno, psytrance — with genre-specific
   drum grammar (jungle/DnB are **not** four-on-the-floor).

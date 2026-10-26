@@ -57,16 +57,16 @@ static const genre_def_t GENRES[AMARU_NGENRES] = {
     { "TRIBE TEKNO", 150, 166, 2, SC_DOR, 70, 6,
       "x...x...x...x...", "....x.......x...", "................", "..x...x...x...x.", "................", "..x..x....x..x..",
       BASS_TRIBE, PAD_CHOIR, LEAD_STAB, 0,
-      { ASND("HYPOGEUM CHANT", E_FORMANT, 0, 58, 110, 96, 40, 45, 90, 0, AMV_LEGATO),   /* Carnac 3 */
-        ASND("TRIBE PLUCK", E_ANALOG, 8, 70, 0, 55, 10, 40, 55, 0, AMV_POLY),
-        ASND("TRIBE BASS", E_ANALOG, 2, 44, 0, 35, 0, 10, 20, 12, AMV_MONO),
-        ASND("MYC PUNCHY", E_DRUM, 3, 64, 0, 30, 0, 12, 14, 96, AMV_POLY) } },          /* Mycelium PUNCHY: drive 96, tight tail */
+      { ASND("AMARY QRIA", E_FORMANT, 0, 58, 110, 96, 40, 45, 90, 0, AMV_LEGATO),   /* Carnac 3 - Amazon green breath */
+        ASND("MAYA PLUCK", E_ANALOG, 8, 70, 0, 55, 10, 40, 55, 0, AMV_POLY),
+        ASND("AMARU BASS", E_ANALOG, 2, 44, 0, 35, 0, 10, 20, 12, AMV_MONO),
+        ASND("GREEN KIT", E_DRUM, 3, 64, 0, 30, 0, 12, 14, 96, AMV_POLY) } },          /* Mycelium PUNCHY: drive 96, tight tail */
 
     { "MENTAL TEKNO", 158, 178, 9, SC_PHRY, 64, 0,
       "x...x...x...x...", "....x.......x...", "................", "..x...x...x...x.", "......x.......x.", "..x.....x.....x.",
       BASS_ROLL, PAD_NOISE, LEAD_SIREN, 0,
-      { ASND("SKARA HEARTH", E_GRAIN, 0, 58, 70, 112, 35, 35, 100, 0, AMV_POLY),         /* Carnac 4: the hearth's dark noise, far reverb */
-        ASND("MENTAL SIREN", E_PHASE, 3, 82, 8, 78, 20, 45, 60, 18, AMV_MONO),
+      { ASND("TUPAC SHADOW", E_GRAIN, 0, 58, 70, 112, 35, 35, 100, 0, AMV_POLY),         /* Carnac 4: the hearth's dark noise, far reverb */
+        ASND("AZTEC SIREN", E_PHASE, 3, 82, 8, 78, 20, 45, 60, 18, AMV_MONO),
         ASND("MENTAL SUB", E_ANALOG, 7, 36, 0, 60, 0, 12, 25, 0, AMV_MONO),
         ASND("MENTAL DRUMS", E_DRUM, 0, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) } },
 

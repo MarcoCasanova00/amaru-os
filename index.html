@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AMARU OS / BUNKER ADVANCED — alpha</title>
+  <style>
+    html,body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#000;color:#22d35d;margin:0;height:100%;}
+    main{max-width:720px;margin:0 auto;padding:2rem 1rem;}
+    h1{font-size:1.4rem;}
+    code{background:#111;color:#ff9e5d;padding:.1rem .3rem;border-radius:4px;}
+    a{color:#22d35d;}
+    .warn{border:1px solid #ff6b6b;border-radius:8px;padding:1rem;margin:1rem 0;}
+    footer{margin-top:2rem;color:#666;font-size:.85rem;}
+  </style>
+</head>
+<body>
+<main>
+  <h1>AMARU OS / BUNKER ADVANCED</h1>
+  <p>An experimental firmware image for the M‑VAVE FM‑1. This branch holds the
+  <strong>alpha Web‑Assembly emulator</strong>. The real firmware image is in
+  <code>firmware/</code> on the <code>main</code> branch.</p>
+
+  <div class="warn">
+    <strong>⚠️ Not released. Not flashed on hardware.</strong>
+    <p>We have <em>not</em> validated this build on actual FM‑1 hardware.
+    <strong>Do not flash it to a unit yet.</strong> Rollback to the stock image
+    remains possible through the external installer / UBOOT recovery path, but
+    no release guarantees apply in this alpha phase.</p>
+  </div>
+
+  <h2>Try the WASM emulator</h2>
+  <p>The browser emulator ships from <code>firmware/web/emu/index.html</code>
+  and expects <code>felucca.wasm</code> next to it. It is not built on this
+  branch — build it locally with
+  <a href="https://emscripten.org" target="_blank" rel="noreferrer">Emscripten</a>:</p>
+<pre><code>cd firmware
+python3 tools/gen_bunker_library.py
+EMU_PREVIEW=0 sh web/emu/build.sh</code></pre>
+  <p>Then copy <code>build/emu/{felucca.wasm,index.html,worklet.js,fonts/}</code>
+  here and push, or point GitHub Pages at <code>/firmware/build/emu</code> on
+  the <code>main</code> branch after a manual build.</p>
+
+  <h2>Links</h2>
+  <ul>
+    <li><a href="https://marco.casanova00.dev" target="_blank" rel="noreferrer">Project page</a></li>
+    <li><a href="https://github.com/MarcoCasanova00/amaru-os" target="_blank" rel="noreferrer">Source on GitHub</a></li>
+    <li><a href="https://github.com/MarcoCasanova00/amaru-os/blob/main/docs/AMARU-ANALYSIS.md" target="_blank" rel="noreferrer">Engineering record + 9-question release gate</a></li>
+  </ul>
+
+  <footer>AMARU OS is GPL‑3.0‑only. See <code>LICENSE</code> and
+  <code>docs/ATTRIBUTION.md</code>. This page is a manual publishing stub; the
+  WASM artifact is added by a local build.</footer>
+</main>
+</body>
+</html>

@@ -40,7 +40,7 @@ worked end-to-end with real hardware flash-fit verification.
 ## 🔧 ENVIRONMENT READY
 - **Build command:** `sh build.sh` (build.sh has no +x; invoke with sh)
 - **Output:** `firmware/build/felucca.bin` (~498 KB baseline), flash-fits via `utilities/target_budget.py`
-- **Toolchain:** `~/.jieli/toolchain/pi32v2/bin/clang` (confirmed present); AC79 SDK at `~/fw-AC79_AIoT_SDK`
+- **Toolchain:** `~/.jieli/toolchain/pi32v2/bin/clang` (confirmed present **ON THIS MACHINE ONLY**); AC79 SDK at `~/fw-AC79_AIoT_SDK`. If you are on a different machine, the build will NOT run without jieli AC79 toolchain + SDK installed — please install jieli's pi32v2 toolchain or build in a known-working container there. Any `clang` on PATH is NOT equivalent.
 - **Web emulator:** emcc at `/home/maltomare/emsdk`
 - **Reference source trees** (single source of truth, LOCAL PATHS - may NOT be on your machine):
   - Mycelium: `/home/maltomare/amaru-research/mycelium-fm1/src/mycelium-fm1/firmware/src/`

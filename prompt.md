@@ -76,7 +76,7 @@ ENV→PITCH, LFO rate / LFO→filter / LFO→pitch / LFO→shape faithfully appl
 may be re-authored as parameter-shape recipes (parameter combos + LFO + envelopes).
 
 **Current sound-engine gaps:**
-- `amphetamine_sound_apply()` only follows the standard presets (XP not applied)
+- `amaru_sound_apply()` only follows the standard presets (XP not applied)
 - Mycelium's 808 BOOM uses `P_TRANS+1,-24` (essential for authentic 808 sound)
 - `apply_preset_to()` (ui.c:1347) doesn't know about XP extra params
 - LIBRARY approach has equal risk — auth and store + upload needs research
@@ -97,7 +97,7 @@ only trim if needed to free flash budget. Bias TOWARD importing Mycelium samples
 
 ### Task 4 — JIANT GEN Review + 4-channel Port
 JIANT's GEN (gen_tables.c + gen.c · 2869 lines / 688-line tables) produces good coherent songs per genre.
-Review the drum patterns, parameter values, and form. Only Dn… "wrote good reference" — some top-up;
+Review the drum patterns, parameter values, and form. Only the D&B row is the original (Jiant-fork Genesis) — some top-up;
 Drum & Bass (`DM_DNB` map) is the reference template. Genre table at gen_tables.c:461.
 Port to AMARU's 4-track (SPARK, ROOT, AIR, MELODY) 4-engine (ANALOG/DIGITAL/DRUM/FM6).
 Every target genre must have its own drum signature:

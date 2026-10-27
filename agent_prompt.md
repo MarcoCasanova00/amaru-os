@@ -111,11 +111,29 @@ typedef struct {
 
 ## 🎯 IMMEDIATE ACTIONS REQUIRED
 
-### Step 1: Resolve Preset Import Compatibility
+### ⚠️ PRIORITY ORDER (READ THIS FIRST)
+
+**TODAY'S PRIORITY: SOUND ENGINE LOGIC (Mycelium sounds + synthesis + JIANT GEN)**
+
+This session has established the baseline infrastructure. The next agent should focus on:
+
+1. **Sound Engine Logic & Import** (PRIORITY 1 - SOUND IS THE CORE IDENTITY)
+   - Import Mycelium ANALOG presets VERBATIM (all 21, with XP handling)
+   - Import Mycelium DIGITAL presets VERBATIM (all 29, with XP handling)
+   - Carnac parameter-shape recipes (parameter combos, LFO, envelopes)
+   - JIANT FM GEN functionality ported to AMARU (4-channel adaptation)
+   - Drums: Mycelium drum synth → AMARU DRUM engine
+
+2. **Tests / Verification** (PRIORITY 2 - LATER, TAKES TIME AND TOKENS)
+   - Verify and re-baseline tests AFTER magnitude of sound-engine work
+   - Update golden files (union_test) only after significant changes settle
+   - Run hostsim + target build verification
+
+### Step 1: Resolve Preset Import Compatibility (SOUND ENGINE - BLOCKING STEP)
 **Most Urgent**: Choose one approach and implement immediately
 
 **Approach A - Extend preset_t** (most compatible but size impact):
-- Add `uint8_t xp[4][2];` to preset_t struct in `felucca_engine.h`
+- Add XP support to preset_t struct in `felucca_engine.h`
 - Update all preset loading code to handle XP pairs
 - Ensure flash layout compatibility with existing projects
 
@@ -129,7 +147,25 @@ typedef struct {
 - Apply essential XP values manually via track parameters
 - Document limitations for user review
 
-### Step 2: Run Verification Tests
+### Step 2: Append Mycelium Presets Verbatim (SOUND IMPORT)
+- ANALOG: append Mycelium's 21 presets (from mycelium research tree's eng_analog.c at ANALOG_PRESETS) verbatim with XP support
+- DIGITAL: append Mycelium's 29 presets (from eng_digital.c at DIGITAL_PRESETS) verbatim with XP support
+- DRUM: verify all Mycelium kit definitions exist (ANALOG PUNCHY etc.)
+
+### Step 3: JIANT GEN Port (SOUND ENGINE)
+**Critical**: Use DnB as reference for all genres:
+1. **Analyze** `gen.c` generation algorithm end-to-end
+2. **Extract** DnB row behavior as template
+3. **Derive** genre signatures from: Mycelium grooves + first principles
+4. **Adapt** to AMARU's 4-channel architecture
+
+### Step 4: (Later) Sample Data Optimization
+**Decision point**: Keep SMP_DATA or optimize
+- Currently unused (SLICE engine off in AMARU)
+- Estimate ~120 KB free space potential
+- Should bias toward importing Mycelium samples rather than trimming arbitrarily
+
+### Step 5: (Later) Run Verification Tests
 ```bash
 # Re-baseline existing test suite
 tests/run_tests.sh
@@ -141,18 +177,12 @@ cc -O2 -w -Ibuild/gen -Ifirmware/src -o build/host/hostsim tests/hostsim.c -lm
 sh build.sh
 ```
 
-### Step 3: Optimize Sample Data
-**Decision point**: Keep SMP_DATA or optimize
-- Check if any active code references SMP_DATA (search for SMP_ in src/)
-- Implement gating if safe: `#if FELUCCA_SAMPLE_DATA || FELUCCA_SAMPLE`
-- Update gen_samples.py to conditionally output sample data
+### Step 6: (Later) Rebuild Web Emulator
+- Run emcc build at `/home/maltomare/emsdk`
+- Verify emu_test.mjs functionality
 
-### Step 4: Review and Adapt GEN
-**Critical**: Use DnB as reference for all genres:
-1. **Analyze** `gen.c` generation algorithm end-to-end
-2. **Extract** DnB row behavior as template
-3. **Derive** genre signatures from: Mycelium grooves + first principles
-4. **Adapt** to AMARU's 4-channel architecture
+### Step 7: (Later) PAT Rotation
+- Rotate embedded PAT in remote URL
 
 ## 📁 FILES TO MODIFY (FROM COMMITTED MILESTONE A)
 

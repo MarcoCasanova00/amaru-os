@@ -167,17 +167,40 @@ Option C: Implement XP application in apply_preset_to() function
 
 ## NEXT STEPS & MILESTONES
 
-### Immediate (This Session)
-1. **Resolve Preset Import Issue**: Choose approach (A/B/C) for Mycelium preset compatibility
-2. **Document AMARU/XP Gap**: Write detailed technical analysis for next agent
-3. **Baseline Testing**: Run `tests/run_tests.sh` to re-baseline existing failures
+### ⚠️ PRIORITIES (READ FIRST - NEXT SESSION PRIORITY ORDER)
 
-### Priority Order:
-1. **Preset Import** (blocks sound authenticity)
-2. **Sample Data Optimization** (120 KB available)
-3. **GEN Review** (ensure DnB is reference for all genres)
-4. **Web Emulator Rebuild** (final verification)
-5. **Version 0.3 Release** (after all checks pass)
+**Sound engine logic is the priority, tests can wait. User needs Carnac sounds, Mycelium sounds and drums, synthesis (LFO/env), and JIANT FM GEN ported end-to-end BEFORE spending token on tests.**
+
+### Priority 1 (Sound Engine): Sound Imports
+- Append Mycelium ANALOG (21) + DIGITAL (29) presets verbatim with XP handling
+- Each Mycelium preset must carry GLIDE, TRANS, ENV->PITCH, LFO (param combo + LFO + env, "not only params")
+- Carnac parameter-shape recipes into AMARU engine recipe table (no engine port)
+- Mycelium drum kits into AMARU DRUM engine presets
+
+### Priority 2 (Sound Engine): JIANT FM GEN 4-channel Port
+- DnB row as reference implementation for song generation
+- Each target genre (tekno, mental tekno, hardtekk, acidcore, jungle, DnB, breakbeat tekno, techno, psytrance)
+  derives from first-principles, Mycelium grooves, DnB reference
+- Add genres: tribe, mental, acidcore, hardtekk, tekno, psy trance (verify DM_* maps, drum patterns per genre - no 4-on-floor for jungle/DnB/breakbeat)
+
+### Priority 3: Baseline Testing (LATDER, optional this session)
+- Only after sound-engine work is substantially complete
+- Run tests/run_tests.sh to re-baseline
+- Verify hostsim / target build on real build artifacts
+- Walk through the pre-existing failure list: phys_test 2, noise_test 10, mod_test 3, sound14_test 2, insert_test 2, editor_test_c1 build error
+
+### Priority 4: Sample Data Optimization
+- Decide whether to keep the 5 factory sample sets (PIANO, FLUTE, SAX, PERC, TRANH-alias) or gate them
+- User wants samples; ~120 KB available
+- Currently unused (SLICE engine off in AMARU)
+
+### Priority 5: Web Emulator Rebuild + Version 0.3 Release
+- Only after sounds + GEN working correctly
+- Rebuild emcc wasm, verify emu_test.mjs
+- Decide on header version (currently prematurely marked "AMARU 0.3" at gh-pages 50a7ae4)
+
+### Priority 6: PAT Rotation
+- Rotate embedded PAT in remote URL (rotate after publish)
 
 ## CRITICAL DECISION POINTS FOR NEXT AGENT
 

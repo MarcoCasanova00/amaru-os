@@ -20,6 +20,9 @@ enum { AMARU_AIR, AMARU_MELODY, AMARU_ROOT, AMARU_SPARK };
 enum { AMARU_ST_NOTE, AMARU_ST_TIE, AMARU_ST_REST };
 #define AMARU_SF_ACCENT 1u
 #define AMARU_SF_SLIDE 2u
+/* Bunker's step-level ratchet (SF_RATCH, flags bits 3..4): 1..3 = x2..x4 hits of the step */
+#define AMARU_SF_RATCH2 8u
+#define AMARU_SF_RATCH4 24u
 
 /* drum lanes, same bits as Bunker's step_t.hit */
 #define AMARU_L_KICK 0x01u

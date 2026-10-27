@@ -29,8 +29,6 @@ static void amaru_sound_apply(track_t *t, const amaru_sound_t *s)
     t->p[P_LTRIG] = 1;
     t->p[P_LD_FLT] = 0;
     t->p[P_SPRD] = s->engine == E_DRUM ? 0 : 14;
-    if (s->engine == E_FORMANT || s->engine == E_GRAIN)
-        t->p[P_LD_FLT] = 6;
     fm1_irq_on();
 }
 

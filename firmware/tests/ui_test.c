@@ -295,6 +295,13 @@ static uint8_t stored_note(uint32_t slot, uint32_t track, uint32_t step)
     return proj_import(&p, &proj_slot[slot], sizeof proj_slot[slot]) ? p.t[track].step[step].note[0] : 0;
 }
 static int msg_is(const char *s) { return ui.msg_t && str_eq(ui.msg, s); }
+static int msg_starts(const char *s)              /* the message, up to the seed it carries */
+{
+    uint32_t i;
+    if (!ui.msg_t) return 0;
+    for (i = 0; s[i]; i++) if (ui.msg[i] != s[i]) return 0;
+    return 1;
+}
 static void my_steps(track_t *t)                  /* "recorded" steps */
 {
     uint32_t i;
@@ -9844,7 +9851,7 @@ static int test_amaru_gen(void)
     amaru_form = AMARU_PARTS;
     amaru_plan(&want, amaru_genre, amaru_seed, amaru_energy, amaru_form);
     amaru_generate();
-    bad += check("AMARU GEN: message names the genre and form", msg_is("JUNGLE PARTS"));
+    bad += check("AMARU GEN: message names the genre and form", msg_starts("JUNGLE PARTS"));
     bad += check("AMARU GEN: BPM and swing follow the plan", song.g[G_BPM] == want.bpm && song.g[G_SWING] == want.swing);
     int same = 1;
     for (k = 0; k < NTRK; k++) {

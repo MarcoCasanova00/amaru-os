@@ -1771,7 +1771,9 @@ static void track_select(uint32_t i)
     ui.force = 1;
 }
 
+#if FELUCCA_SLICE
 #include "ui_slice.c"                             /* EDIT > SLICES: SLICE's slices by hand (an action page too) */
+#endif
 #include "ui_events.c"                            /* SEQ > AUTOMATION: locks, events, CHANCE, RATCH as a list (an action page) */
 #include "midi_learn.c"                           /* MIDI LEARN (1.5): GLO + D4, a knob, a CC */
 

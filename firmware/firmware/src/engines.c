@@ -24,7 +24,9 @@ static uint8_t eng_mem_owner[NPART];       /* engine index + 1 whose state is in
 #include "../engines/src/eng_analog.c"   /* Felucca-Engines (MIT): ANALOG LOFI TRIO WHEEL NOISE */
 #include "eng_phase.c"
 #include "../engines/src/eng_lofi.c"
+#if FELUCCA_SAMPLE
 #include "eng_sample.c"
+#endif
 #include "eng_formant.c"
 #include "../engines/src/eng_trio.c"
 #include "../engines/src/eng_wheel.c"

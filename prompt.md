@@ -42,10 +42,22 @@ worked end-to-end with real hardware flash-fit verification.
 - **Output:** `firmware/build/felucca.bin` (~498 KB baseline), flash-fits via `utilities/target_budget.py`
 - **Toolchain:** `~/.jieli/toolchain/pi32v2/bin/clang` (confirmed present); AC79 SDK at `~/fw-AC79_AIoT_SDK`
 - **Web emulator:** emcc at `/home/maltomare/emsdk`
-- **Reference source trees** (single source of truth):
+- **Reference source trees** (single source of truth, LOCAL PATHS - may NOT be on your machine):
   - Mycelium: `/home/maltomare/amaru-research/mycelium-fm1/src/mycelium-fm1/firmware/src/`
   - Carnac: `/home/maltomare/amaru-research/carnac-os/src/`
   - JIANT fork: `/home/maltomare/JIANT-fork/firmware/src/`
+
+  ⚠️ **If these directories don't exist on your machine**, search the web for the public source
+  repositories via **firmawarehub.com** (search "firmawarehub.com amaru" or "firmawarehub Carnac"
+  etc.). The community source repos are typically published there. The essential things needed:
+    - Mycelium's ANALOG + DIGITAL preset tables (with XP extras) – they are `static const preset_t
+      ANALOG_PRESETS[]` and `DIGITAL_PRESETS[]` in `eng_analog.c` / `eng_digital.c`.
+    - Mycelium's drum kit definitions – `drum_synth.c` + `felucca_drumkits.h`.
+    - JIANT's GEN tables – `gen_tables.c` (GENRE[] at ~461) + `gen.c`.
+    - Carnac parameter shapes – `PresetStructures.h` documents its structural layout.
+
+  The AMARU documentation (`HANDOFF.md`, `docs/RESCUE.md`, `docs/AMARU-ANALYSIS.md`)
+  annotates verbatim excerpts of these reference tables so you don't strictly need them."""
 
 ---
 ## 🚧 TASK LIST (ordered — do in sequence)

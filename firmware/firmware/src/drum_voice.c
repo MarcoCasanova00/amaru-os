@@ -57,6 +57,10 @@
  *   TIGHT  short and dry: 55's kick, 66's bright snare, 80's clap, 55's hats, 55's tom, 66's high rim, 80's bell
  *   PERC   a percussion kit: 10's kick, 77's snare and claps, 66's hats, 66's conga on TOM, 77's claves on RIM, 66's
  *          two-sine bell
+ * AMARU: three more kits of the same pieces, for the four-engine firmware:
+ *   PSY KICK 80's deep kick, 66's snare, 77's claps and hats, 77's tom and claves, 10's long cymbal on BELL
+ *   FOREST   66's swelling kick, 55's snare, 80's clap, 66's hats and bell, 66's conga on TOM, 80's rim
+ *   HITECH   55's short kick and cluster hats, 10's long snare and slow claps, 55's tom and cymbal, 66's rim
  * Parameters per lane (dv_param_t): TUNE (1/16 semitone from the designed pitch, held in the voice's
  * range), DECAY, TONE, extra, LEVEL, accent, 0..127 each; the designed sound is at DV_DEF's values.
  * Accent adds up to 4 dB, a little more on the transient (click, spike, the claps). At LEVEL 100 the
@@ -76,7 +80,7 @@ enum {
 };
 /* a lane of a model kit as a type: the kit (1..DV_NKIT) in the high 4 bits, the lane in the low 3 (Felucca's own
  * types: 0 above). Its run (the DVT_* it plays through) is the kit's (DV_KIT) */
-#define DV_NKIT 8                                        /* (1.5.6, #216: DEEP TIGHT PERC after 77) */
+#define DV_NKIT 11                                       /* (1.5.6, #216: DEEP TIGHT PERC after 77; AMARU: PSY FOREST HITECH) */
 #define DV_KITOF(t) ((uint32_t)(t) >> 4)
 #define DV_KTYPE(kit, lane) ((uint8_t)(((kit) << 4) | (lane)))
 
@@ -187,7 +191,7 @@ typedef struct {
     int16_t v[13];
 } dv_kit_t;
 /* the accent per kit: + (x / 16384) per accent step (75: +4 dB at full, as Felucca's own) */
-static const uint8_t DV_KIT_ACC[DV_NKIT] = {120, 45, 100, 40, 40, 80, 60, 70};
+static const uint8_t DV_KIT_ACC[DV_NKIT] = {120, 45, 100, 40, 40, 80, 60, 70, 55, 35, 65};
 static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
     {   /* 80 */
         /* deep sine, a small drop, long decay */
@@ -329,6 +333,58 @@ static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
         {DVT_CLAVE, 32, 1568, 149, 2131, {84, 28000, 10000, 6348, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* 66's bell: sines 830 / 613 Hz */
         {DVT_RIM, 40, 1280, 60, 3629, {-84, 30000, 7500, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    },
+    {   /* PSY KICK (AMARU): the pieces of 80 66 77 77 77 77 77 10 */
+        /* 80's deep sine kick (a small drop, a long decay) */
+        {DVT_PUNCH, 64, 499, 198, 3124, {26, 150, 0, 300, 0, 0, 0, 4096, 12, 0, 0, 0, 0}},
+        /* 66's bright noisy snare with a short shell */
+        {DVT_SNARE, 40, 979, 54, 10633, {107, 0, 100, 120, 6000, 1200, 1907, 8192, 30, 16000, 32767, 32767, 1828}},
+        /* 77's claps: 8 claps 7 ms apart, a tail */
+        {DVT_CLAP, 48, 1393, 281, 8368, {0, 6302, 1585, 1500, 8000, 30000, 52, 322, 6, 0, 0, 0, 0}},
+        /* 77's six pulses 3.7 .. 13.5 kHz */
+        {DVT_HATC, 45, 1690, 300, 3359, {1828, 8192, 1596, 2042, 0, 29491, 0, 3, 5, 0, 0, 0, 0}},
+        /* tau 0.47 s */
+        {DVT_HATO, 63, 1690, 1188, 2748, {1828, 8192, 1596, 2042, 0, 29491, 0, 3, 5, 0, 0, 0, 0}},
+        /* 77's tom 140 Hz bent 7.5 % */
+        {DVT_TOM, 53, 797, 377, 2858, {20, 180, 1523, 2500, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 77's claves on RIM: 2350 / 3180 Hz */
+        {DVT_CLAVE, 32, 1568, 149, 2131, {84, 28000, 10000, 6348, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 10's long cymbal on BELL: band 4.2 kHz, 60 ms + 0.9 s */
+        {DVT_CYM, 53, 1014, 3773, 10841, {1766, 3413, 1729, 3413, 16384, 20000, 60, 19661, 0, 2, 0, 0, 0}},
+    },
+    {   /* FOREST (AMARU): the pieces of 66 55 80 66 66 66 80 66 */
+        /* 66's kick: a kick that swells in */
+        {DVT_PUNCH, 64, 570, 119, 4353, {0, 100, 0, 0, 0, 0, 0, 4096, 40, 0, 0, 0, 0}},
+        /* 55's 245 Hz snare under band noise */
+        {DVT_SNARE, 40, 942, 92, 5087, {0, 26, 180, 64, 0, 9000, 1809, 4096, 100, 32767, 32000, 0, 1828}},
+        /* 80's clap: band 1 kHz, 3 teeth 10 ms, tail 90 ms */
+        {DVT_CLAP, 48, 1331, 316, 13485, {0, 4096, 1678, 0, 2000, 30000, 35, 441, 3, 0, 0, 0, 0}},
+        /* 66's hats: noise through a narrow band at 8 kHz */
+        {DVT_HATC, 45, 1907, 225, 4594, {1907, 1024, 1870, 2042, 0, 0, 7000, 3, 6, 0, 0, 0, 0}},
+        {DVT_HATO, 63, 1907, 197, 6084, {1907, 1024, 1870, 2042, 0, 0, 7000, 3, 6, 0, 0, 0, 0}},
+        /* 66's low conga 157 Hz on TOM */
+        {DVT_CONGA, 53, 819, 94, 5803, {0, 50, 1523, 0, 1500, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 80's rim: 455 + 1667 Hz into a hard clip */
+        {DVT_RIM, 32, 1113, 12, 4599, {360, 12000, 30000, 32000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 66's bell: sines 830 / 613 Hz */
+        {DVT_RIM, 40, 1280, 60, 3629, {-84, 30000, 7500, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+    },
+    {   /* HITECH (AMARU): the pieces of 55 10 10 55 55 55 66 55 */
+        /* 55's kick: 55 Hz dropping from 100, tau 45 ms */
+        {DVT_PUNCH, 60, 531, 103, 4388, {163, 120, 0, 1600, 0, 1444, 1500, 6000, 0, 0, 0, 0, 0}},
+        /* 10's snare: one shell 185 Hz swept from 280, noise tau 100 ms */
+        {DVT_SNARE, 40, 864, 418, 3710, {0, 115, 160, 77, 0, 9000, 1828, 8192, 30, 0, 32767, 0, 1828}},
+        /* 10's claps: 3 claps 28 ms apart, a 0.7 s tail */
+        {DVT_CLAP, 30, 1678, 3636, 2932, {0, 9102, 1715, 8000, 17000, 30000, 100, 1235, 3, 0, 0, 0, 0}},
+        /* 55's cluster 8 .. 14.7 kHz + noise */
+        {DVT_HATC, 45, 1909, 94, 2473, {1996, 5120, 1940, 2042, 4000, 11469, 18022, 3, 3, 0, 0, 0, 0}},
+        {DVT_HATO, 63, 1909, 354, 1662, {1996, 5120, 1940, 2042, 4000, 11469, 18022, 3, 3, 0, 0, 0, 0}},
+        /* 55's low tom 150 Hz */
+        {DVT_TOM, 53, 824, 179, 4091, {21, 600, 1523, 9000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 66's rim: 1.5 kHz, tau 2.7 ms */
+        {DVT_RIM, 32, 1441, 13, 8636, {304, 26000, 1000, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 55's wide cymbal on BELL: 0.7 .. 7.6 kHz */
+        {DVT_CYM, 50, 1240, 114, 13203, {1701, 4096, 1550, 4096, 22000, 20000, 30, 19661, 8192, 4, 0, 0, 0}},
     },
 };
 

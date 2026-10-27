@@ -19,9 +19,13 @@ static uint32_t cat_of_engine(uint32_t e) { return e == 10u || e == 13u ? CAT_DR
  * only; SAMPLE's retired PERC, past SMP_NPRESETS): its engine's (cat_of_engine). tests/ui_test.c checks every string
  * against its engine's preset count. A preset's category is a hint for browsing: nothing else reads it */
 static const char *const PRESET_CAT[16] = {
-    "LPBPBKLBULLP",              /* 0 ANALOG: SAW LEAD, SOFT PAD, SQR BASS, PWM STR, ACID, SINE KEY, RAVE, SUB BASS,
-                                  * PLUCK, BRASS, WIND, STRINGS */
-    "KUBLKPUK",                  /* 1 DIGITAL: E.PIANO, BELL, BASS, BRASS, ORGAN, PAD, MARIMBA, FUNK KEY */
+    "LPBPBKLBULLPBBDLB",         /* 0 ANALOG: SAW LEAD, SOFT PAD, SQR BASS, PWM STR, ACID, SINE KEY, RAVE, SUB BASS,
+                                  * PLUCK, BRASS, WIND, STRINGS; AMARU: PSY BASS, HI BASS, PSY KICK, GOA ACID,
+                                  * SWAMP SQ */
+    "KUBLKPUKBLULPFUPLUFFFFPU",  /* 1 DIGITAL: E.PIANO, BELL, BASS, BRASS, ORGAN, PAD, MARIMBA, FUNK KEY; AMARU:
+                                  * ROOT BASS, SPORE TALK, HYPHA BLIP, BARK GROWL, MOSS DRONE, GILL METAL,
+                                  * FUNGAL DROP, NIGHT SPORE, ACID FOAM, SWAMP CHIRP, METAL HIT, RUST IMPACT,
+                                  * HITECH ZAP, LASER FALL, LIQUID FM, SPORE BURST */
     "LKPLUU",                    /* 2 PHASE: BRASS, ORGAN, STRING, RESO, BELL, WIRE */
     "LBLLL",                     /* 3 LOFI: PULSE LD, WAVE BASS, ARP 8BIT, WAVE LEAD, STEP LEAD */
     "KKLL",                      /* 4 SAMPLE: PIANO, (PIANO: the retired TRANH's alias), FLUTE, SAX */
@@ -31,7 +35,8 @@ static const char *const PRESET_CAT[16] = {
     "PFPP",                      /* 8 GRAIN: CLOUD PAD, GLITCH, FROZEN, SHIMMER */
     "UUUPUDDPU",                 /* 9 PHYS: BELL TREE, MARIMBA, PLUCK, BOWED METAL, KALIMBA, HAND DRUM, TOMS, DRONE
                                   * STRING, HARP */
-    "DDDD",                      /* 10 DRUM: DRUM KIT; 1.5.6: DEEP KIT, TIGHT KIT, PERC KIT */
+    "DDDDDDD",                   /* 10 DRUM: DRUM KIT; 1.5.6: DEEP KIT, TIGHT KIT, PERC KIT; AMARU: PSY KICK,
+                                  * FOREST, HITECH */
     "FFFF",                      /* 11 NOISE: WIND, RAIN, ARCADE, METAL */
     "KUBLPUKU",                  /* 12 FM6: TINE EP, BELL, FM BASS, BRASS, PAD, MARIMBA, ORGAN, PLUCK */
     "DD",                        /* 13 SLICE: CHOP, STUTTER */

@@ -73,11 +73,35 @@ static const preset_t DIGITAL_PRESETS[] = {
     {"PAD", {5, 2, 1, 3, 40, 90, 10, 0}, {80, 90, 110, 95}, 0, 0, FX(0, 60, 30, 70), PAT(5)},
     {"MARIMBA", {4, 4, 1, 1, 60, 30, 0, 0}, {0, 80, 0, 60}, 0, 0, FX(0, 0, 25, 40), PAT(3)},
     {"FUNK KEY", {3, 1, 3, 5, 90, 25, 20, 0}, {0, 45, 30, 30}, 0, 0, FX(0, 20, 30, 20), PAT(6)},
+    /* AMARU (appended): the Mycelium-derived voices the DIGITAL engine keeps, on the four-operator
+     * grammar (ALG R2 R3 R4 INDEX MODDEC FDBK -). No sample of the reference project is used */
+    {"ROOT BASS", {0, 1, 1, 1, 55, 40, 10, 0}, {0, 70, 60, 20}, 0, 1, FX(10, 0, 5, 8), PAT(2)},
+    {"SPORE TALK", {3, 2, 3, 4, 85, 45, 15, 0}, {5, 80, 50, 40}, 12, 1, FX(10, 30, 35, 45), PAT(6)},
+    {"HYPHA BLIP", {4, 1, 2, 3, 90, 20, 0, 0}, {0, 40, 0, 30}, 0, 0, FX(0, 20, 40, 40), PAT(3)},
+    {"BARK GROWL", {0, 1, 2, 3, 100, 60, 40, 0}, {10, 70, 60, 50}, 20, 1, FX(35, 10, 20, 30), PAT(4)},
+    {"MOSS DRONE", {5, 1, 2, 1, 40, 100, 5, 0}, {90, 100, 120, 110}, 10, 0, FX(0, 70, 30, 80), PAT(5)},
+    {"GILL METAL", {2, 7, 9, 11, 110, 30, 30, 0}, {0, 80, 20, 60}, 0, 0, FX(20, 30, 40, 60), PAT(7)},
+    {"FUNGAL DROP", {1, 4, 2, 1, 70, 25, 0, 0}, {0, 60, 0, 45}, 0, 0, FX(0, 30, 50, 50), PAT(3)},
+    {"NIGHT SPORE", {6, 1, 1, 2, 30, 95, 8, 0}, {80, 95, 115, 100}, 8, 0, FX(0, 60, 30, 70), PAT(5)},
+    {"ACID FOAM", {1, 1, 3, 1, 120, 35, 55, 0}, {0, 50, 30, 20}, 30, 1, FX(30, 20, 45, 20), PAT(1)},
+    {"SWAMP CHIRP", {3, 2, 4, 8, 100, 18, 10, 0}, {0, 45, 0, 35}, 0, 0, FX(10, 25, 40, 45), PAT(7)},
+    {"METAL HIT", {2, 3, 7, 11, 127, 45, 45, 0}, {0, 70, 10, 55}, 0, 0, FX(30, 10, 20, 35), PAT(7)},
+    {"RUST IMPACT", {0, 1, 5, 9, 115, 55, 60, 0}, {0, 65, 0, 50}, 10, 0, FX(45, 20, 10, 25), PAT(7)},
+    {"HITECH ZAP", {1, 8, 2, 1, 105, 15, 20, 0}, {0, 35, 0, 25}, 0, 0, FX(15, 40, 45, 35), PAT(3)},
+    {"LASER FALL", {6, 2, 3, 4, 95, 40, 15, 0}, {0, 55, 0, 40}, 0, 0, FX(0, 45, 55, 50), PAT(4)},
+    {"LIQUID FM", {5, 1, 1, 3, 60, 85, 25, 0}, {40, 90, 100, 80}, 10, 0, FX(0, 65, 40, 65), PAT(6)},
+    {"SPORE BURST", {7, 1, 2, 4, 120, 20, 35, 0}, {0, 50, 0, 35}, 0, 0, FX(10, 35, 35, 55), PAT(13)},
 };
-#define FM4_NPRESETS 8u
+#define FM4_NPRESETS 24u
 _Static_assert(NELEM(DIGITAL_PRESETS) == FM4_NPRESETS, "DIGITAL presets");
 /* DIGITAL preset k -> the FM6 factory preset (= its PTCH) that covers that sound */
-static const uint8_t FM4_TO_FM6[FM4_NPRESETS] = {0, 1, 2, 3, 6, 4, 5, 7};
+static const uint8_t FM4_TO_FM6[FM4_NPRESETS] = {
+    0, 1, 2, 3, 6, 4, 5, 7,                         /* E.PIANO BELL BASS BRASS ORGAN PAD MARIMBA FUNK KEY */
+    2, 7, 7, 3, 4, 1, 5, 4, 7, 5, 1, 3, 7, 1, 4, 5 /* ROOT BASS SPORE TALK HYPHA BLIP BARK GROWL MOSS DRONE
+                                                     * GILL METAL FUNGAL DROP NIGHT SPORE ACID FOAM SWAMP CHIRP
+                                                     * METAL HIT RUST IMPACT HITECH ZAP LASER FALL LIQUID FM
+                                                     * SPORE BURST */
+};
 
 /* EDIT: the ranges are the stores' (a value of engine 1 is clamped to them before it converts) */
 #define FM4_EDIT(l0, l1, l2, l3, l4, l5, l6, f0, f1, n0, n1) {                                              \

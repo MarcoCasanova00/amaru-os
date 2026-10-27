@@ -212,6 +212,13 @@ static const preset_t ANALOG_PRESETS[] = {
     {"BRASS", {0, 10, 64, 0, 45, 20, 10, 64}, {35, 70, 90, 45}, 40, 0, FX(0, 20, 20, 40), PAT(6)},
     {"WIND", {0, 0, 0, 90, 30, 90, 0, 0}, {60, 90, 60, 80}, 50, 0, FX(0, 30, 30, 70), PAT(5)},
     {"STRINGS", {0, 25, 64, 0, 70, 10, 0, 32}, {70, 90, 115, 90}, 5, 0, FX(0, 60, 20, 70), PAT(5)},
+    /* AMARU (appended; the numbered presets above keep theirs): the tekno/psy/acid sounds the four
+     * engines were kept for. WAVE DTN MIX NOIS CUT RES DRV KTR - ATK DEC SUS REL - ENV>FLT - MONO */
+    {"PSY BASS", {6, 0, 92, 0, 46, 58, 42, 28}, {0, 55, 78, 24}, 30, 1, FX(16, 0, 6, 8), PAT(2)},
+    {"HI BASS", {1, 0, 0, 0, 62, 70, 56, 38}, {0, 48, 66, 20}, 26, 1, FX(22, 0, 8, 6), PAT(2)},
+    {"PSY KICK", {3, 0, 0, 28, 38, 24, 34, 0}, {0, 34, 0, 8}, 0, 1, FX(40, 0, 0, 0), PAT(12)},
+    {"GOA ACID", {0, 0, 0, 0, 58, 104, 28, 40}, {0, 52, 18, 28}, 48, 1, FX(26, 22, 30, 14), PAT(1)},
+    {"SWAMP SQ", {1, 18, 40, 6, 36, 62, 22, 52}, {30, 82, 64, 62}, 20, 0, FX(6, 34, 22, 44), PAT(6)},
 };
 
 static const engine_t ENG_ANALOG = {

@@ -589,8 +589,8 @@ static int cc_map_test(void)
     };
     int bad = 0, ok = 1; uint32_t i, e; int16_t before[P_COUNT];
     midi_test_reset();
-    bad += check("power-on parts: ANALOG, FM6, LOFI, DRUM", trk[0].eng_req == 0u && trk[1].eng_req == ENGI_FM6 &&
-                 trk[2].eng_req == 3u && trk[3].eng_req == ENGI_DRUM);
+    bad += check("power-on parts: ANALOG, DIGITAL, FM6, DRUM", trk[0].eng_req == ENGI_ANALOG &&
+                 trk[1].eng_req == ENGI_DIGITAL && trk[2].eng_req == ENGI_FM6 && trk[3].eng_req == ENGI_DRUM);
     for (i = 0; i < NELEM(COMMON); i++) {
         queued(0xB0, COMMON[i].cc, 127, 1);
         ok &= trk[0].p[COMMON[i].id] == TP[COMMON[i].id].max;
@@ -606,8 +606,8 @@ static int cc_map_test(void)
     bad += check("CC10 PAN: 0 left, 64 centre, 127 right", ok);
     queued(0xB0, 74, 127, 1); queued(0xB0, 71, 0, 1);
     bad += check("CC74 / CC71 on ANALOG: CUT / RES", trk[0].p[P_E4] == 127 && trk[0].p[P_E5] == 0);
-    queued(0xB1, 74, 64, 1); queued(0xB1, 74, 127, 1);
-    bad += check("CC74 on FM6 (channel 2): MLVL, bipolar (127: +63)", trk[1].p[P_E2] == 63);
+    queued(0xB2, 74, 64, 1); queued(0xB2, 74, 127, 1);
+    bad += check("CC74 on FM6 (channel 3): MLVL, bipolar (127: +63)", trk[2].p[P_E2] == 63);
     memcpy(before, trk[1].p, sizeof before); queued(0xB1, 71, 99, 1);
     bad += check("CC71 on FM6 (no resonance): ignored", !memcmp(before, trk[1].p, sizeof before));
     queued(0xB3, 74, 10, 1);
@@ -880,12 +880,13 @@ static int pc_test(void)
         ok &= !memcmp(was.p, t->p, sizeof was.p) && t->preset == was.preset && t->eng_req == e;
     }
     bad += check("  every engine: 0.. its presets in PRESETS' order (no alias twice); past the last ignored", ok);
-    set_engine_of(t, ENGI_SAMPLE);
+    set_engine_of(t, ENGI_SAMPLE);                      /* retired: loads as ANALOG */
+    ok = t->eng_req == ENGI_ANALOG;
     pc(0, 1); frame();
-    ok = str_eq(ENGINES[ENGI_SAMPLE]->presets[t->preset].name, "FLUTE");
+    ok &= t->eng_req == ENGI_ANALOG && str_eq(ENGINES[ENGI_ANALOG]->presets[t->preset].name, "SOFT PAD");
     pc(0, 4); frame();
-    ok &= t->eng_req == ENGI_SAMPLE && str_eq(ENGINES[ENGI_SAMPLE]->presets[t->preset].name, "FLUTE");
-    bad += check("  SAMPLE: PC 1 is FLUTE (not PIANO's alias); PC 4 (once PERC) does not turn the track into DRUM", ok);
+    ok &= t->eng_req == ENGI_ANALOG && str_eq(ENGINES[ENGI_ANALOG]->presets[t->preset].name, "ACID");
+    bad += check("  SAMPLE (retired): the track loads as ANALOG; PC 1 / 4 pick ANALOG's sounds", ok);
 
     /* DRUM: the kits as KIT steps through them */
     {
@@ -904,10 +905,10 @@ static int pc_test(void)
                 ok &= k == P_E0 || dr->p[k] == was.p[k];
             last = dr->p[P_E0];
         }
-        ok &= n == 9u && last == d->max;                 /* (1.5.6, #216: DEEP TIGHT PERC 6..8) */
+        ok &= n == 12u && last == d->max;                /* DEEP TIGHT PERC, then AMARU's PSY FOREST HITECH */
         pc(3, DK_COUNT + 2u); frame();
         ok &= dr->p[P_E0] == last;
-        bad += check("  DRUM: 0..8 the nine kits (STD 80 10 66 55 77 DEEP TIGHT PERC; HAND CYM H+CYM skipped), only KIT; 9.. ignored", ok);
+        bad += check("  DRUM: 0..11 the twelve kits (STD 80 10 66 55 77 DEEP TIGHT PERC PSY FOREST HITECH; HAND CYM H+CYM skipped), only KIT; 12.. ignored", ok);
     }
 
     /* FM6: its presets, then the bank's voices */

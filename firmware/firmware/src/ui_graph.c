@@ -686,6 +686,7 @@ static void graph_slices(void)
 }
 #endif
 
+#if FELUCCA_RETIRED
 /* WHEEL: the nine drawbars as rounded bars over RAISE slots (the bars of the knob just turned: the accent),
  * their footages under them */
 static void graph_wheel(const track_t *t, uint16_t c)
@@ -704,6 +705,7 @@ static void graph_wheel(const track_t *t, uint16_t c)
         cv_text_in(x + 3, 82, 12, &AF_S, names[k], T_MID, T_SURF);   /* under the bar, by its ink */
     }
 }
+#endif
 /* The FM charts' parts: an operator box 21 x 17 (rows 23 px apart, columns 24), junction dots, Manhattan routes */
 #define FM_BH 17
 static void fm_dot(int32_t x, int32_t y, uint16_t c) { cv_rect(x - 1, y - 1, 3, 3, c); }
@@ -1234,13 +1236,21 @@ static uint32_t graph_signature(void)
 #if FELUCCA_SLICE
     if (pg->graph == GR_SLICES && slice_page_ok()) h ^= slice_sig();
 #endif
-    if (pg->scope == SC_ENGINE && (ENGINES[t->eng_req % NENGINES] == &ENG_WHEEL || t->eng_req % NENGINES == ENGI_FM6 ||
-                                   (FELUCCA_FM4 && t->eng_req % NENGINES == ENGI_DIGITAL)))
+    int wheel_or_live = pg->scope == SC_ENGINE &&
+        (t->eng_req % NENGINES == ENGI_FM6 ||
+         (FELUCCA_FM4 && t->eng_req % NENGINES == ENGI_DIGITAL)
+#if FELUCCA_RETIRED
+         || ENGINES[t->eng_req % NENGINES] == &ENG_WHEEL
+#endif
+        );
+    if (wheel_or_live)
         h ^= (ui.hot_t ? ui.hot_col + 1u : 0u) * 65537u;
     if ((pg->scope == SC_ENGINE || fop_page(pg->graph)) && t->eng_req % NENGINES == ENGI_FM6)   /* the patch (PAT's algorithm,
                                                      * levels, FB; the operator pages: the operator, the stage) */
         h ^= (fm6_pgen[(t - trk) % NTRK] + 1u) * 2246822519u + (fop_op + 1u) * 40503u + (fop_stg + 1u) * 7919u;
+#if FELUCCA_SAMPLE
     if (pg->scope == SC_ENGINE && ENGINES[t->eng_req % NENGINES] == &ENG_SAMPLE) h ^= sample_wave.pos * 13u + sample_wave.key;
+#endif
     if (pg->graph == GR_ROLL) {
         uint32_t ph = song.playing ? t->seq_idx : 0xFFFFu;
         if (ph / 16u != ui.bank)
@@ -2245,7 +2255,9 @@ static void draw_graph(void)
         draw_home_tracks();
         return;
     }
+#if FELUCCA_SAMPLE
     if (!ui.home && pg->scope == SC_ENGINE && ENGINES[t->eng_req % NENGINES] == &ENG_SAMPLE) sample_wave_tick(t);
+#endif
     sig = graph_signature();
     if (!ui.force && sig == ui.graph_sig)
         return;
@@ -2345,9 +2357,15 @@ static void draw_graph(void)
             if (fop_ok()) graph_fm6env(t, c);
             break;
         default:
+#if FELUCCA_RETIRED
             if (pg->scope == SC_ENGINE && ENGINES[t->eng_req % NENGINES] == &ENG_WHEEL) graph_wheel(t, c);
-            else if (pg->scope == SC_ENGINE && ENGINES[t->eng_req % NENGINES] == &ENG_SAMPLE && sample_wave.ready) graph_sample(c);
-            else if (pg->scope == SC_ENGINE && t->eng_req % NENGINES == ENGI_FM6) graph_fm6(t, c, 6u);   /* EDIT 1 and 2 */
+            else
+#endif
+#if FELUCCA_SAMPLE
+            if (pg->scope == SC_ENGINE && ENGINES[t->eng_req % NENGINES] == &ENG_SAMPLE && sample_wave.ready) graph_sample(c);
+            else
+#endif
+            if (pg->scope == SC_ENGINE && t->eng_req % NENGINES == ENGI_FM6) graph_fm6(t, c, 6u);   /* EDIT 1 and 2 */
 #if FELUCCA_FM4
             else if ((pg->scope == SC_ENGINE || pg->id[0] == P_FM1_LEVEL) && t->eng_req % NENGINES == ENGI_DIGITAL)
                 graph_fm(t, c);                      /* (OP LEVEL too: the levels on the chart) */

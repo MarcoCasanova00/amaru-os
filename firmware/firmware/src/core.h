@@ -16,6 +16,11 @@
 #ifndef FELUCCA_SLICE
 #define FELUCCA_SLICE 0          /* the SLICE engine (eng_slice.c), engine 13; retired from the AMARU build */
 #endif
+#ifndef FELUCCA_RETIRED
+#define FELUCCA_RETIRED 0        /* the retired engines' code (PHASE LOFI TRIO WHEEL GRAIN PHYS NOISE FORMANT):
+                                   * out of the AMARU build (their table slots are the silent ENG_RETIRED); 1
+                                   * keeps their host tests working (tests/run_tests.sh builds them with -DFELUCCA_RETIRED=1) */
+#endif
 #ifndef FELUCCA_FM4
 #define FELUCCA_FM4 1            /* the DIGITAL engine (eng_digital.c, four-operator FM), engine 1: active */
 #endif

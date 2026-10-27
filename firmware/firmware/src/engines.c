@@ -21,21 +21,24 @@ static uint8_t eng_mem_owner[NPART];       /* engine index + 1 whose state is in
 #define ENG_MEM(p) ((void *)eng_mem[p].b)  /* part p's region (p < NPART) */
 #define ENG_MEM_FITS(name, size) _Static_assert((size) <= ENG_MEM_PART, name " state over ENG_MEM_PART")
 
+#include "smp_store.c"          /* the sample store: always (the SLICER's sources, the editor's uploads) */
 #include "../engines/src/eng_analog.c"   /* Felucca-Engines (MIT): ANALOG LOFI TRIO WHEEL NOISE */
+#include "eng_drum.c"           /* DRUM: the 8-lane kit (drum_voice.c) */
+#include "eng_fm6.c"            /* FM6: 6-operator FM, msfa ported (fm6_core.c, Apache-2.0) */
+#include "fm4_convert.c"        /* DIGITAL's tables, and its sounds -> FM6 */
+#if FELUCCA_RETIRED             /* the retired engines' code: out of the AMARU build (their slots are ENG_RETIRED) */
 #include "eng_phase.c"
 #include "../engines/src/eng_lofi.c"
-#if FELUCCA_SAMPLE
-#include "eng_sample.c"
-#endif
 #include "eng_formant.c"
 #include "../engines/src/eng_trio.c"
 #include "../engines/src/eng_wheel.c"
 #include "eng_grain.c"
 #include "eng_phys.c"           /* PHYS: DaisySP physical models (phys_dsp.c, MIT) */
-#include "eng_drum.c"           /* DRUM: the 8-lane kit (drum_voice.c) */
 #include "../engines/src/eng_noise.c"
-#include "eng_fm6.c"            /* FM6: 6-operator FM, msfa ported (fm6_core.c, Apache-2.0) */
-#include "fm4_convert.c"        /* DIGITAL's tables, and its sounds -> FM6 */
+#endif
+#if FELUCCA_SAMPLE
+#include "eng_sample.c"
+#endif
 #if FELUCCA_FM4
 #include "eng_digital.c"        /* DIGITAL: four-operator FM (retired; FELUCCA_FM4=1 builds it) */
 #endif
@@ -126,10 +129,19 @@ static const char *snd_missing(const track_t *t, uint32_t *code)
         return slc_get(si) ? 0 : N_SLC_SRC[si];
     }
 #endif
-    if (e != &ENG_SAMPLE && e != &ENG_GRAIN)
-        return 0;
-    *code = (e == &ENG_GRAIN ? 32u : 1u) + si % 32u;
-    return smp_set_missing(si) ? SMP_ALL_NAMES[si] : 0;
+#if FELUCCA_SAMPLE
+    if (e == &ENG_SAMPLE) {
+        *code = 1u + si % 32u;
+        return smp_set_missing(si) ? SMP_ALL_NAMES[si] : 0;
+    }
+#endif
+#if FELUCCA_RETIRED
+    if (e == &ENG_GRAIN) {
+        *code = 32u + si % 32u;
+        return smp_set_missing(si) ? SMP_ALL_NAMES[si] : 0;
+    }
+#endif
+    return 0;
 }
 
 /* the order the engines are shown in (PRESETS browsing and its ENG knob, the EDIT layer's keys, the editor's list).

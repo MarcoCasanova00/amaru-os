@@ -1797,8 +1797,10 @@ static uint32_t act_cols(void)                   /* the columns that are actions
         return 2u;                               /* LOAD */
     if (pg->graph == GR_USER)
         return 14u;                              /* LOAD ERASE SAVE */
+#if FELUCCA_SLICE
     if (pg->graph == GR_SLICES)
         return slice_page_ok() ? 12u : 0u;       /* SPLIT JOIN (a SLICE track only) */
+#endif
     if (pg->graph == GR_SLOTS)
         return 14u;                              /* PROJECT: ERASE (1.5.5, #199) LOAD SAVE */
     if (pg->scope == SC_GLOBAL)

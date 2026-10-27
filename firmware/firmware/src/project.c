@@ -305,8 +305,10 @@ static void proj_phys(project_t *q)
         proj_trk_t *d = &q->t[k];
         if (d->engine != ENGI_PHYS)
             continue;
+#if FELUCCA_RETIRED
         if (!q->phys)
             phys_legacy(&d->p[P_E0]);
+#endif
         if (drum_from_phys(d->engine, &d->p[P_E0])) {
             d->engine = ENGI_DRUM;
             d->preset = 0;

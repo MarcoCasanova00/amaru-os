@@ -114,8 +114,12 @@ compile fallout of the broken tree; and project_test had PM_SYMP undefined — f
 ### Task 6 (later) — Web Emulator
 Rebuild emu with emcc from `/home/maltomare/emsdk`, run emu_test.mjs.
 
-### Task 7 (later) — PAT Rotation
-Rotate embedded ghp PAT in origin URL.
+### Task 7 (later, hygiene) — PAT Rotation
+The PAT is NOT committed (verified grep of source tree). It lives only in local
+`.git/config`'s `remote.origin.url`. To avoid token leakage from backups/sync tools, rotate it:
+GitHub → Developer settings → revoke old token → create scoped `contents:write` token →
+`git remote set-url origin https://x-access-token:<NEW>@github.com/MarcoCasanova00/amaru-os.git`
+on every clone. Then confirm `git push --dry-run origin main` succeeds.
 
 ---
 ## 🔍 TECHNICAL FINDINGS (verified)

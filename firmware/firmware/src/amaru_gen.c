@@ -338,6 +338,7 @@ static void build_chords(amaru_plan_t *p, const amaru_genre_t *g, uint8_t pi, ui
     const prog_t *pr = &PROG[g->prog[pi]];
     int bars = p->steps / 16;
     if (cbars < 1) cbars = 1;
+    if (bars >= 4 && cbars > 2) cbars = 2;                  /* a four-bar plan still changes chord */
     if (cbars > bars) cbars = (uint8_t)(bars ? bars : 1);
     if (p->form == AMARU_LOOP && pr->n > 1) cbars = 1;      /* a loop still moves */
     for (int i = 0; i < p->steps; i++) {

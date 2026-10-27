@@ -130,6 +130,15 @@ static void up_migrate(up_rec_t *r)
     if (drum_from_phys(r->engine, e) || drum_from_perc(r->engine, e)) {   /* (SAMPLE PERC: see the top) */
         r->engine = ENGI_DRUM;
         for (k = 0; k < 8u; k++) up_set_value(r, r->np - 8u + k, e[k]);
+    } else if (!eng_active(r->engine)) {               /* any other retired engine: its fallback, fresh EDIT */
+        uint32_t target = eng_fallback(r->engine);
+        r->engine = (uint8_t)target;
+        for (k = 0; k < 8u; k++)
+#ifdef UP_HOST
+            up_set_value(r, r->np - 8u + k, 0);
+#else
+            up_set_value(r, r->np - 8u + k, param_desc_of(target, P_E0 + k)->def);
+#endif
     }
 }
 

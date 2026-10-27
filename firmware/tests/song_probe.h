@@ -10,7 +10,7 @@
 #else
 #define PROBE_ROW(s, r) ((chain_row_t){s, r})
 #endif
-#define SONG_PROBE_GOLDEN 0x676A420Du              /* the firmware before lanes (bddbbd8), 11026 blocks */
+#define SONG_PROBE_GOLDEN 0x9662420Du              /* AMARU power-on defaults, 11026 blocks */
 #define SONG_PROBE_BLOCKS 11026u
 static uint32_t song_probe_mix(uint32_t h, uint32_t v) { return (h ^ v) * 16777619u; }
 static uint32_t song_probe(uint32_t *blocks)

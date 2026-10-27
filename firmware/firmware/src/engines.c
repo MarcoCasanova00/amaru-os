@@ -41,28 +41,50 @@ static uint8_t eng_mem_owner[NPART];       /* engine index + 1 whose state is in
 #include "eng_slice.c"
 #endif
 
-/* the editor protocol, user presets and projects store these indices: append, never reorder */
+/* a retired engine's slot: no sound, no presets, nothing to edit. Its source stays in the tree, but the table
+ * does not point at it; old sounds migrate to an active engine before they reach a track. */
+static void retired_note_on(struct track *t, voice_t *v) { (void)t; (void)v; }
+static void retired_render(struct track *t, voice_t *v, int32_t *out, uint32_t n, const vmod_t *m)
+{
+    (void)t; (void)v; (void)out; (void)n; (void)m;
+}
+static const preset_t RETIRED_PRESET = {"-", {0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0}, 0, 0, {0, 0, 0, 0}, 0};
+#define RETIRED_EDIT { {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0}, \
+                       {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0}, \
+                       {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0}, \
+                       {"-", F_INT, 0, 0, 0, 0, 0}, {"-", F_INT, 0, 0, 0, 0, 0} }
+static const engine_t ENG_RETIRED = {
+    .name = "-",
+    .page_title = {"-", "-"},
+    .edit = RETIRED_EDIT,
+    .presets = &RETIRED_PRESET,
+    .npresets = 0,
+    .knob = {P_E0, P_E1, P_E2, P_REL},
+    .note_on = retired_note_on,
+    .render = retired_render,
+};
+
+/* the editor protocol, user presets and projects store these indices: append, never reorder. AMARU keeps four:
+ * ANALOG (0), DIGITAL (1), DRUM (10), FM6 (12); the others are silent placeholders. */
 static const engine_t *const ENGINES[NENGINES] = {
     &ENG_ANALOG,                 /* 0 */
 #if FELUCCA_FM4
     &ENG_DIGITAL,                /* 1 (ENGI_DIGITAL) */
 #else
-    &ENG_FM4_GONE,               /* 1: reserved (DIGITAL, retired: its sounds convert to FM6, fm4_convert.c) */
+    &ENG_FM4_GONE,               /* 1: DIGITAL's DSP is off in this build */
 #endif
-    &ENG_PHASE,                  /* 2 */
-    &ENG_LOFI,                   /* 3 */
-    &ENG_SAMPLE,                 /* 4 */
-    &ENG_FORMANT,                /* 5 VOICE (eng_formant.c: "voice" is a sounding note in voice.c) */
-    &ENG_TRIO,                   /* 6 */
-    &ENG_WHEEL,                  /* 7 */
-    &ENG_GRAIN,                  /* 8 */
-    &ENG_PHYS,                   /* 9 (ENGI_PHYS) */
+    &ENG_RETIRED,                /* 2 PHASE (retired) */
+    &ENG_RETIRED,                /* 3 LOFI (retired) */
+    &ENG_RETIRED,                /* 4 SAMPLE (retired) */
+    &ENG_RETIRED,                /* 5 VOICE (retired) */
+    &ENG_RETIRED,                /* 6 TRIO (retired) */
+    &ENG_RETIRED,                /* 7 WHEEL (retired) */
+    &ENG_RETIRED,                /* 8 GRAIN (retired) */
+    &ENG_RETIRED,                /* 9 PHYS (retired) */
     &ENG_DRUM,                   /* 10 (ENGI_DRUM) */
-    &ENG_NOISE,                  /* 11 */
+    &ENG_RETIRED,                /* 11 NOISE (retired) */
     &ENG_FM6,                    /* 12 (ENGI_FM6) */
-#if FELUCCA_SLICE
-    &ENG_SLICE,                  /* 13 (FELUCCA_SLICE=0 builds without it) */
-#endif
+    &ENG_RETIRED,                /* 13 SLICE (retired) */
 };
 
 /* a track's engine number as an index (the audio paths: a compare, cheaper than % NENGINES; a bad number: 0) */
@@ -108,32 +130,24 @@ static const char *snd_missing(const track_t *t, uint32_t *code)
     return smp_set_missing(si) ? SMP_ALL_NAMES[si] : 0;
 }
 
-/* the order the engines are shown in (PRESETS browsing and its ENG knob, the EDIT layer's keys, the editor's list):
- * engine indices, never DIGITAL's reserved 1 (with FELUCCA_FM4 it follows FM6). The indices stay as they are (the
- * stores and the protocol hold them); only this table orders them */
+/* the order the engines are shown in (PRESETS browsing and its ENG knob, the EDIT layer's keys, the editor's list).
+ * The indices stay as they are (the stores and the protocol hold them); only this table orders them. */
 static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
-    0,                           /* ANALOG */
-    12,                          /* FM6 */
-#if FELUCCA_FM4
-    1,                           /* DIGITAL */
-#endif
-    2, 3, 4, 5, 6, 7, 8, 9,      /* PHASE LOFI SAMPLE VOICE TRIO WHEEL GRAIN PHYS */
-    11,                          /* NOISE */
-#if FELUCCA_SLICE
-    13,                          /* SLICE */
-#endif
-    10,                          /* DRUM */
+    ENGI_ANALOG,                 /* 0 ANALOG */
+    ENGI_DIGITAL,                /* 1 DIGITAL */
+    ENGI_FM6,                    /* 12 FM6 */
+    ENGI_DRUM,                   /* 10 DRUM */
 };
 
-/* the engines one can pick (engine 1 only with FELUCCA_FM4), in ENGINE_ORDER: eng_ok(e), the n-th of them
- * eng_vis(n), e's place among them eng_rank(e), the next / previous one eng_step(e, dir) (wraps) */
-static int eng_ok(uint32_t e) { return e < NENGINES && (FELUCCA_FM4 || e != ENGI_DIGITAL); }
+/* the engines one can pick, in ENGINE_ORDER: eng_ok(e), the n-th of them eng_vis(n), e's place among them
+ * eng_rank(e), the next / previous one eng_step(e, dir) (wraps) */
+static int eng_ok(uint32_t e) { return eng_active(e); }
 static uint32_t eng_vis(uint32_t n) { return ENGINE_ORDER[n % NENG_SHOWN]; }
 static uint32_t eng_rank(uint32_t e)
 {
     uint32_t n;
     if (!eng_ok(e))
-        e = ENGI_FM6;                            /* (DIGITAL without FELUCCA_FM4: its sounds play as FM6) */
+        e = eng_fallback(e);                     /* (an old retired sound: the active engine it loads as) */
     for (n = 0; n < NENG_SHOWN && ENGINE_ORDER[n] != e; n++)
         ;
     return n < NENG_SHOWN ? n : 0u;
@@ -186,7 +200,8 @@ static const struct {
 #undef T_
 #define NPATTERNS (sizeof PATTERNS / sizeof PATTERNS[0])
 
-/* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are): bass, pad, lead, drums */
-static const uint8_t TRK_DEF[NPART][3] = {{0, 4, 0}, {ENGI_FM6, 4, 0}, {3, 0, 0}, {ENGI_DRUM, 0, 0}}; /* ANALOG ACID,
-                                                                       * FM6 PAD (was DIGITAL PAD), LOFI PULSE LD, DRUM KIT */
+/* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are):
+ * ANALOG ACID, DIGITAL FM BASS, FM6 PAD, DRUM KIT */
+static const uint8_t TRK_DEF[NPART][3] = {{ENGI_ANALOG, 4, 0}, {ENGI_DIGITAL, 2, 0},
+                                          {ENGI_FM6, 4, 0}, {ENGI_DRUM, 0, 0}};
 static uint32_t trk_def_engine(uint32_t i) { return TRK_DEF[i % NPART][0]; }

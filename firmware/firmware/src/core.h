@@ -14,11 +14,10 @@
 #define NSTEP 64
 #define HALF_FRAMES 128          /* I2S half buffer: 2.9 ms at 44.1 kHz (a key waits 0..1 half, then plays 1 half later) */
 #ifndef FELUCCA_SLICE
-#define FELUCCA_SLICE 1          /* the SLICE engine (eng_slice.c), engine 13; FELUCCA_SLICE=0 builds without it */
+#define FELUCCA_SLICE 0          /* the SLICE engine (eng_slice.c), engine 13; retired from the AMARU build */
 #endif
 #ifndef FELUCCA_FM4
-#define FELUCCA_FM4 0            /* the DIGITAL engine (eng_digital.c, four-operator FM): kept in the tree, not built
-                                  * by default; replaced by FM6, its sounds convert (fm4_convert.c) */
+#define FELUCCA_FM4 1            /* the DIGITAL engine (eng_digital.c, four-operator FM), engine 1: active */
 #endif
 #ifndef FELUCCA_CPU2
 #define FELUCCA_CPU2 0           /* the second core (src/felucca.c): 1 = built in, MENU > 2ND CORE ON lets it render
@@ -28,10 +27,32 @@
                                             * second core (mod.c, voice.c SPREAD, eng_formant.c): one each with two cores,
                                             * one for all with one, as up to 1.6 */
 #define C1_PI(t) ((uint32_t)((t) - trk) % C1_NP)   /* a part's copy */
-#define NENGINES (13 + FELUCCA_SLICE)   /* SLICE (13) comes last: the other engines keep their numbers */
-#define ENGI_DIGITAL 1u          /* reserved without FELUCCA_FM4: never selectable (eng_ok), its sounds load as FM6 */
-#define NENG_SHOWN (NENGINES - !FELUCCA_FM4)   /* the engines one can pick: PRESETS, the EDIT layer, the editor,
-                                                * in the display order of engines.c ENGINE_ORDER */
+#define NENGINES 14u             /* append-only: every stored index keeps its engine number */
+#define ENGI_DIGITAL 1u          /* DIGITAL (four-operator FM): active in AMARU */
+#define ENGI_ANALOG 0u
+#define ENGI_PHYS 9u
+#define ENGI_DRUM 10u
+#define ENGI_FM6 12u
+#define NENG_SHOWN 4u            /* ANALOG DIGITAL FM6 DRUM: PRESETS, the EDIT layer, the editor */
+/* AMARU's four active engines; every other number is retired (silent, never selectable). */
+#define ENG_ACTIVE_MASK ((1u << ENGI_ANALOG) | (1u << ENGI_DIGITAL) | (1u << ENGI_DRUM) | (1u << ENGI_FM6))
+static int eng_active(uint32_t e) { return e < 32u && ((ENG_ACTIVE_MASK >> e) & 1u); }
+/* the active engine an old sound of e loads as: WHEEL / GRAIN -> DIGITAL, SLICE -> DRUM, the rest -> ANALOG.
+ * PHYS MODEL DRUM and SAMPLE PERC migrate first (drum_from_phys / drum_from_perc). */
+static uint32_t eng_fallback(uint32_t e)
+{
+    if (eng_active(e))
+        return e;
+    switch (e) {
+    case 7u:                     /* WHEEL */
+    case 8u:                     /* GRAIN */
+        return ENGI_DIGITAL;
+    case 13u:                    /* SLICE */
+        return ENGI_DRUM;
+    default:
+        return ENGI_ANALOG;
+    }
+}
 #define UP_SLOTS 32u             /* user presets (upreset.c) */
 
 /* ------------------------------------------------------- parameters --- */
@@ -106,9 +127,6 @@ static void params_by_count(int16_t *out, const int16_t *in, uint32_t np, const 
         out[P_E0 + i] = in[nc + i];
 }
 
-/* engine indices the stores name (engines.c ENGINES[]: append-only) */
-#define ENGI_PHYS 9u
-#define ENGI_DRUM 10u
 /* PHYS MODEL DRUM (MODEL 4, before 1.0) -> the DRUM engine, its E values in place: {MODEL, TUNE, TONE, DECY,
  * SNAP, ACC, KICK 0..127, PERC 0..127} -> {KIT, TUNE, TONE, DECY, SNAP, ACC, KICK 0..1, DRV 0}. 1 = it was one
  * (its engine is ENGI_DRUM now); projects (project.c) and user presets (upreset.c) */

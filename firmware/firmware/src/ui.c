@@ -1346,8 +1346,13 @@ static void set_engine_of(track_t *t, uint32_t ei);
 /* preset pi of the engine the track asked for: the sound only (not the steps, not param_kept) */
 static void apply_preset_to(track_t *t, uint32_t pi)
 {
-    const engine_t *e = ENGINES[t->eng_req % NENGINES];
+    const engine_t *e;
     uint32_t i;
+    if (!eng_ok(t->eng_req % NENGINES)) {               /* an old retired engine: load its fallback first */
+        set_engine_of(t, eng_fallback(t->eng_req));
+        return;
+    }
+    e = ENGINES[t->eng_req % NENGINES];
 #if !FELUCCA_FM4
     if (t->eng_req % NENGINES == ENGI_DIGITAL) {
         fm4_load_preset(t, pi);
@@ -1394,8 +1399,10 @@ static void apply_preset_to(track_t *t, uint32_t pi)
  * its values or the new one with its own (voice.c engine_block), never one with the other's */
 static void set_engine_of(track_t *t, uint32_t ei)
 {
-    const engine_t *e = ENGINES[ei % NENGINES];
+    const engine_t *e;
     uint32_t i;
+    ei = eng_fallback(ei % NENGINES);                   /* retired numbers never reach a track */
+    e = ENGINES[ei];
 #if !FELUCCA_FM4
     if (ei % NENGINES == ENGI_DIGITAL) {             /* DIGITAL (retired): its first preset, as FM6 */
         fm4_load_preset(t, 0);

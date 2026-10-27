@@ -385,6 +385,41 @@ static void proj_perc(project_t *q)
     q->sum = proj_sum(q);
 }
 
+/* a retired engine's track -> an active one: PHYS MODEL DRUM and SAMPLE PERC keep their moved values (their
+ * migrations ran first), the rest take the fallback engine's EDIT defaults. The steps stay. Idempotent */
+static void proj_retired(project_t *q)
+{
+    uint32_t k, i, n, hit = 0;
+    for (k = 0; k < NTRK; k++) {
+        proj_trk_t *d = &q->t[k];
+        uint32_t target;
+        if (eng_active(d->engine))
+            continue;
+        if (drum_from_phys(d->engine, &d->p[P_E0]) || drum_from_perc(d->engine, &d->p[P_E0]))
+            target = ENGI_DRUM;
+        else {
+            target = eng_fallback(d->engine);
+            for (i = 0; i < 8u; i++)
+                d->p[P_E0 + i] = param_desc_of(target, P_E0 + i)->def;
+        }
+        d->engine = (uint8_t)target;
+        d->preset = 0;
+        hit |= 1u << k;
+    }
+    if (!hit)
+        return;
+    for (i = n = 0; i < q->motion.count && i < MOTION_MAX; i++) {
+        const motion_event_t *e = &q->motion.event[i];
+        if (((hit >> (e->place >> 6)) & 1u) && MOTION_ID(e) >= P_E0)
+            continue;
+        q->motion.event[n++] = *e;
+    }
+    for (i = n; i < q->motion.count && i < MOTION_MAX; i++)
+        memset(&q->motion.event[i], 0, sizeof q->motion.event[i]);
+    q->motion.count = (uint8_t)n;
+    q->sum = proj_sum(q);
+}
+
 /* a format 4 project (n bytes in *v4) -> slot q as format 6 */
 static int proj_from_v4(project_t *q, const project_v4_t *v4, int n)
 {
@@ -503,6 +538,7 @@ static int proj_import(project_t *q, const void *b, int n)
         return 0;
     proj_fm4(q);
     proj_perc(q);
+    proj_retired(q);
     return 1;
 }
 static int proj_import_any(project_t *q, const void *b, int n)
@@ -522,6 +558,7 @@ static int proj_import_any(project_t *q, const void *b, int n)
         memcpy(q, b, sizeof *q);
         proj_drums_to_part(q);
         proj_phys(q);
+        proj_retired(q);
         return 1;
     }
     if (!proj_import_old(q, b, n))
@@ -1062,6 +1099,7 @@ static int project_restore_runtime(const project_t *input)
     proj_phys(p);                                       /* .. before PHYS lost DUST and DRUM */
     proj_fm4(p);                                        /* .. that had DIGITAL tracks */
     proj_perc(p);                                       /* .. or SAMPLE PERC tracks */
+    proj_retired(p);                                    /* .. or any other retired engine */
     transport_req = 2;
     panic_req = (1u << NTRK) - 1u;
     fm1_irq_off();                                      /* the audio ISR must not see half a project */

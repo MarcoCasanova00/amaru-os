@@ -18,28 +18,23 @@ static void bunker_garden(void)
     uint32_t phase=(ui_prefs&PREF_ANIM_OFF) ? 0 : ui.frame/8u;
     /* A quiet star field, bounded to the middle band. */
     for(uint32_t i=0;i<18u;i++)cv_rect(25+(int)(i*47u%202u),35+(int)(i*29u%70u),1,1,T_LINE);
-    /* a small Mesoamerican sun/spiral accent in the top-right margin (decorative, theme-colored) */
-    {   int sx=204, sy=34;
-        bunker_diamond(sx,sy,5,T_LINE);
-        cv_line(sx-3,sy-7,sx+3,sy-13,T_LINE); cv_line(sx+3,sy-7,sx+7,sy-13,T_LINE);
-        cv_line(sx-3,sy+7,sx+3,sy+13,T_LINE); cv_line(sx+3,sy+7,sx+7,sy+13,T_LINE);
-        cv_line(sx-8,sy-3,sx-14,sy+3,T_LINE); cv_line(sx-8,sy+3,sx-14,sy+7,T_LINE);
-        cv_line(sx+8,sy-3,sx+14,sy+3,T_LINE); cv_line(sx+8,sy+3,sx+14,sy+7,T_LINE);
-        /* a short staff below the sun: the worshipper's sun-staff */
-        cv_line(sx,sy+4,sx,sy+14,T_LINE);
-        cv_line(sx-2,sy+10,sx+2,sy+10,T_LINE);
-    }
-    /* a mirrored sun in the top-left margin (above the tracks, clear of the star field) */
-    {   int sx=34, sy=22;
-        bunker_diamond(sx,sy,4,T_LINE);
-        cv_line(sx-2,sy-6,sx+2,sy-11,T_LINE); cv_line(sx+2,sy-6,sx+6,sy-11,T_LINE);
-        cv_line(sx-2,sy+6,sx+2,sy+11,T_LINE); cv_line(sx+2,sy+6,sx+6,sy+11,T_LINE);
-        cv_line(sx-7,sy-2,sx-12,sy+2,T_LINE); cv_line(sx-7,sy+2,sx-12,sy+6,T_LINE);
-        cv_line(sx+7,sy-2,sx+12,sy+2,T_LINE); cv_line(sx+7,sy+2,sx+12,sy+6,T_LINE);
-    }
-    /* a faint "temple step" strip along the top edge, clear of the tracks and the scale bar */
-    {   uint16_t c=T_LINE;
-        for(int i=0;i<17;i++){ int x=30+i*12; cv_rect(x,4,4,2,c); cv_rect(x+1,6,2,2,c); }
+    /* decorative Mesoamerican suns in the bottom corners, clear of the title text and the scale bar; canary yellow
+     * for contrast (the strict monochrome boundary is intentionally relaxed for these marks) */
+    {   uint16_t canary = RGB(255, 240, 0);
+        /* left sun: tucked in the corner, clear of the scale bar (which starts at x=7) and the last track (base 99) */
+        int sx=4, sy=104;
+        bunker_diamond(sx,sy,4,canary);
+        cv_line(sx-2,sy-6,sx+2,sy-11,canary); cv_line(sx+2,sy-6,sx+6,sy-11,canary);
+        cv_line(sx-2,sy+5,sx+2,sy+9,canary); cv_line(sx+2,sy+5,sx+6,sy+9,canary);
+        cv_line(sx-6,sy-3,sx-10,sy+1,canary); cv_line(sx+6,sy-3,sx+10,sy+1,canary);
+        cv_rect(sx-6,99,5,2,canary); cv_rect(sx-4,101,3,2,canary);
+        /* right sun: clear of the scale bar (ends at x=216) */
+        int dx=236, dy=104;
+        bunker_diamond(dx,dy,4,canary);
+        cv_line(dx-2,dy-6,dx+2,dy-11,canary); cv_line(dx+2,dy-6,dx+6,dy-11,canary);
+        cv_line(dx-2,dy+5,dx+2,dy+9,canary); cv_line(dx+2,dy+5,dx+6,dy+9,canary);
+        cv_line(dx-6,dy-3,dx-10,dy+1,canary); cv_line(dx+6,dy-3,dx+10,dy+1,canary);
+        cv_rect(dx+1,99,5,2,canary); cv_rect(dx+1,101,3,2,canary);
     }
     for(uint32_t k=0;k<NTRK;k++) {
         track_t *t=&trk[k];uint32_t len=(uint32_t)clamp(t->p[P_SLEN],1,NSTEP);

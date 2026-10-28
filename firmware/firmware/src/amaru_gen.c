@@ -862,6 +862,57 @@ static void make_lead(amaru_plan_t *p, const amaru_genre_t *g)
 
 #undef ASND
 
+/* AMARU_SONG: 64 steps are four bars, so the form is the phrase that loops: bar 1 the groove as thrown, bar 2 the
+ * same with the top end opened (make_drums' energy > 66 fills the hats), bar 3 the break (the kick and the toms
+ * out, the snare and the clap on 2 and 4, the bass thinned to the chord root where its riff has one, the pad and
+ * the lead carrying it), bar 4 the build back (the kick again for the four-on-the-floor rows -- the broken rows keep
+ * their own kick -- and the last beat a snare roll into the loop point). JIANT's FM_CLUB arc (intro build drop
+ * break) over its 32 bars, here in the four a pattern holds. LOOP and PARTS keep the plain 1 and 2 bars */
+static void shape_song(amaru_plan_t *p, int broken)
+{
+    int i, k;
+    if (p->steps < 64)
+        return;
+    for (i = 32; i < 48; i++) {                        /* the break: the bottom out, the backbeat kept */
+        amaru_step_t *s = &p->step[AMARU_SPARK][i];
+        s->hit &= (uint8_t)~(AMARU_L_KICK | AMARU_L_TOM);
+        if (i % 16 == 4 || i % 16 == 12) {             /* 2 and 4 still answer */
+            s->hit |= AMARU_L_SNARE;
+            if (s->time == AMARU_ST_REST) {
+                s->time = AMARU_ST_NOTE;
+                s->vel = 100;
+            }
+        }
+        s->acc &= s->hit;
+        if (!s->hit)
+            s->time = AMARU_ST_REST, s->vel = 0;
+        if (p->step[AMARU_ROOT][i].time != AMARU_ST_REST && (i % 16)) {
+            amaru_step_t *b = &p->step[AMARU_ROOT][i];      /* the bass holds its chord root through the break */
+            b->time = AMARU_ST_REST;
+            b->n = 0;
+            b->vel = 0;
+            b->flags = 0;
+        }
+    }
+    for (i = 48; i < 64; i++) {                        /* the build: the kick back under it */
+        amaru_step_t *s = &p->step[AMARU_SPARK][i];
+        if (!broken && i % 4 == 0)
+            s->hit |= AMARU_L_KICK, s->acc |= AMARU_L_KICK;
+        if (s->hit && s->time == AMARU_ST_REST) {
+            s->time = AMARU_ST_NOTE;
+            s->vel = 96;
+        }
+    }
+    for (k = 0; k < 4; k++) {                          /* the last beat: a roll into the loop's downbeat */
+        amaru_step_t *s = &p->step[AMARU_SPARK][60 + k];
+        s->time = AMARU_ST_NOTE;
+        s->hit = AMARU_L_SNARE;
+        s->acc = (uint8_t)(k == 3 ? AMARU_L_SNARE : 0);
+        s->vel = (uint8_t)(64 + k * 18);
+        s->flags = (uint8_t)(k < 3 ? AMARU_SF_RATCH2 : 0);
+    }
+}
+
 /* The public entry point. */
 void amaru_plan(amaru_plan_t *out, uint8_t genre, uint16_t seed, uint8_t energy, uint8_t form)
 {
@@ -905,5 +956,7 @@ void amaru_plan(amaru_plan_t *out, uint8_t genre, uint16_t seed, uint8_t energy,
         make_pad(out, g);
         seed_part(seed, genre, form, energy, AMARU_MELODY);
         make_lead(out, g);
+        if (form == AMARU_SONG)
+            shape_song(out, genre == AMARU_JUNGLE || genre == AMARU_DNB || genre == AMARU_BREAKBEAT);
     }
 }

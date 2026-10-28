@@ -173,6 +173,55 @@ static void genre_identity(void)
     }
 }
 
+/* SONG is four bars: bar 3 a break (no kick, the backbeat kept), bar 4 a build with the roll into the loop point */
+static void song_form(void)
+{
+    for (int g = 0; g < AMARU_NGENRES; g++) {
+        amaru_plan_t p, q, r;
+        int i, kick_break = 0, backbeat = 0, kick_build = 0, roll = 0, broken;
+        broken = g == AMARU_JUNGLE || g == AMARU_DNB || g == AMARU_BREAKBEAT;
+        amaru_plan(&p, (uint8_t)g, 4242, 70, AMARU_SONG);
+        amaru_plan(&q, (uint8_t)g, 4242, 70, AMARU_PARTS);
+        amaru_plan(&r, (uint8_t)g, 4242, 70, AMARU_LOOP);
+        CHECK(p.steps == 64 && q.steps == 32 && r.steps == 16, "form lengths genre %d", g);
+        {   /* the four bars are not one bar repeated: a phrase, not a longer loop */
+            uint32_t h[4];
+            int same = 0;
+            for (int b = 0; b < 4; b++) {
+                h[b] = 2166136261u;
+                for (int k = 0; k < 16; k++)
+                    h[b] = hsh(hsh(h[b], p.step[AMARU_SPARK][b * 16 + k].hit),
+                               (uint32_t)p.step[AMARU_SPARK][b * 16 + k].vel);
+            }
+            for (int b = 1; b < 4; b++)
+                same += h[b] == h[0];
+            CHECK(same < 2, "SONG repeats one bar genre %d", g);
+        }
+        for (i = 32; i < 48; i++)
+            kick_break += (p.step[AMARU_SPARK][i].hit & AMARU_L_KICK) != 0;
+        for (i = 0; i < 16; i++)
+            backbeat += (p.step[AMARU_SPARK][32 + i].hit & AMARU_L_SNARE) != 0;
+        for (i = 48; i < 64; i++)
+            kick_build += (p.step[AMARU_SPARK][i].hit & AMARU_L_KICK) != 0;
+        for (i = 60; i < 64; i++)
+            roll += (p.step[AMARU_SPARK][i].hit & AMARU_L_SNARE) != 0;
+        CHECK(kick_break == 0, "SONG break keeps the kick genre %d (%d)", g, kick_break);
+        CHECK(backbeat > 0, "SONG break lost the backbeat genre %d", g);
+        CHECK(roll == 4, "SONG build has no roll into the loop genre %d", g);
+        CHECK(broken ? kick_build > 0 : kick_build >= 3, "SONG build lost its kick genre %d (%d)", g, kick_build);
+        if (broken) {                                   /* the broken rows stay broken in every bar */
+            for (int b = 0; b < 4; b++) {
+                int qk = 0;
+                for (i = 0; i < 16; i++)
+                    qk += (p.step[AMARU_SPARK][b * 16 + i].hit & AMARU_L_KICK) && !(i % 4);
+                CHECK(qk < 4, "SONG bar %d of a broken genre is four-on-the-floor genre %d", b + 1, g);
+            }
+        }
+        CHECK(note_count(&p, AMARU_AIR) > 0 && note_count(&p, AMARU_MELODY) > 0,
+              "SONG lost a melodic part genre %d", g);
+    }
+}
+
 int main(void)
 {
     const uint8_t forms[] = {AMARU_LOOP, AMARU_PARTS, AMARU_SONG};
@@ -236,6 +285,7 @@ int main(void)
         }
     }
     genre_identity();
+    song_form();
     if (failures) { printf("%d failure(s)\n", failures); return 1; }
     printf("amaru_gen_test: all genres/forms valid and deterministic\n");
     return 0;

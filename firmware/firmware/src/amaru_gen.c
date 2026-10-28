@@ -81,7 +81,7 @@ static const uint8_t HAT_CELL[4][4] = {{100, 100, 100, 100}, {100, 55, 80, 55},
 static const uint8_t GHOST_RANK[12] = {3, 7, 11, 15, 13, 5, 9, 1, 14, 6, 10, 2};
 
 /* fills on the last bar of a multi-bar form */
-enum { FL_NONE, FL_ROLL, FL_TOM, FL_DROP, FL_HAT, FL_LINEAR };
+enum { FL_NONE, FL_ROLL, FL_TOM, FL_DROP, FL_HAT, FL_LINEAR, FL_ROLL_GS };
 enum { KICK_INTERLOCK, KICK_ANSWER, KICK_SUSTAIN, KICK_DOUBLE };
 
 /* ------------------------------------------------------- bass archetypes --- */
@@ -193,7 +193,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
         ASND("CORE DRUMS", E_DRUM, DP_TECHNO, 64, 0, 26, 0, 12, 20, 108, AMV_POLY) }, 2, 20, 0 },
 
     { "JUNGLE", 160, 170, 8, 2, {SC_MIN, SC_DOR, SC_PHRY, SC_MPEN},
-      DM_JUNGLE, 206, HC_FUNK, 16, FL_LINEAR,
+      DM_JUNGLE, 206, HC_FUNK, 16, FL_ROLL_GS,
       {BA_JUNGLE, BA_DNB, BA_AROUND}, 31, KICK_INTERLOCK,
       {PR_I_VI, PR_MINOR4, PR_ONE}, 2, PAD_DUB, VM_RICH, LD_MOTIF,
       {45, 35, 95, 95},
@@ -203,7 +203,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
         ASND("JUNGLE DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 0, 70, 0 },
 
     { "DRUM & BASS", 170, 178, 0, 7, {SC_MIN, SC_DOR, SC_PHRY, SC_MPEN},
-      DM_DNB, 210, HC_FLAT, 14, FL_LINEAR,
+      DM_DNB, 210, HC_FLAT, 14, FL_ROLL_GS,
       {BA_DNB, BA_JUNGLE, BA_WOBBLE}, 29, KICK_DOUBLE,
       {PR_I_VI, PR_DEEP4, PR_ONE}, 2, PAD_SPARSE, VM_RICH, LD_SPARSE,
       {50, 30, 95, 95},
@@ -213,7 +213,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
         ASND("DNB DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 0, 65, 0 },
 
     { "BREAKBEAT TEKNO", 140, 150, 6, 5, {SC_MIN, SC_DOR, SC_PHRY, SC_MPEN},
-      DM_BREAKS, 208, HC_FUNK, 18, FL_LINEAR,
+      DM_BREAKS, 208, HC_FUNK, 18, FL_ROLL_GS,
       {BA_ACID, BA_JUNGLE, BA_AROUND}, 33, KICK_INTERLOCK,
       {PR_ONE, PR_I_IV, PR_I_VI}, 2, PAD_STAB, VM_RICH, LD_OSTINATO,
       {45, 40, 90, 95},
@@ -555,6 +555,16 @@ static void make_drums(amaru_plan_t *p, const amaru_genre_t *g)
                 }
                 break;
             }
+            case FL_ROLL_GS:                    /* DnB/jungle: a gated snare roll into the loop point */
+                for (int k = 0; k < 8; k++) {
+                    int i = base + 8 + k;
+                    p->step[AMARU_SPARK][i].time = AMARU_ST_REST;
+                    p->step[AMARU_SPARK][i].hit = 0;
+                    d_hit(p, i, 1, 62 + k * 7, k == 3 || k == 7);
+                    if (i < p->steps && (k & 1) && p->energy > 45)
+                        p->step[AMARU_SPARK][i].flags |= AMARU_SF_RATCH2;
+                }
+                break;
             default:
                 break;
             }

@@ -25,6 +25,21 @@ static void bunker_garden(void)
         cv_line(sx-3,sy+7,sx+3,sy+13,T_LINE); cv_line(sx+3,sy+7,sx+7,sy+13,T_LINE);
         cv_line(sx-8,sy-3,sx-14,sy+3,T_LINE); cv_line(sx-8,sy+3,sx-14,sy+7,T_LINE);
         cv_line(sx+8,sy-3,sx+14,sy+3,T_LINE); cv_line(sx+8,sy+3,sx+14,sy+7,T_LINE);
+        /* a short staff below the sun: the worshipper's sun-staff */
+        cv_line(sx,sy+4,sx,sy+14,T_LINE);
+        cv_line(sx-2,sy+10,sx+2,sy+10,T_LINE);
+    }
+    /* a mirrored sun in the top-left margin (above the tracks, clear of the star field) */
+    {   int sx=34, sy=22;
+        bunker_diamond(sx,sy,4,T_LINE);
+        cv_line(sx-2,sy-6,sx+2,sy-11,T_LINE); cv_line(sx+2,sy-6,sx+6,sy-11,T_LINE);
+        cv_line(sx-2,sy+6,sx+2,sy+11,T_LINE); cv_line(sx+2,sy+6,sx+6,sy+11,T_LINE);
+        cv_line(sx-7,sy-2,sx-12,sy+2,T_LINE); cv_line(sx-7,sy+2,sx-12,sy+6,T_LINE);
+        cv_line(sx+7,sy-2,sx+12,sy+2,T_LINE); cv_line(sx+7,sy+2,sx+12,sy+6,T_LINE);
+    }
+    /* a faint "temple step" strip along the top edge, clear of the tracks and the scale bar */
+    {   uint16_t c=T_LINE;
+        for(int i=0;i<17;i++){ int x=30+i*12; cv_rect(x,4,4,2,c); cv_rect(x+1,6,2,2,c); }
     }
     for(uint32_t k=0;k<NTRK;k++) {
         track_t *t=&trk[k];uint32_t len=(uint32_t)clamp(t->p[P_SLEN],1,NSTEP);

@@ -14,7 +14,7 @@ drum & bass, psytrance) — in continuous evolution, with wavetable, FM, granula
 analog synthesis available per track.
 
 Built by musicians, for musicians — the pursuit of trap groove, true dark atmosphere
-and in-pocket bounces. Tested on real FM-1 hardware. `AMARU OS 0.1a` is a green/black
+and in-pocket bounces. Tested on real FM-1 hardware. `AMARU OS 0.4` is a green/black
 terminal session running on top of AMARU's original 96×96 monochrome splash logo.
 
 ---
@@ -24,7 +24,7 @@ terminal session running on top of AMARU's original 96×96 monochrome splash log
 - **4 tracks**: AIR (pad/chorus), MELODY (lead), ROOT (bass), SPARK (drums)
 - **9 first-class genres**: tribe tekno, mental tekno, hardtekk, acidcore, jungle, drum & bass, breakbeat tekno, techno, psytrance (DnB/breakbeats are **not** four-on-the-floor)
 - **Deterministic generator (GEN page)**: GROW/EVOLVE-style presses → OCT+ advances SEED and plays a new take; OCT- resets. Full one-bar punch at LOOP, or PARTS or SONG.
-- **Synthesis engines**: ANALOG, PHASE, GRAIN, FM6, FORMANT, PHYS, NOISE, LOFI + SAMPLE (poly voice)
+- **Synthesis engines** (four active): ANALOG, DIGITAL (FM4-style), FM6 and DRUM; the other engines are retired slots
 - **Three strict monochrome palettes**: `GRN/BLK`, `WHT/BLK`, `AMB/BLK` + accent REC LED
 - **Timbres**: Native Carnac- / Mycelium-style textures recreated strictly by parameter values (no binaries imported)
 - **License**: GPL-3.0-only (derivative of Bunker Evolved 1.0)
@@ -40,8 +40,9 @@ K1–K4. The output pushes dark techno and acidcore energy, and keeps the swing 
 of breaks, jungle and DnB. `ENERGY` thickens hats beyond 60 and ghosts below 34; `FORM`
 runs either a loop, structured parts, or a full 64-step song phrase.
 
-The track slots let you slot any engine on any track (`ANALOG → AIR`, `GRAIN → ROOT`,
-`NOISE → MELODY`). End the take with one press if you need the original.
+The track slots let you slot any of the four engines on any track (`ANALOG → AIR`,
+`DRUM → SPARK`, `FM6 → ROOT`, `DIGITAL → MELODY`). End the take with one press if
+you need the original.
 
 ## Tips
 

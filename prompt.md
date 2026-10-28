@@ -14,9 +14,11 @@ drums, synthesis, JIANT FM GEN) comes first. Tests come last (they take time/tok
 
 ---
 ## 📊 CURRENT STATUS
-- **Main commit:** `54db624` (latest) — sound import (Mycelium ANALOG / DIGITAL verbatim), DRUM kit
-  presets, GEN's four-bar SONG form
-- **Branches:** `main` (everything), `gh-pages` (web emulator only), `alpha` (old, ignore)
+- **Release commit:** `release` branch (identical to `main`) at `6029600` — sound import
+  (Mycelium ANALOG / DIGITAL verbatim), DRUM kit presets, GEN's four-bar SONG form, web
+  emulator rebuilt, release version **AMARU 0.4**.
+- **Branches:** `release` (app snapshot, same code as `main`), `main` (everything), `gh-pages`
+  (web emulator only), `alpha` (old, ignore)
 - `engine-rework` has been deleted (its changes merged into main); do not recreate
 - **Milestone A (engine retirement):** complete. AMARU build 500,172 B (`build/felucca.bin`);
   RETIRED=1 baseline 498,332 B. Flash-fit is checked by `utilities/target_budget.py`; there is no
@@ -29,7 +31,9 @@ drums, synthesis, JIANT FM GEN) comes first. Tests come last (they take time/tok
 - **Milestone C (GEN):** 9 genres, JIANT's drum maps / bass archetypes / progressions adapted to the
   four tracks; SONG is a four-bar phrase (break, then the build back); jungle / DnB / breakbeat stay
   off the quarters. `tests/amaru_gen_test.c` holds these invariants.
-- **Milestone D (web emulator):** not rebuilt yet.
+- **Milestone D (web emulator):** rebuilt (Emscripten) — `build/emu/felucca.wasm`
+  764,907 B, AMARU 0.4; verified bit-for-bit against native via `emu_test.mjs`; published
+  on `gh-pages`.
 - **Power-on sounds (TRK_DEF):** fixed to the four roles -- AIR SOFT PAD (ANALOG 4), MELODY BRASS
   (DIGITAL 3 -> FM6 BRASS), ROOT FM BASS (FM6 2), SPARK DRUM KIT. The four-engine patch had left
   DIGITAL BASS on MELODY and FM6 PAD on ROOT (no lead at power-on); the hostsim TRACKS chord test

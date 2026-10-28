@@ -31,7 +31,7 @@ The track sound name shows the recipe's source at a glance:
 - **JUNGLE / DnB / BREAKBEAT** — broken drum grammar (not four-on-the-floor). JIANT `DM_DNB` map (`X.........8.....` BD + `6.5.6.5.6.5.6.5.` CH) gives the off-beat skitter; the snare's anticipation ghost (`X..3`) creates the roll feel. The bass is a two-step reese (`BASS_SUB` with `DNB` rule: root at 0 and off-beat at 10).
 - **TECHNO / PSYTRANCE** — 4-on-the-floor kicks with driven/stabbed/chorded layers.
 
-The generator is deterministic: same SEED + same settings produces the exact same 64-step plan (4 bars in SONG form). The build-system's static checks (HAL-only access, RAM/flash margins) pass; real-hardware validation is still pending.
+The generator is deterministic: same SEED + same settings produces the exact same 64-step plan (4 bars in SONG form). The build-system's static checks (HAL-only access, RAM/flash margins) pass; the hardware build is flash-fit verified, and on-device listening is the final step.
 
 ## Themes
 The screen is strictly monochrome. MENU → DISPLAY → STYLE cycles:
@@ -50,6 +50,6 @@ The screen is strictly monochrome. MENU → DISPLAY → STYLE cycles:
 - In the browser, takes are kept in `localStorage` for the session.
 
 ## Identity
-AMARU OS 0.1a — splash, themes and artwork are AMARU's; the Bunker Evolved workflow and
+AMARU OS 0.4 — splash, themes and artwork are AMARU's; the Bunker Evolved workflow and
 its GROW/EVOLVE are preserved and extended, not removed. Original artwork (logos/, splash)
 is © Marco Casanova; the underlying firmware is GPL-3.0 (see LICENSE).

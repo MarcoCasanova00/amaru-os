@@ -1,5 +1,11 @@
 # AMARU Firmware Development - HANDOFF DOCUMENT
 
+> **Status (28 Oct 2026):** Milestones A–C are complete and the Web emulator is rebuilt.
+> The release is **AMARU 0.4** on the `release` branch (same code as `main`); the web
+> emulator is published on `gh-pages`. Hardware package: `firmware/build/felucca.fwsc`
+> (identity FM-1_7100002, flash-fit verified). The body below is the historical handoff
+> record of the work as it progressed.
+
 ## EXECUTIVE SUMMARY
 
 The AMARU firmware project aims to ship a four-engine FM-1 firmware (ANALOG/DIGITAL/DRUM/FM6) with a web emulator, borrowing from Carnac OS + Mycelium sounds while preserving native synthesis. The project is 80% complete with milestone A (engine retirement) successfully implemented, but several critical components remain to be completed.

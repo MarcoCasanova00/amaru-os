@@ -71,6 +71,7 @@ Hold **OCT−** while switching the FM-1 on — the device enters update mode an
 ## Pages
 
 - Emulator: https://marcocasanova00.github.io/amaru-os/
+- Song editor: https://marcocasanova00.github.io/amaru-os/editor/ (create/modify songs, JSON import/export)
 - Package verifier: https://marcocasanova00.github.io/amaru-os/install.html
   (hash-and-size check only, no flash actions)
 - Releases: https://github.com/MarcoCasanova00/amaru-os/releases

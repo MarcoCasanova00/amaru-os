@@ -39,15 +39,15 @@
 /* 1.5.6 (Discussion #216): DEEP TIGHT PERC (9..11), kits put together from the five's pieces (drum_voice.c DV_KIT),
  * appended. Firmware before 1.5.6 clamps 9..11 to 8 (77) when it loads them (param_fit) */
 enum { DK_STD, DK_HAND, DK_CYM, DK_HCYM, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP, DK_TIGHT, DK_PERC,
-       DK_PSY, DK_FOREST, DK_HITECH, DK_COUNT };   /* (stored values; AMARU appended PSY FOREST HITECH) */
+       DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER, DK_COUNT };   /* (stored values; AMARU appended PSY FOREST HITECH GABBER) */
 /* the kit a stored KIT value plays: HAND CYM H+CYM (retired after 1.0.4) -> 66 (a conga on TOM), 10 (a cymbal on
  * BELL), 77 (claves on RIM, a cymbal on BELL) */
 static const uint8_t DK_PLAYS[DK_COUNT] = {DK_STD, DK_66, DK_10, DK_77, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP,
-                                           DK_TIGHT, DK_PERC, DK_PSY, DK_FOREST, DK_HITECH};
+                                           DK_TIGHT, DK_PERC, DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER};
 static uint32_t drum_kit_plays(int32_t v) { return DK_PLAYS[clamp(v, 0, DK_COUNT - 1)]; }
 /* the model kits' pieces where a lane plays another than its own (the lane's name): 1 TOM -> CONGA, 2 RIM -> CLAVE,
  * 4 BELL -> CYM */
-static const uint8_t DK_SWAP[DV_NKIT] = {0, 4, 1, 0, 2 | 4, 4, 0, 1 | 2, 2 | 4, 1, 4};
+static const uint8_t DK_SWAP[DV_NKIT] = {0, 4, 1, 0, 2 | 4, 4, 0, 1 | 2, 2 | 4, 1, 4, 0};
 static const uint8_t DV_TYPE_LANE[DVT_COUNT] = {
     DV_KICK, DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_TOM, DV_RIM, DV_RIM, DV_BELL, DV_BELL,
 };
@@ -72,7 +72,7 @@ static uint8_t drum_mute[NPART];
 
 /* 1..3 named as the kit they play: aliases, never shown or offered (EDITOR_PROTOCOL.md: retired values) */
 static const char *const N_DRUM_KIT[] = {"STD", "66", "10", "77", "80", "10", "66", "55", "77", "DEEP", "TIGHT", "PERC",
-                                         "PSY", "FOREST", "HITECH"};
+                                         "PSY", "FOREST", "HITECH", "GABBER"};
 static const char *const N_DRUM_KICK[] = {"PUNCH", "ROUND"};
 
 /* General MIDI notes 35..81 -> the drum (DVT_*; DVT_PUNCH: the kick KICK picks) and semitones from its
@@ -342,10 +342,11 @@ static const preset_t DRUM_PRESETS[] = {
     {"JUNGLE KIT", {DK_77, 64, 62, 44, 82, 108, 0, 50}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(12)},
     {"TECHNO KIT", {DK_77, 64, 52, 70, 74, 104, 1, 96}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 22), PAT(12)},
     {"HARDTEKK KIT", {DK_HITECH, 66, 66, 40, 88, 112, 0, 72}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 10), PAT(12)},
+    {"GABBER KIT", {DK_GABBER, 64, 64, 76, 70, 116, 0, 127}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 8), PAT(12)},
 };
 
 /* amaru_gen.c's DP_* enum indexes this table in order (GEN's drum recipes): keep the order, append only */
-_Static_assert(NELEM(DRUM_PRESETS) == 15u, "DRUM presets: amaru_gen.c DP_* order");
+_Static_assert(NELEM(DRUM_PRESETS) == 16u, "DRUM presets: amaru_gen.c DP_* order");
 
 static const engine_t ENG_DRUM = {
     .name = "DRUM",

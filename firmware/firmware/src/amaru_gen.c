@@ -39,7 +39,7 @@ enum { AMV_POLY = 0, AMV_MONO = 1, AMV_LEGATO = 2, AMV_UNISON = 3 };
 
 /* DRUM's preset numbers (src/eng_drum.c DRUM_PRESETS, in order): the kit a genre's drums play */
 enum { DP_STD, DP_DEEP, DP_TIGHT, DP_PERC, DP_PSY, DP_FOREST, DP_HITECH,
-       DP_808, DP_909, DP_606, DP_CR78, DP_707, DP_JUNGLE, DP_TECHNO, DP_HARDTEKK };
+       DP_808, DP_909, DP_606, DP_CR78, DP_707, DP_JUNGLE, DP_TECHNO, DP_HARDTEKK, DP_GABBER };
 
 /* ------------------------------------------------------------- drum maps --- */
 /* A lane's 16 steps as levels: '.' 0, '1'..'9' 26 a step (9 = 234), 'X' 255. A step
@@ -180,7 +180,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("HARDTEKK PAD", E_ANALOG, 3, 54, 12, 55, 20, 25, 45, 30, AMV_POLY),
         ASND("HARDTEKK STAB", E_ANALOG, 6, 56, 0, 32, 8, 20, 35, 52, AMV_POLY),
         ASND("HARDTEKK BASS", E_ANALOG, 4, 52, 0, 26, 0, 5, 12, 35, AMV_MONO),
-        ASND("MYC BLOWN", E_DRUM, DP_HARDTEKK, 60, 0, 24, 0, 10, 12, 127, AMV_POLY) }, 1, 10, 0 }, /* Mycelium BLOWN: the short driven kick, drive 72..105 */
+        ASND("MYC BLOWN", E_DRUM, DP_GABBER, 60, 0, 24, 0, 10, 12, 127, AMV_POLY) }, 1, 10, 0 }, /* Mycelium BLOWN: the short driven kick, drive 72..105 */
 
     { "ACID CORE", 165, 180, 0, 3, {SC_PHRY, SC_MIN, SC_HARM, SC_MPEN},
       DM_ACIDCORE, 222, HC_MACHINE, 0, FL_DROP,

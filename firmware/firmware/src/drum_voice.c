@@ -80,7 +80,7 @@ enum {
 };
 /* a lane of a model kit as a type: the kit (1..DV_NKIT) in the high 4 bits, the lane in the low 3 (Felucca's own
  * types: 0 above). Its run (the DVT_* it plays through) is the kit's (DV_KIT) */
-#define DV_NKIT 11                                       /* (1.5.6, #216: DEEP TIGHT PERC after 77; AMARU: PSY FOREST HITECH) */
+#define DV_NKIT 12                                       /* (1.5.6, #216: DEEP TIGHT PERC after 77; AMARU: PSY FOREST HITECH GABBER) */
 #define DV_KITOF(t) ((uint32_t)(t) >> 4)
 #define DV_KTYPE(kit, lane) ((uint8_t)(((kit) << 4) | (lane)))
 
@@ -383,6 +383,23 @@ static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
         {DVT_TOM, 53, 824, 179, 4091, {21, 600, 1523, 9000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* 66's rim: 1.5 kHz, tau 2.7 ms */
         {DVT_RIM, 32, 1441, 13, 8636, {304, 26000, 1000, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 55's wide cymbal on BELL: 0.7 .. 7.6 kHz */
+        {DVT_CYM, 50, 1240, 114, 13203, {1701, 4096, 1550, 4096, 22000, 20000, 30, 19661, 8192, 4, 0, 0, 0}},
+    },
+    {   /* GABBER (AMARU): a heavy, saturated kick; a cracking noisy snare; metal hats */
+        /* 55's kick, deepened (50 Hz), longer decay, stronger harmonics, heavy drive */
+        {DVT_PUNCH, 64, 500, 140, 3100, {180, 130, 0, 2600, 2000, 1478, 2200, 8192, 20, 24, 0, 0, 0}},
+        /* 66's bright snare with the shell, noisy */
+        {DVT_SNARE, 40, 979, 54, 10633, {107, 0, 100, 120, 6000, 1200, 1907, 8192, 30, 16000, 32767, 32767, 1828}},
+        /* 80's clap: band 1 kHz, 3 teeth 10 ms, tail 90 ms */
+        {DVT_CLAP, 48, 1331, 316, 13485, {0, 4096, 1678, 0, 2000, 30000, 35, 441, 3, 0, 0, 0, 0}},
+        /* 55's cluster hats + noise */
+        {DVT_HATC, 45, 1909, 94, 2473, {1996, 5120, 1940, 2042, 4000, 11469, 18022, 3, 3, 0, 0, 0, 0}},
+        {DVT_HATO, 63, 1909, 354, 1662, {1996, 5120, 1940, 2042, 4000, 11469, 18022, 3, 3, 0, 0, 0, 0}},
+        /* 55's low tom 150 Hz */
+        {DVT_TOM, 53, 824, 179, 4091, {21, 600, 1523, 9000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* 80's rim: 455 + 1667 Hz into a hard clip */
+        {DVT_RIM, 32, 1113, 12, 4599, {360, 12000, 30000, 32000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* 55's wide cymbal on BELL: 0.7 .. 7.6 kHz */
         {DVT_CYM, 50, 1240, 114, 13203, {1701, 4096, 1550, 4096, 22000, 20000, 30, 19661, 8192, 4, 0, 0, 0}},
     },

@@ -49,6 +49,14 @@ The screen is strictly monochrome. MENU → DISPLAY → STYLE cycles:
 - SAVE → SONGS writes the current session; WORLD names your take.
 - In the browser, takes are kept in `localStorage` for the session.
 
+## Safety & backups
+- The FM-1 has a **ROM-level rescue** (hold **OCT−** at power-on, or two crash loops)
+  that boots a minimal updater — it cannot be disabled by firmware, so a bad flash is
+  always recoverable.
+- AMARU installs as a validated `.fwsc` and never touches the bootloader region.
+- Use the editor's **backup/restore** to save settings, projects and presets before
+  flashing. See `docs/SAFETY.md` for the full verification.
+
 ## Identity
 AMARU OS 0.4 — splash, themes and artwork are AMARU's; the Bunker Evolved workflow and
 its GROW/EVOLVE are preserved and extended, not removed. Original artwork (logos/, splash)

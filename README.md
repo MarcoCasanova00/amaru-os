@@ -75,6 +75,7 @@ Hold **OCT−** while switching the FM-1 on — the device enters update mode an
   (hash-and-size check only, no flash actions)
 - Releases: https://github.com/MarcoCasanova00/amaru-os/releases
 - Firmware Hub: https://thefirmwarehub.com (submission planned post-release)
+- Flash safety & storage: `docs/SAFETY.md`
 
 ---
 

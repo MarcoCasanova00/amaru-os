@@ -14,11 +14,14 @@ drums, synthesis, JIANT FM GEN) comes first. Tests come last (they take time/tok
 
 ---
 ## 📊 CURRENT STATUS
-- **Release commit:** `release` branch (identical to `main`) at `6029600` — sound import
-  (Mycelium ANALOG / DIGITAL verbatim), DRUM kit presets, GEN's four-bar SONG form, web
-  emulator rebuilt, release version **AMARU 0.4**.
+- **Release commit:** `release` branch (identical to `main`) — sound import (Mycelium
+  ANALOG / DIGITAL verbatim), DRUM kit presets, GEN's four-bar SONG form **and the finished
+  GEN port** (arp lead for psy/techno, pad harmony colour, per-genre humanise, tribal tom
+  ghosts), web emulator rebuilt, release version **AMARU 0.4**.
 - **Branches:** `release` (app snapshot, same code as `main`), `main` (everything), `gh-pages`
   (web emulator only), `alpha` (old, ignore)
+- **Safety/storage:** flash safety (no hard-brick path) and storage capacity are verified —
+  see `docs/SAFETY.md`.
 - `engine-rework` has been deleted (its changes merged into main); do not recreate
 - **Milestone A (engine retirement):** complete. AMARU build 500,172 B (`build/felucca.bin`);
   RETIRED=1 baseline 498,332 B. Flash-fit is checked by `utilities/target_budget.py`; there is no

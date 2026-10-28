@@ -1,10 +1,11 @@
 # AMARU Firmware Development - HANDOFF DOCUMENT
 
-> **Status (28 Oct 2026):** Milestones A–C are complete and the Web emulator is rebuilt.
-> The release is **AMARU 0.4** on the `release` branch (same code as `main`); the web
-> emulator is published on `gh-pages`. Hardware package: `firmware/build/felucca.fwsc`
-> (identity FM-1_7100002, flash-fit verified). The body below is the historical handoff
-> record of the work as it progressed.
+> **Status (28 Oct 2026):** Milestones A–C and the GEN port are complete; the Web
+> emulator is rebuilt. The release is **AMARU 0.4** on the `release` branch (same code as
+> `main`); the web emulator is published on `gh-pages`. Hardware package:
+> `firmware/build/felucca.fwsc` (identity FM-1_7100002, flash-fit verified). Flash safety
+> and storage capacity are documented and verified in `docs/SAFETY.md`. The body below is
+> the historical handoff record of the work as it progressed.
 
 ## EXECUTIVE SUMMARY
 

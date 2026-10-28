@@ -130,7 +130,7 @@ enum { PAD_STAB, PAD_DRONE, PAD_TRANCE, PAD_SPARSE, PAD_DUB, PAD_SWELL, PAD_COMP
 /* voicings */
 enum { VM_PLAIN, VM_QUART, VM_RICH, VM_POWER, VM_PLANE };
 /* lead styles */
-enum { LD_HOOK, LD_OSTINATO, LD_MOTIF, LD_SPARSE, LD_MECH };
+enum { LD_HOOK, LD_OSTINATO, LD_MOTIF, LD_SPARSE, LD_MECH, LD_ARP };
 
 /* ---------------------------------------------------------------- genres --- */
 typedef struct {
@@ -144,6 +144,7 @@ typedef struct {
     uint8_t lead;
     uint8_t amt[AMARU_TRACKS];             /* AIR MELODY ROOT SPARK density, all four live */
     amaru_sound_t snd[AMARU_TRACKS];
+    uint8_t harm_color, human, perc;       /* 0 default; colour/humanise/tribal tom ghost */
 } amaru_genre_t;
 
 /* The sounds are AMARU's recipe names (Carnac / Mycelium parameter shapes written as
@@ -157,7 +158,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("AMARY QRIA", E_FM6, 4, 58, 110, 96, 40, 45, 90, 0, AMV_LEGATO),   /* Carnac 3 - Amazon green breath */
         ASND("MAYA PLUCK", E_ANALOG, 8, 70, 0, 55, 10, 40, 55, 0, AMV_POLY),
         ASND("AMARU BASS", E_ANALOG, 2, 44, 0, 35, 0, 10, 20, 12, AMV_MONO),
-        ASND("GREEN KIT", E_DRUM, DP_909, 64, 0, 30, 0, 12, 14, 96, AMV_POLY) } },   /* Mycelium TEKNO: the 909, driven */
+        ASND("GREEN KIT", E_DRUM, DP_909, 64, 0, 30, 0, 12, 14, 96, AMV_POLY) }, 1, 55, 1 },   /* Mycelium TEKNO: the 909, driven */
 
     { "MENTAL TEKNO", 155, 178, 4, 9, {SC_PHRY, SC_HARM, SC_MIN, SC_DOR},
       DM_MENTAL, 214, HC_MACHINE, 0, FL_NONE,
@@ -167,7 +168,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("TUPAC SHADOW", E_DIGITAL, 5, 58, 70, 112, 35, 35, 100, 0, AMV_POLY),  /* Carnac 4: the hearth's dark noise, far reverb */
         ASND("AZTEC SIREN", E_ANALOG, 6, 82, 8, 78, 20, 45, 60, 18, AMV_MONO),
         ASND("MENTAL SUB", E_ANALOG, 7, 36, 0, 60, 0, 12, 25, 0, AMV_MONO),
-        ASND("MENTAL DRUMS", E_DRUM, DP_909, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) } },
+        ASND("MENTAL DRUMS", E_DRUM, DP_909, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 2, 35, 1 },
 
     { "HARDTEKK", 170, 180, 0, 5, {SC_MIN, SC_PHRY, SC_HARM, SC_DOR},
       DM_HARDTEKK, 220, HC_MACHINE, 0, FL_HAT,
@@ -177,7 +178,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("HARDTEKK PAD", E_ANALOG, 3, 66, 12, 55, 20, 25, 45, 25, AMV_POLY),
         ASND("HARDTEKK STAB", E_ANALOG, 6, 76, 0, 32, 8, 20, 35, 40, AMV_POLY),
         ASND("HARDTEKK BASS", E_ANALOG, 4, 52, 0, 26, 0, 5, 12, 35, AMV_MONO),
-        ASND("MYC BLOWN", E_DRUM, DP_HARDTEKK, 60, 0, 24, 0, 10, 12, 105, AMV_POLY) } }, /* Mycelium BLOWN: the short driven kick, drive 72..105 */
+        ASND("MYC BLOWN", E_DRUM, DP_HARDTEKK, 60, 0, 24, 0, 10, 12, 105, AMV_POLY) }, 1, 10, 0 }, /* Mycelium BLOWN: the short driven kick, drive 72..105 */
 
     { "ACID CORE", 165, 180, 0, 3, {SC_PHRY, SC_MIN, SC_HARM, SC_MPEN},
       DM_ACIDCORE, 222, HC_MACHINE, 0, FL_DROP,
@@ -187,7 +188,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("ACID MIST", E_DIGITAL, 5, 72, 35, 90, 20, 28, 80, 0, AMV_POLY),
         ASND("SILBURY WAIL", E_ANALOG, 4, 88, 0, 96, 20, 45, 20, 60, AMV_LEGATO),  /* Carnac 20: the wailing register, SH-2 drive 60 */
         ASND("SILBURY MOUND", E_ANALOG, 4, 44, 0, 30, 0, 10, 12, 60, AMV_LEGATO), /* Carnac 20: driven resonant SH-2, tied glide, an octave down */
-        ASND("CORE DRUMS", E_DRUM, DP_TECHNO, 64, 0, 26, 0, 12, 20, 0, AMV_POLY) } },
+        ASND("CORE DRUMS", E_DRUM, DP_TECHNO, 64, 0, 26, 0, 12, 20, 0, AMV_POLY) }, 2, 20, 0 },
 
     { "JUNGLE", 160, 170, 8, 2, {SC_MIN, SC_DOR, SC_PHRY, SC_MPEN},
       DM_JUNGLE, 206, HC_FUNK, 16, FL_LINEAR,
@@ -197,7 +198,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("JUNGLE CHOIR", E_FM6, 4, 55, 60, 105, 30, 32, 92, 0, AMV_POLY),
         ASND("JUNGLE STAB", E_ANALOG, 8, 74, 0, 46, 12, 38, 55, 0, AMV_POLY),
         ASND("JUNGLE SUB", E_ANALOG, 7, 30, 0, 70, 0, 8, 18, 0, AMV_MONO),
-        ASND("JUNGLE DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) } },
+        ASND("JUNGLE DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 0, 70, 0 },
 
     { "DRUM & BASS", 170, 178, 0, 7, {SC_MIN, SC_DOR, SC_PHRY, SC_MPEN},
       DM_DNB, 210, HC_FLAT, 14, FL_LINEAR,
@@ -207,7 +208,7 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("DNB PAD", E_FM6, 4, 60, 55, 110, 28, 30, 88, 0, AMV_POLY),
         ASND("DNB REESE", E_DIGITAL, 3, 80, 0, 55, 18, 36, 45, 18, AMV_MONO),
         ASND("DNB SUB", E_ANALOG, 7, 28, 0, 80, 0, 6, 15, 0, AMV_MONO),
-        ASND("DNB DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) } },
+        ASND("DNB DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 0, 65, 0 },
 
     { "BREAKBEAT TEKNO", 140, 150, 6, 5, {SC_MIN, SC_DOR, SC_PHRY, SC_MPEN},
       DM_BREAKS, 208, HC_FUNK, 18, FL_LINEAR,
@@ -217,27 +218,27 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       { ASND("BREAK PAD", E_ANALOG, 11, 58, 45, 95, 30, 28, 78, 0, AMV_POLY),
         ASND("BREAK STAB", E_ANALOG, 8, 78, 0, 40, 10, 30, 45, 18, AMV_POLY),
         ASND("BREAK BASS", E_ANALOG, 2, 46, 0, 38, 0, 8, 18, 18, AMV_MONO),
-        ASND("BREAK DRUMS", E_DRUM, DP_707, 64, 0, 28, 0, 14, 26, 0, AMV_POLY) } },
+        ASND("BREAK DRUMS", E_DRUM, DP_707, 64, 0, 28, 0, 14, 26, 0, AMV_POLY) }, 0, 60, 0 },
 
     { "TECHNO", 140, 155, 4, 7, {SC_MIN, SC_PHRY, SC_DOR, SC_HARM},
       DM_TEKNO, 212, HC_MACHINE, 4, FL_DROP,
       {BA_ROLL16, BA_PSY, BA_BOUNCE}, 33, KICK_SUSTAIN,
-      {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_DRONE, VM_PLANE, LD_OSTINATO,
+      {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_DRONE, VM_PLANE, LD_ARP,
       {30, 30, 85, 95},
       { ASND("TECHNO PAD", E_FM6, 4, 62, 50, 100, 25, 30, 80, 0, AMV_POLY),
         ASND("TECHNO LEAD", E_ANALOG, 0, 82, 0, 50, 20, 40, 45, 10, AMV_MONO),
         ASND("TECHNO BASS", E_DIGITAL, 2, 48, 0, 42, 8, 20, 20, 22, AMV_MONO),
-        ASND("TECHNO DRUMS", E_DRUM, DP_TECHNO, 64, 0, 30, 0, 12, 24, 0, AMV_POLY) } },
+        ASND("TECHNO DRUMS", E_DRUM, DP_TECHNO, 64, 0, 30, 0, 12, 24, 0, AMV_POLY) }, 1, 30, 0 },
 
     { "PSYTRANCE", 140, 148, 0, 9, {SC_PHRY, SC_MIN, SC_HARM, SC_DOR},
       DM_PSY, 216, HC_MACHINE, 0, FL_ROLL,
       {BA_PSY, BA_ROLL16, BA_PUMP8}, 33, KICK_SUSTAIN,
-      {PR_PHRY, PR_TRANCE, PR_ANDAL}, 4, PAD_TRANCE, VM_RICH, LD_MOTIF,
+      {PR_PHRY, PR_TRANCE, PR_ANDAL}, 4, PAD_TRANCE, VM_RICH, LD_ARP,
       {100, 45, 100, 100},
       { ASND("ORACLE CHOIR", E_FM6, 4, 66, 90, 110, 35, 40, 92, 0, AMV_POLY),      /* Carnac 3: the menhir-thud strike, the vowel opens */
         ASND("PSY LEAD", E_ANALOG, 0, 92, 0, 55, 30, 50, 55, 12, AMV_UNISON),
         ASND("PSY ROLL", E_ANALOG, 4, 52, 0, 30, 10, 22, 22, 18, AMV_MONO),
-        ASND("PSY DRUMS", E_DRUM, DP_PSY, 64, 0, 28, 0, 12, 24, 0, AMV_POLY) } }
+        ASND("PSY DRUMS", E_DRUM, DP_PSY, 64, 0, 28, 0, 12, 24, 0, AMV_POLY) }, 0, 50, 0 }
 };
 
 const char *amaru_genre_name(uint8_t genre)
@@ -495,6 +496,20 @@ static void make_drums(amaru_plan_t *p, const amaru_genre_t *g)
         }
     }
 
+    if (g->perc) {                             /* the tribe: conga/tom ghosts off the beats (polyrhythm) */
+        for (int i = 0; i < p->steps; i++) {
+            int pos = i % 16;
+            if (pos != 6 && pos != 10 && pos != 14)
+                continue;
+            amaru_step_t *s = &p->step[AMARU_SPARK][i];
+            if (s->time == AMARU_ST_NOTE && (s->hit & (AMARU_L_TOM | AMARU_L_KICK)))
+                continue;
+            if (!chance((uint32_t)(55 + p->energy / 3)))
+                continue;
+            d_hit(p, i, 5, 58 + p->energy / 4, 0);
+        }
+    }
+
     {   /* the fill on the last bar of a multi-bar form; LOOP keeps its one bar */
         int last = bars - 1, base = last * 16, lane = DRUM_MAP[g->drum][1][0] ? 1 : 6;
         if (bars >= 2 && g->fills != FL_NONE && (bars >= 4 || chance(50))) {
@@ -687,8 +702,8 @@ static void make_bass(amaru_plan_t *p, const amaru_genre_t *g, uint8_t bi)
             if (f == 'g') vel = 50;
             if (f == 'a') { vel = 110; fl |= AMARU_SF_ACCENT; }
             if (f == 's') fl |= AMARU_SF_SLIDE;
-            if (g->amt[AMARU_ROOT] > 70)
-                vel = clampi(vel + rr(-6, 6), 28, 127);
+            if (g->amt[AMARU_ROOT] > 70 || g->human)
+                vel = clampi(vel + rr(-(3 + g->human / 18), 3 + g->human / 18), 28, 127);
 
             amaru_step_t *s = &p->step[AMARU_ROOT][i];
             s->n = 1;
@@ -731,7 +746,11 @@ static void make_bass(amaru_plan_t *p, const amaru_genre_t *g, uint8_t bi)
 }
 
 /* ------------------------------------------------------------------ pad --- */
-static int chord_notes(const amaru_plan_t *p, int cd, int octave, int voicing, uint8_t *n)
+/* harmony colour: a tension note added over the chord root (0 none, 1 b2, 2 #4, 3 b6).
+ * It is added only when the voicing leaves room (it never replaces a set tone), and it
+ * never moves the root, so the bass / lead stay in mode. */
+static const int8_t CH_COLOUR[4] = {0, 1, 6, 8};
+static int chord_notes(const amaru_plan_t *p, int cd, int octave, int voicing, int color, uint8_t *n)
 {
     int cnt = 3, deg[4];
     switch (voicing) {
@@ -743,12 +762,14 @@ static int chord_notes(const amaru_plan_t *p, int cd, int octave, int voicing, u
     }
     for (int i = 0; i < cnt; i++)
         n[i] = (uint8_t)note_at(p, deg[i], octave);
+    if (color && cnt < 4)
+        n[cnt++] = (uint8_t)clampi((int)note_at(p, cd, octave) + CH_COLOUR[color & 3], 12, 108);
     return cnt;
 }
-static void put_chord(amaru_plan_t *p, int i, int cd, int voicing, int vel, int acc)
+static void put_chord(amaru_plan_t *p, int i, int cd, int voicing, int color, int vel, int acc)
 {
     uint8_t n[4];
-    int cnt = chord_notes(p, cd, 3, voicing, n);
+    int cnt = chord_notes(p, cd, 3, voicing, color, n);
     amaru_step_t *s = &p->step[AMARU_AIR][i];
     s->n = (uint8_t)cnt;
     for (int k = 0; k < cnt; k++)
@@ -788,7 +809,7 @@ static void make_pad(amaru_plan_t *p, const amaru_genre_t *g)
         acc = chord_at[i];
         if (g->amt[AMARU_AIR] > 70)
             vel = clampi(vel + rr(-5, 5), 30, 127);
-        put_chord(p, i, chord_deg[i], g->voicing, vel, acc);
+        put_chord(p, i, chord_deg[i], g->voicing, g->harm_color, vel, acc);
         for (int k = 1; k <= hold && i + k < p->steps; k++) {
             if (on[i + k] || chord_at[i + k])
                 break;
@@ -835,6 +856,14 @@ static void make_lead(amaru_plan_t *p, const amaru_genre_t *g)
             idx = (pos / 4) % mlen;
             acc = pos == 0;
             break;
+        case LD_ARP: {
+            static const uint8_t AP[8] = {0, 1, 2, 3, 2, 1, 0, 1};
+            on = !(pos & 3) || pos == 14;       /* eighth-note arp, a 16th lift near the end */
+            idx = AP[(pos >> 1) & 7];
+            acc = pos == 0 || pos == 8;
+            slide = ((pos & 3) == 3) && chance(25);
+            break;
+        }
         default: /* LD_MECH */
             on = (pos != 3 && pos != 5 && pos != 9 && pos != 13);
             idx = (pos + bar) % mlen;
@@ -855,7 +884,11 @@ static void make_lead(amaru_plan_t *p, const amaru_genre_t *g)
             s->note[0] = (uint8_t)n;
             s->time = AMARU_ST_NOTE;
             s->flags = (uint8_t)((acc ? AMARU_SF_ACCENT : 0) | (slide ? AMARU_SF_SLIDE : 0));
-            s->vel = (uint8_t)(acc ? 116 : 92);
+            {
+                int hv = acc ? 116 : 92;
+                if (g->human) hv += rr(-(g->human / 18), g->human / 18);
+                s->vel = (uint8_t)clampi(hv, 30, 127);
+            }
         }
     }
 }

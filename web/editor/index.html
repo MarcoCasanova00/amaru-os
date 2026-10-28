@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMARU Song Editor</title>
+<style>
+  :root{
+    --bg:#0b0d14; --panel:#151927; --panel2:#1c2233; --edge:#2a3350;
+    --fg:#e6ecf7; --dim:#93a0bd; --accent:#5fe08a; --hat:#ffd166;
+    --red:#ff5d5d; --blue:#79b8ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--edge);flex-wrap:wrap}
+  header h1{font-size:16px;margin:0;font-weight:650}
+  header .sub{color:var(--dim);font-size:12px}
+  button{font:inherit;background:var(--panel2);color:var(--fg);border:1px solid var(--edge);
+    border-radius:8px;padding:6px 12px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:#0b1a10;border-color:var(--accent);font-weight:600}
+  button.danger:hover{border-color:var(--red)}
+  .wrap{display:flex;gap:14px;padding:14px;flex-wrap:wrap}
+  .card{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px;min-width:340px;flex:1}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:0 0 10px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .tabs button.active{border-color:var(--accent);color:var(--accent)}
+  table.grid{border-collapse:collapse;width:100%}
+  table.grid td{border:1px solid var(--edge);width:26px;height:26px;text-align:center;font-size:11px;cursor:pointer}
+  table.grid td.on{background:var(--accent);color:#08170e;font-weight:700}
+  table.grid td.acc{background:var(--hat);color:#221800}
+  table.grid td.sel{outline:2px solid var(--blue);outline-offset:-2px}
+  table.grid td.rest{opacity:.18}
+  .lane td{border-color:transparent;color:var(--dim)}
+  .grid-scroll{overflow-x:auto}
+  .note-entry{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .piano{display:flex;}
+  .piano .key{width:20px;height:44px;border:1px solid var(--edge);background:#fff;color:#111;border-radius:0 0 4px 4px;cursor:pointer;font-size:9px;position:relative}
+  .piano .key.black{width:14px;height:28px;background:#111;color:#fff;margin:0 -7px;z-index:2}
+  .piano .key:hover{background:var(--blue)}
+  .params .row{display:grid;grid-template-columns:110px 1fr 46px;gap:8px;align-items:center;margin:4px 0}
+  .params input[type=range]{width:100%}
+  .params .val{text-align:right;color:var(--dim);font-variant-numeric:tabular-nums}
+  .stepinfo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .stepinfo label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+  input[type=number]{width:64px;background:var(--panel2);border:1px solid var(--edge);color:var(--fg);border-radius:6px;padding:4px 6px;font:inherit}
+  select{background:var(--panel2);border:1px solid var(--edge);color:var(--fg);border-radius:6px;padding:4px 6px;font:inherit}
+  .song-rows{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .song-rows .row{background:var(--panel2);border:1px solid var(--edge);padding:4px 8px;border-radius:6px;font-size:12px}
+  footer{margin-top:16px;color:var(--dim);font-size:12px;text-align:center;padding-bottom:20px}
+  .hint{color:var(--dim);font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>AMARU · Song Editor</h1>
+  <span class="sub">4 tracks · 64 steps · JSON import/export</span>
+  <span style="flex:1"></span>
+  <button onclick="exportJSON()">Export JSON</button>
+  <label style="font-size:12px;color:var(--dim)">Import
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+  </label>
+  <button class="primary" onclick="document.getElementById('importFile').click()">Import JSON</button>
+  <button onclick="newSong()">New</button>
+</header>
+
+<div class="wrap">
+
+  <!-- Track / step editor -->
+  <div class="card" style="flex:2;min-width:520px">
+    <h2>Steps</h2>
+    <div class="tabs" id="trackTabs"></div>
+
+    <div class="grid-scroll">
+      <table class="grid" id="grid"></table>
+    </div>
+
+    <div class="stepinfo" id="stepInfo"></div>
+
+    <div class="note-entry">
+      <span style="color:var(--dim);align-self:center">Note:</span>
+      <div class="piano" id="piano"></div>
+      <input type="number" id="noteField" min="0" max="127" value="60" title="MIDI note">
+      <button onclick="setSelectedNote(parseInt(document.getElementById('noteField').value))">Set</button>
+    </div>
+  </div>
+
+  <!-- Track params + song -->
+  <div style="display:flex;flex-direction:column;gap:14px;flex:1;min-width:340px">
+    <div class="card">
+      <h2>Track</h2>
+      <div class="params" id="trackParams"></div>
+    </div>
+
+    <div class="card">
+      <h2>Song sections</h2>
+      <div class="song-rows" id="songRows"></div>
+      <div class="hint">ORDER of sections as for playback. Click a bar to cycle its section (A–D).</div>
+    </div>
+
+    <div class="card">
+      <h2>Song</h2>
+      <div class="params">
+        <div class="row"><span>BPM</span><input type="range" id="bpm" min="40" max="220" value="140"><span class="val" id="bpmV">140</span></div>
+        <div class="row"><span>Swing</span><input type="range" id="swing" min="0" max="12" value="4"><span class="val" id="swingV">4</span></div>
+        <div class="row"><span>Key/root</span><select id="root"></select><span></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  AMARU Song Editor — JSON model independent of the device; change sync hooks in <code>state.deviceSync</code>.<br>
+  Autosaves to <code>localStorage</code>.
+</footer>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------------ *
+ * Song model
+ *
+ * Matches the AMARU firmware data: 4 tracks (AIR/MELODY/ROOT/SPARK), 64 steps,
+ * per-track params, and a song section chain. A step is:
+ *   n: MIDI notes (0..4); vel; time 0=note 1=tie 2=rest; flags bit0=accent,
+ *      bit1=slide; prob 0..100 probability; rtch 0..3 ratchet (x2..x4);
+ *      hit/acc = drum lane bitmask (SPARK only).
+ * ------------------------------------------------------------------------ */
+const TRACKS = ["AIR","MELODY","ROOT","SPARK"];
+const LANES = ["KICK","SNARE","CLAP","HAT","OHAT","TOM","RIM","BELL"];
+const NSTEPS = 64;
+
+function emptyStep(){
+  return { n:[], vel:100, time:0, flags:0, prob:0, rtch:0, hit:0, acc:0 };
+}
+function emptyTrack(){
+  return { engine:0, preset:0, transpose:0, params:{}, steps: Array.from({length:NSTEPS}, emptyStep) };
+}
+function newSong(){
+  const tracks = {};
+  TRACKS.forEach(t => tracks[t] = emptyTrack());
+  return { format:"AMARU-SONG", version:1, bpm:140, swing:4, root:0,
+           song:["A","A","B","C"], tracks };
+}
+let state = { song:newSong(), selTrack:0, selStep:0, selNote:60 };
+
+/* keys */
+const ROOT_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+document.getElementById("root").innerHTML = ROOT_NAMES.map((r,i)=>`<option value="${i}">${r}</option>`).join("");
+
+/* ------------------------------ persistence ------------------------------ */
+function save(){ try{ localStorage.setItem("amaru-editor", JSON.stringify(state.song)); }catch(e){} }
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem("amaru-editor"));
+    if(s && s.format === "AMARU-SONG") state.song = s;
+  }catch(e){}
+}
+
+/* ------------------------------- export/import -------------------------- */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(state.song, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "amaru-song.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+document.getElementById("importFile").addEventListener("change", function(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const s = JSON.parse(r.result);
+      if(!s || s.format !== "AMARU-SONG") throw new Error("not an AMARU song");
+      state.song = s;
+      renderAll();
+      save();
+    }catch(e){ alert("Import failed: " + e.message); }
+  };
+  r.readAsText(file);
+  ev.target.value = "";
+});
+function newSong(){ state.song = newSong(); renderAll(); save(); }
+
+/* -------------------------------- rendering ------------------------------ */
+function renderAll(){ renderTabs(); renderGrid(); renderStepInfo(); renderPiano(); renderParams(); renderSong(); renderGlobal(); }
+
+/* track tabs */
+function renderTabs(){
+  const el = document.getElementById("trackTabs");
+  el.innerHTML = TRACKS.map((t,i)=>
+    `<button class="${i===state.selTrack?"active":""}" onclick="selectTrack(${i})">${t}</button>`).join("");
+}
+function selectTrack(i){ state.selTrack = i; state.selStep = 0; renderAll(); }
+
+/* step grid */
+function renderGrid(){
+  const t = state.song.tracks[TRACKS[state.selTrack]];
+  const isDrum = state.selTrack === 3;
+  let html = "";
+  // header
+  html += "<tr class='lane'><td></td>";
+  for(let s=0;s<NSTEPS;s++) html += `<td style="font-size:9px">${s%16===0?s:""}</td>`;
+  html += "</tr>";
+
+  if(!isDrum){
+    // two rows: Note, Vel
+    ["Note","Vel"].forEach((label,ri)=>{
+      html += `<tr><td style="color:var(--dim)">${label}</td>`;
+      for(let s=0;s<NSTEPS;s++){
+        const st = t.steps[s];
+        let cls = "", txt = "";
+        if(ri===0){
+          if(st.time===1) cls="rest";
+          else if(st.n.length) cls="on"+(st.flags&1?" acc":"");
+          txt = st.n.length ? st.n[0] : "";
+        } else {
+          txt = st.vel;
+          if(st.time===1) cls="rest";
+        }
+        const sel = s===state.selStep ? " sel":"";
+        html += `<td class="${cls}${sel}" onclick="selectStep(${s})">${txt}</td>`;
+      }
+      html += "</tr>";
+    });
+  } else {
+    // drum lanes only
+    LANES.forEach((lane,li)=>{
+      let row = `<tr><td style="color:var(--dim)">${lane}</td>`;
+      for(let s=0;s<NSTEPS;s++){
+        const st = t.steps[s];
+        const on = st.hit & (1<<li);
+        const acc = st.acc & (1<<li);
+        const cls = (on? (acc?"acc":"on") : "") + (s===state.selStep?" sel":"");
+        row += `<td class="${cls}" onclick="selectStep(${s});toggleLane(${li})"></td>`;
+      }
+      html += row + "</tr>";
+    });
+  }
+  document.getElementById("grid").innerHTML = html;
+}
+function selectStep(s){ state.selStep = s; renderGrid(); renderStepInfo(); }
+
+/* step info / editing */
+function stepInfo(){
+  const t = state.song.tracks[TRACKS[state.selTrack]];
+  document.getElementById("stepInfo").innerHTML = `
+    <span>Step <b id="stepN">${state.selStep}</b></span>
+    <label>Time
+      <select id="timeSel" onchange="setTime(+this.value)">
+        <option value="0">NOTE</option><option value="1">TIE</option><option value="2">REST</option>
+      </select></label>
+    <label>Vel <input type="number" id="velField" min="0" max="127" value="${t.steps[state.selStep].vel}" onchange="setVel(+this.value)"></label>
+    <label><input type="checkbox" id="accBox" onchange="setAcc(this.checked)"> Accent</label>
+    <label><input type="checkbox" id="slideBox" onchange="setSlide(this.checked)"> Slide</label>
+    <label>Prob <input type="number" id="probField" min="0" max="100" value="${t.steps[state.selStep].prob}" onchange="setProb(+this.value)"></label>
+    <label>Ratch <input type="number" id="rtchField" min="0" max="3" value="${t.steps[state.selStep].rtch}" onchange="setRtch(+this.value)"></label>
+  `;
+  const st = t.steps[state.selStep];
+  document.getElementById("timeSel").value = st.time;
+  document.getElementById("accBox").checked = !!(st.flags & 1);
+  document.getElementById("slideBox").checked = !!(st.flags & 2);
+}
+function renderStepInfo(){
+  document.getElementById("stepN") && (document.getElementById("stepN").textContent = state.selStep);
+  const t = state.song.tracks[TRACKS[state.selTrack]];
+  const st = t.steps[state.selStep];
+  document.getElementById("velField") && (document.getElementById("velField").value = st.vel);
+  document.getElementById("timeSel") && (document.getElementById("timeSel").value = st.time);
+  document.getElementById("accBox") && (document.getElementById("accBox").checked = !!(st.flags & 1));
+  document.getElementById("slideBox") && (document.getElementById("slideBox").checked = !!(st.flags & 2));
+  document.getElementById("probField") && (document.getElementById("probField").value = st.prob);
+  document.getElementById("rtchField") && (document.getElementById("rtchField").value = st.rtch);
+}
+function curStep(){
+  return state.song.tracks[TRACKS[state.selTrack]].steps[state.selStep];
+}
+function setTime(v){ curStep().time = v; save(); renderGrid(); renderStepInfo(); }
+function setVel(v){ curStep().vel = Math.max(0,Math.min(127,v)); save(); renderGrid(); }
+function setAcc(b){ const s=curStep(); s.flags = b? (s.flags|1):(s.flags&~1); save(); renderGrid(); renderStepInfo(); }
+function setSlide(b){ const s=curStep(); s.flags = b? (s.flags|2):(s.flags&~2); save(); renderGrid(); }
+function setProb(v){ curStep().prob = Math.max(0,Math.min(100,v)); save(); }
+function setRtch(v){ curStep().rtch = Math.max(0,Math.min(3,v)); save(); }
+function toggleLane(li){
+  const s = curStep();
+  const bit = 1<<li;
+  s.hit ^= bit;
+  if(!(s.hit & bit)){ s.acc &= ~bit; }   // clearing a lane clears its accent
+  s.time = s.hit ? 0 : 2;                 // a hit makes it NOTE; none -> REST
+  save(); renderGrid(); renderStepInfo();
+}
+function setSelectedNote(n){
+  const s = curStep();
+  if(!s.n.includes(n)) s.n.push(n);
+  s.n = s.n.slice(0,4);
+  s.time = 0;
+  save(); renderGrid(); renderStepInfo();
+}
+
+/* piano */
+function renderPiano(){
+  const white = [0,2,4,5,7,9,11];
+  let html = "";
+  for(let oct=3;oct<=5;oct++){
+    for(let i=0;i<12;i++){
+      const note = oct*12+i;
+      const black = [1,3,6,8,10].includes(i);
+      if(black){
+        html += `<div class="key black" onclick="setSelectedNote(${note})"></div>`;
+      } else {
+        html += `<div class="key" onclick="setSelectedNote(${note})">${ROOT_NAMES[i]}${oct}</div>`;
+      }
+    }
+  }
+  document.getElementById("piano").innerHTML = html;
+}
+
+/* track params */
+function renderParams(){
+  const t = state.song.tracks[TRACKS[state.selTrack]];
+  const params = {
+    "Preset": t.preset,
+    "Transpose": t.transpose,
+    "Attack": 0, "Release": 0, "Cutoff": 64, "Drive": 0, "Tone": 64,
+    "Reverb": 0, "Delay": 0, "Chorus": 0
+  };
+  let html = "";
+  Object.keys(params).forEach(name=>{
+    const val = (name==="Preset")? t.preset : (name==="Transpose")? t.transpose : (t.params[name] !== undefined? t.params[name] : params[name]);
+    html += `<div class="row">
+      <span>${name}</span>
+      <input type="range" min="0" max="127" value="${val}" data-p="${name}" oninput="setParam('${name}',+this.value)">
+      <span class="val">${val}</span></div>`;
+  });
+  document.getElementById("trackParams").innerHTML = html;
+  document.querySelectorAll("#trackParams input[data-p]").forEach(inp=>{
+    const name = inp.dataset.p;
+    const t2 = state.song.tracks[TRACKS[state.selTrack]];
+    if(name==="Preset"){ inp.value = t2.preset; inp.nextElementSibling.textContent = t2.preset; }
+    else if(name==="Transpose"){ inp.value = t2.transpose; inp.nextElementSibling.textContent = t2.transpose; }
+    else if(t2.params[name] !== undefined){ inp.nextElementSibling.textContent = t2.params[name]; }
+  });
+}
+function setParam(name, v){
+  const t = state.song.tracks[TRACKS[state.selTrack]];
+  if(name==="Preset"){ t.preset = v; }
+  else if(name==="Transpose"){ t.transpose = v; }
+  else t.params[name] = v;
+  renderParams(); save();
+}
+
+/* song sections */
+function renderSong(){
+  const s = state.song;
+  let html = s.song.map((sec,i)=>
+    `<span class="row" onclick="cycleSection(${i})">${i+1}:${sec}</span>`).join("");
+  html += ` <button onclick="addSection()">+</button>`;
+  document.getElementById("songRows").innerHTML = html;
+}
+function cycleSection(i){
+  const letters = ["A","B","C","D"];
+  const cur = state.song.song[i];
+  state.song.song[i] = letters[(letters.indexOf(cur)+1)%letters.length];
+  renderSong(); save();
+}
+function addSection(){ state.song.song.push("A"); renderSong(); save(); }
+
+/* global params */
+function renderGlobal(){
+  document.getElementById("bpm").value = state.song.bpm;
+  document.getElementById("bpmV").textContent = state.song.bpm;
+  document.getElementById("swing").value = state.song.swing;
+  document.getElementById("swingV").textContent = state.song.swing;
+  document.getElementById("root").value = state.song.root;
+}
+document.getElementById("bpm").addEventListener("input", e=>{ state.song.bpm = +e.target.value; document.getElementById("bpmV").textContent = e.target.value; save(); });
+document.getElementById("swing").addEventListener("input", e=>{ state.song.swing = +e.target.value; document.getElementById("swingV").textContent = e.target.value; save(); });
+document.getElementById("root").addEventListener("change", e=>{ state.song.root = +e.target.value; save(); });
+
+/* ---------------------------------------------------------------- init --- */
+/* Extension hook: wire a device-sync here (editor protocol over WebMIDI).
+ * The JSON model above is device-independent, so a song can be composed offline
+ * and later mirrored to the FM-1. */
+state.deviceSync = function(){ /* reserved */ };
+
+load();
+renderAll();
+</script>
+</body>
+</html>

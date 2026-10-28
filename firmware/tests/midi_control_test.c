@@ -905,10 +905,10 @@ static int pc_test(void)
                 ok &= k == P_E0 || dr->p[k] == was.p[k];
             last = dr->p[P_E0];
         }
-        ok &= n == 12u && last == d->max;                /* DEEP TIGHT PERC, then AMARU's PSY FOREST HITECH */
+        ok &= n == 13u && last == d->max;                /* DEEP TIGHT PERC, then AMARU's PSY FOREST HITECH GABBER */
         pc(3, DK_COUNT + 2u); frame();
         ok &= dr->p[P_E0] == last;
-        bad += check("  DRUM: 0..11 the twelve kits (STD 80 10 66 55 77 DEEP TIGHT PERC PSY FOREST HITECH; HAND CYM H+CYM skipped), only KIT; 12.. ignored", ok);
+        bad += check("  DRUM: 0..12 the thirteen kits (STD 80 10 66 55 77 DEEP TIGHT PERC PSY FOREST HITECH GABBER; HAND CYM H+CYM skipped), only KIT; 13.. ignored", ok);
     }
 
     /* FM6: its presets, then the bank's voices */

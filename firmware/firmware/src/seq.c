@@ -638,6 +638,10 @@ static __attribute__((noinline)) void cin_keep(track_t *t, uint32_t note, uint32
 static void input_on(track_t *t, uint32_t note, uint32_t vel)
 {
     last_note = (uint8_t)note;
+    /* scale-lock for live input (keys already snap in kb_pitch; this covers MIDI IN /
+     * arp-add so every input follows the track's ROOT/SCALE when QNT is SNAP or SEQ). */
+    if (!(t->p[P_AMODE]) && (t->p[P_QUANT] == QN_SNAP || t->p[P_QUANT] >= QN_SEQ))
+        note = (uint32_t)clamp(scale_snap(t, (int32_t)note), 0, 127);
     if (cin_left)
         cin_keep(t, note, vel);
     if (rec_on(t) && !t->p[P_AMODE])               /* (ARP on: arp_tick records its notes) */

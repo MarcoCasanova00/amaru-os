@@ -14,7 +14,7 @@
 @font-face { font-family: "DotGothic16"; src: url("fonts/DotGothic16-subset.woff") format("woff"); font-display: swap; }
 :root { --bg: #080a12; --fg: #e8edf5; --dim: #a2acbd; --rule: #333748;
         --body: #1d1d1f; --tray: #141415; --part: #2a2a2d; --edge: #3a3a3e; --label: #d6d6d8;
-        --lit: #fff4d6; --green: #5fe08a; color-scheme: dark; }
+        --lit: #fff4d6; --green: #5fe08a; --jade: #7c9a6d; --terra: #c97a4a; color-scheme: dark; }
 html, body { background: var(--bg); }
 body { margin: 0; color: var(--fg); font: 13px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
 main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 32px; }
@@ -173,6 +173,30 @@ function build(name) {
   for (const d of device.querySelectorAll(".hit")) d.remove();
   knobs.length = buttons.length = keys.length = 0;
   el("rect", { x: 4, y: 4, width: L.w - 8, height: L.h - 8, rx: 40, fill: "var(--body)" });
+  // ---- decorative Mesoamerican corners (Aztec / Mayan / Incan step-fret + sun), pure SVG, pointer-events none,
+  // ---- drawn in the empty bezel strips away from every control, so the UI is untouched.
+  const DEC = "#b893ff", DEC2 = "#7c9a6d";
+  const step = (x, y, s, dir, stroke) => {           // a small step-fret zigzag
+    const d = `M${x} ${y} l0 ${-s} l${dir * s} 0 l0 ${-s} l${dir * s} 0 l0 ${s} l${dir * s} 0 l0 ${s} l${-dir * s} 0 l0 ${s} l${-dir * s} 0`;
+    el("path", { d, fill: "none", stroke, "stroke-width": 2, "stroke-linecap": "round", "stroke-linejoin": "round", opacity: 0.55 });
+  };
+  const sun = (x, y, r, stroke) => {                 // a small sun / symbol disc
+    el("circle", { cx: x, cy: y, r, fill: "none", stroke, "stroke-width": 2, opacity: 0.5 });
+    for (let r2 = 0; r2 < 8; r2++) {
+      const a = r2 * Math.PI / 4;
+      el("line", { x1: x + Math.cos(a) * (r + 3), y1: y + Math.sin(a) * (r + 3),
+                   x2: x + Math.cos(a) * (r + 10), y2: y + Math.sin(a) * (r + 10), stroke, "stroke-width": 2, opacity: 0.5 });
+    }
+  };
+  // top bezel band: a row of small step-frets along the very top edge
+  for (let i = 0; i < 6; i++) step(L.w / 2 - 210 + i * 84, 20, 6, 1, DEC);
+  // corner accents
+  step(28, 110, 7, 1, DEC);
+  step(L.w - 28, 110, 7, -1, DEC);
+  sun(40, L.h - 36, 9, DEC2);
+  sun(L.w - 40, L.h - 36, 9, DEC2);
+  // a thin glyph line under the top edge
+  el("line", { x1: 30, y1: 40, x2: L.w - 30, y2: 40, stroke: DEC, "stroke-width": 1, opacity: 0.35 });
   for (const [x, y, w, h] of L.trays) el("rect", { x, y, width: w, height: h, rx: 14, fill: "var(--tray)" });
   const [sx, sy, ss] = L.screen;
   el("rect", { x: sx, y: sy, width: ss, height: ss, rx: 18, fill: "#0b0b0c" });

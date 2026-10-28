@@ -18,6 +18,14 @@ static void bunker_garden(void)
     uint32_t phase=(ui_prefs&PREF_ANIM_OFF) ? 0 : ui.frame/8u;
     /* A quiet star field, bounded to the middle band. */
     for(uint32_t i=0;i<18u;i++)cv_rect(25+(int)(i*47u%202u),35+(int)(i*29u%70u),1,1,T_LINE);
+    /* a small Mesoamerican sun/spiral accent in the top-right margin (decorative, theme-colored) */
+    {   int sx=204, sy=34;
+        bunker_diamond(sx,sy,5,T_LINE);
+        cv_line(sx-3,sy-7,sx+3,sy-13,T_LINE); cv_line(sx+3,sy-7,sx+7,sy-13,T_LINE);
+        cv_line(sx-3,sy+7,sx+3,sy+13,T_LINE); cv_line(sx+3,sy+7,sx+7,sy+13,T_LINE);
+        cv_line(sx-8,sy-3,sx-14,sy+3,T_LINE); cv_line(sx-8,sy+3,sx-14,sy+7,T_LINE);
+        cv_line(sx+8,sy-3,sx+14,sy+3,T_LINE); cv_line(sx+8,sy+3,sx+14,sy+7,T_LINE);
+    }
     for(uint32_t k=0;k<NTRK;k++) {
         track_t *t=&trk[k];uint32_t len=(uint32_t)clamp(t->p[P_SLEN],1,NSTEP);
         uint16_t c=t->p[P_MUTE] ? T_DIM : bunker_ink(k);

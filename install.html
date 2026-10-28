@@ -8,7 +8,7 @@
 <input type=file id=f accept=".fwsc,.fw,.bin"><div class=status id=s>no file selected.</div>
 <button id=c>Connect device (WebMIDI)</button><button id=x disabled>Flash loaded package</button>
 <div class=status id=o></div><script>
-const expected={identity:'FM-1_7100002',size:610090,sha256:'f87a5683cb4463260f48c320076fb4f6a315a1919241a691f08c773d519e3cb2'.toLowerCase()};
+const expected={identity:'FM-1_7100002',size:610090,sha256:'ed8f179dc35ffb57f832a93908720720ebfae303afa765509d6084a165baefa5'.toLowerCase()};
 let buf=null, mi=null, mo=null;
 document.getElementById('f').addEventListener('change', async e=>{
   buf=await e.target.files[0].arrayBuffer(); const v=new DataView(buf);

@@ -110,6 +110,22 @@
         <div class="row"><span>Key/root</span><select id="root"></select><span></span></div>
       </div>
     </div>
+
+    <div class="card">
+      <h2>Device (librarian)</h2>
+      <div class="params">
+        <div class="row"><span>FM-1</span><span id="devStatus" class="val" style="text-align:left">not connected</span></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="primary" onclick="devConnect()">Connect</button>
+        <button onclick="devExportBackup()" disabled id="devExportBtn">Export backup (JSON)</button>
+        <label style="font-size:12px;color:var(--dim)">Import <input type="file" id="devImportFile" accept=".json,application/json" style="display:none"></label>
+        <button onclick="document.getElementById('devImportFile').click()" disabled id="devImportBtn">Restore backup</button>
+      </div>
+      <div class="hint" id="devLog">Backup export/import reads and writes the whole device state (songs/projects,
+        presets, settings) through the firmware's validated protocol. Nothing is written until the
+        device validates and commits; the bootloader is never touched,</div>
+    </div>
   </div>
 </div>
 
@@ -122,6 +138,7 @@
   <code>localStorage</code>.
 </footer>
 
+<script src="device.js"></script>
 <script>
 "use strict";
 
@@ -429,6 +446,84 @@ document.getElementById("swing").addEventListener("input", e=>{ state.song.swing
 document.getElementById("root").addEventListener("change", e=>{ state.song.root = +e.target.value; save(); });
 
 /* ---------------------------------------------------------------- init --- */
+/* Device librarian (see device.js). Offline by default; only these functions
+ * talk to the FM-1, and only through the validated backup protocol. */
+let devSession = null;
+
+function bytesToB64(bytes){
+  let s = "";
+  for(let i=0;i<bytes.length;i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
+function b64ToBytes(b64){
+  const s = atob(b64), out = new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++) out[i] = s.charCodeAt(i);
+  return out;
+}
+function devSetStatus(t){ const el=document.getElementById("devStatus"); if(el) el.textContent = t; }
+function devLog(t){ const el=document.getElementById("devLog"); if(el) el.textContent = t; }
+function devSetEnabled(on){
+  const e=document.getElementById("devExportBtn"), i=document.getElementById("devImportBtn");
+  if(e) e.disabled=!on; if(i) i.disabled=!on;
+}
+async function devConnect(){
+  try{
+    devSetStatus("connecting…"); devLog("requesting MIDI…");
+    devSession = await D.connect();
+    const info = await devSession.info();
+    devSetStatus("connected · " + (info.version||"FM-1"));
+    devLog("Connected. Version " + info.version + ", " + info.NENGINES + " engines, P_COUNT " + info.P_COUNT + ", NSTEP " + info.NSTEP + ".");
+    devSetEnabled(true);
+  }catch(e){ devSetStatus("not connected"); devLog("Connect failed: " + e.message); devSetEnabled(false); }
+}
+async function devExportBackup(){
+  if(!devSession) return devSetStatus("not connected");
+  try{
+    devSetStatus("reading…"); devLog("listing backup objects…");
+    const objects = await devSession.backupList();
+    const bundle = { format:"AMARU-DEVICE-BACKUP", version:1, exported:(new Date()).toISOString(), objects:{} };
+    for(const o of objects){
+      if(!o.size) { bundle.objects[o.id] = {size:0, crc:o.crc, data:""}; continue; }
+      devLog("reading object "+o.id+" ("+o.size+" B)…");
+      const buf = await devSession.backupGet(o.id, o.size, o.crc);
+      bundle.objects[o.id] = { size:o.size, crc:o.crc, data: bytesToB64(buf) };
+    }
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], {type:"application/json"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = "amaru-device-backup.json"; a.click(); URL.revokeObjectURL(a.href);
+    devSetStatus("connected · exported"); devLog("Exported device backup (see download).");
+  }catch(e){ devSetStatus("connected"); devLog("Export failed: " + e.message); }
+}
+async function devRestoreBackup(bundle){
+  if(!devSession) throw new Error("not connected");
+  if(!bundle || bundle.format !== "AMARU-DEVICE-BACKUP") throw new Error("not a device backup file");
+  // safe write order: preset banks, FM6, samples, projects, settings, runtime last
+  const order = [6,7,8,9,32,33,34,2,3,4,5,1,0];
+  for(const id of order){
+    const o = bundle.objects && bundle.objects[id];
+    if(!o || !o.size) continue;
+    devLog("writing object "+id+" ("+o.size+" B)…");
+    const buf = b64ToBytes(o.data);
+    const crc = typeof o.crc === "number" ? o.crc : undefined;
+    await devSession.backupPut(id, buf, crc);
+  }
+}
+document.getElementById("devImportFile").addEventListener("change", async ev=>{
+  const file = ev.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = async ()=>{
+    try{
+      const bundle = JSON.parse(r.result);
+      if(!confirm("Restore this backup to the device? It overwrites the device's songs/projects/presets/settings. This uses the firmware's validated write path (nothing is written until the device validates and commits).")) return;
+      devSetStatus("writing…");
+      await devRestoreBackup(bundle);
+      devSetStatus("connected · restored"); devLog("Backup restored to the device.");
+    }catch(e){ devSetStatus("connected"); devLog("Restore failed: " + e.message); }
+  };
+  r.readAsText(file);
+  ev.target.value = "";
+});
+
 /* Extension hook: wire a device-sync here (editor protocol over WebMIDI).
  * The JSON model above is device-independent, so a song can be composed offline
  * and later mirrored to the FM-1. */

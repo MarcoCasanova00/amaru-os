@@ -133,12 +133,11 @@
 </div>
 
 <footer>
-  AMARU Song Editor — <b>offline-only: it never writes to the FM-1</b> (no MIDI/USB/flash).
-  JSON import/export touches only this browser's data and files.<br>
-  The reserved <code>state.deviceSync</code> hook, if ever wired, must go only through the
-  firmware's validated project/preset protocol (A/B sectors + CRC + commit records), never raw
-  flash and never the bootloader header — see <code>docs/SAFETY.md</code>. Autosaves to
-  <code>localStorage</code>.
+  AMARU Song Editor — the JSON model is offline and never touches the device by itself.
+  The <b>Device (librarian)</b> panel connects over WebMIDI and reads/writes the device only
+  through the firmware's validated backup protocol (A/B sectors + CRC + commit records) —
+  nothing is written until the device validates and commits, and the bootloader header is
+  never touched. See <code>docs/SAFETY.md</code>. Autosaves to <code>localStorage</code>.
 </footer>
 
 <script src="device.js"></script>

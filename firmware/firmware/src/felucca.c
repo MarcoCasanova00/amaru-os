@@ -40,7 +40,7 @@
 #define FM1_CPU1_USED FELUCCA_CPU2   /* hal/fm1_sys.h: the second core is built in; every reset holds it first (its
                                       * waiting loop is in RAM the ROM and the SPL use at boot) */
 #ifndef FELUCCA_VERSION
-#define FELUCCA_VERSION "AMARU 0.1a" /* shown in the menu, the console and the editor; AMARU alpha identity */
+#define FELUCCA_VERSION "AMARU 0.4" /* shown in the menu, the console and the editor; AMARU alpha identity */
 #endif
 #if FELUCCA_OTA && !FELUCCA_FLASH
 #error "FELUCCA_OTA needs FELUCCA_FLASH"

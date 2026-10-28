@@ -101,9 +101,12 @@ typedef struct {
     uint8_t pat;                 /* suggested pattern (PATTERNS[pat - 1], 0 = none): only a hint. A sound load
                                   * never touches the steps; SEQ > PATTERNS loads a pattern (ui.c pat_load). The
                                   * arp is the track's too: a preset does not set it */
+    int8_t x[8];                 /* more of the patch: up to 4 (track parameter id + 1, value) pairs, 0 = none
+                                  * (glide, pitch / LFO modulation, voice mode...: preset_extras) */
 } preset_t;
 #define FX(d, c, dl, r) .fx = {(d) + 1, (c) + 1, (dl) + 1, (r) + 1}
 #define PAT(n) .pat = (n)
+#define XP(...) .x = {__VA_ARGS__}  /* XP(P_GLIDE + 1, 30, P_ED_PIT + 1, 8): parameter id + 1, value */
 
 struct track;
 typedef struct {                 /* an engine (engines.c ENGINES[]; the eng_*.c files) */

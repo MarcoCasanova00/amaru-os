@@ -1391,6 +1391,7 @@ static void apply_preset_to(track_t *t, uint32_t pi)
         for (i = 0; i < 4u; i++)
             t->p[P_DIST + i] = (int16_t)(pr->fx[i] ? pr->fx[i] - 1 : FX_DEF[i]);
     }
+    preset_extras(t->p, &e->presets[pi]);                 /* the preset's extra pairs: glide, pitch / LFO, voice */
     fm6_track_loaded(t);                              /* FM6: the preset's patch (its SLOT) */
     load_end(t);
 }

@@ -213,12 +213,31 @@ static const preset_t ANALOG_PRESETS[] = {
     {"WIND", {0, 0, 0, 90, 30, 90, 0, 0}, {60, 90, 60, 80}, 50, 0, FX(0, 30, 30, 70), PAT(5)},
     {"STRINGS", {0, 25, 64, 0, 70, 10, 0, 32}, {70, 90, 115, 90}, 5, 0, FX(0, 60, 20, 70), PAT(5)},
     /* AMARU (appended; the numbered presets above keep theirs): the tekno/psy/acid sounds the four
-     * engines were kept for. WAVE DTN MIX NOIS CUT RES DRV KTR - ATK DEC SUS REL - ENV>FLT - MONO */
-    {"PSY BASS", {6, 0, 92, 0, 46, 58, 42, 28}, {0, 55, 78, 24}, 30, 1, FX(16, 0, 6, 8), PAT(2)},
-    {"HI BASS", {1, 0, 0, 0, 62, 70, 56, 38}, {0, 48, 66, 20}, 26, 1, FX(22, 0, 8, 6), PAT(2)},
-    {"PSY KICK", {3, 0, 0, 28, 38, 24, 34, 0}, {0, 34, 0, 8}, 0, 1, FX(40, 0, 0, 0), PAT(12)},
-    {"GOA ACID", {0, 0, 0, 0, 58, 104, 28, 40}, {0, 52, 18, 28}, 48, 1, FX(26, 22, 30, 14), PAT(1)},
-    {"SWAMP SQ", {1, 18, 40, 6, 36, 62, 22, 52}, {30, 82, 64, 62}, 20, 0, FX(6, 34, 22, 44), PAT(6)},
+     * engines were kept for, now the Mycelium originals verbatim (SLOOP hip-hop / drum & bass bank
+     * and the Mycelium psy bank landed after them: the same values, with the XP extras (GLIDE,
+     * TRANSPOSE, ENV > PITCH, LFO rate / LFO > filter / LFO > pitch / LFO > shape, DETUNE, VOICE).
+     * WAVE DTN MIX NOIS CUT RES DRV KTR - ATK DEC SUS REL - ENV>FLT - MONO */
+    {"PSY BASS", {0,0,0,0,46,18,22,0}, {0,62,0,12}, 38, 1, FX(0,0,0,0), XP(P_TRANS+1,-24,P_VOICE+1,V_MONO)},
+    {"HI BASS", {1,0,0,0,46,40,46,110}, {0,26,0,6}, 48, 1, FX(8,0,0,0), XP(P_TRANS+1,-24,P_VOICE+1,V_MONO)},
+    {"PSY KICK", {3,0,0,0,127,0,30,0}, {0,50,0,8}, 0, 1, FX(8,0,0,0), XP(P_TRANS+1,-24,P_ED_PIT+1,90,P_VOICE+1,V_MONO)},
+    {"GOA ACID", {0,0,0,0,30,118,42,70}, {0,68,42,44}, 82, 1, FX(20,0,24,12), XP(P_GLIDE+1,30,P_TRANS+1,-12,P_LD_FLT+1,20,P_LRATE+1,66)},
+    {"SWAMP SQ", {1,0,20,8,32,120,54,96}, {0,68,24,44}, 106, 1, FX(24,0,30,20), XP(P_LD_FLT+1,42,P_LRATE+1,54)},
+    {"808 BOOM", {3, 0, 0, 0, 127, 0, 48, 0}, {0, 112, 0, 52}, 0, 1, FX(0, 0, 0, 0), XP(P_GLIDE + 1, 59, P_GLMODE + 1, 1, P_ED_PIT + 1, 18, P_TRANS + 1, -24)},
+    {"808 DIRTY", {3, 0, 0, 0, 96, 12, 118, 30}, {0, 108, 0, 46}, 0, 1, FX(24, 0, 0, 0), XP(P_GLIDE + 1, 56, P_GLMODE + 1, 1, P_ED_PIT + 1, 24, P_TRANS + 1, -24)},
+    {"808 SLIDE", {3, 0, 0, 0, 127, 0, 72, 0}, {0, 118, 0, 60}, 0, 1, FX(30, 0, 0, 0), XP(P_GLIDE + 1, 82, P_GLMODE + 1, 1, P_ED_PIT + 1, 12, P_TRANS + 1, -24)},
+    {"ACID 303", {0, 0, 0, 0, 36, 112, 44, 64}, {0, 56, 24, 20}, 52, 1, FX(28, 0, 22, 10), XP(P_GLIDE + 1, 34, P_GLMODE + 1, 1, P_TRANS + 1, -12)},
+    {"PLUGG BASS", {2, 0, 0, 0, 92, 0, 30, 0}, {0, 96, 92, 34}, 0, 1, FX(0, 0, 0, 6), XP(P_GLIDE + 1, 52, P_GLMODE + 1, 1, P_TRANS + 1, -24)},
+    {"REESE", {0, 22, 64, 0, 56, 22, 36, 40}, {0, 70, 118, 28}, 0, 1, FX(0, 22, 0, 6), XP(P_LRATE + 1, 22, P_LD_FLT + 1, 10, P_TRANS + 1, -24)},
+    {"WOBBLE", {0, 9, 64, 0, 38, 72, 62, 30}, {0, 64, 127, 22}, 0, 1, FX(10, 0, 0, 4), XP(P_LRATE + 1, 74, P_LD_FLT + 1, 40, P_TRANS + 1, -24)},
+    {"FUNK BASS", {1, 6, 50, 0, 50, 30, 22, 64}, {0, 55, 62, 20}, 30, 1, FX(0, 0, 0, 4), XP(P_GLIDE + 1, 50, P_GLMODE + 1, 1, P_TRANS + 1, -24)},
+    {"G-FUNK LD", {2, 0, 0, 0, 92, 0, 10, 64}, {6, 70, 112, 46}, 0, 1, FX(0, 0, 28, 30),
+     XP(P_GLIDE + 1, 74, P_LD_PIT + 1, 2, P_LRATE + 1, 89, P_LFADE + 1, 50)},
+    {"TRAP PLUCK", {0, 8, 64, 0, 52, 35, 20, 64}, {0, 80, 24, 45}, 48, 0, FX(0, 15, 34, 26)},
+    {"SYN BRASS", {0, 10, 64, 0, 45, 20, 16, 64}, {12, 70, 96, 35}, 34, 0, FX(0, 15, 12, 24)},
+    {"SUPERSAW", {0, 14, 64, 0, 96, 12, 10, 64}, {4, 70, 112, 46}, 10, 1, FX(0, 20, 30, 36), XP(P_VOICE + 1, 3, P_DETUNE + 1, 64, P_GLIDE + 1, 30)},
+    {"WARM PAD", {4, 12, 64, 6, 52, 8, 0, 32}, {75, 90, 115, 90}, 0, 0, FX(0, 55, 20, 55), XP(P_LRATE + 1, 30, P_LD_SHP + 1, 20)},
+    {"DARK STR", {0, 18, 64, 0, 48, 6, 0, 32}, {60, 90, 118, 85}, 0, 0, FX(0, 50, 18, 60)},
+    {"ATMOS PAD", {4, 25, 64, 20, 60, 15, 0, 32}, {90, 100, 120, 100}, 0, 0, FX(0, 60, 30, 75), XP(P_LRATE + 1, 18, P_LD_PIT + 1, 1)},
 };
 
 static const engine_t ENG_ANALOG = {

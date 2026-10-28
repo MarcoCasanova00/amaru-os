@@ -223,6 +223,18 @@ static const param_desc_t GP[G_COUNT] = {
     [G_DRREV] = PD("-", F_INT, 0, 0, 0),
 };
 
+/* a preset's extra parameters (preset_t.x, the Mycelium-style glide / pitch / LFO / voice extras) into p,
+ * each clamped to its range: up to 4 pairs of (parameter id + 1, value), 0 = none */
+void preset_extras(int16_t *p, const preset_t *pr)
+{
+    uint32_t i;
+    for (i = 0; i + 1u < 8u; i += 2u) {
+        int32_t id = (int32_t)pr->x[i] - 1;
+        if (id >= 0 && (uint32_t)id < P_E0)
+            p[id] = (int16_t)clamp(pr->x[i + 1u], TP[id].min, TP[id].max);
+    }
+}
+
 static const param_desc_t *track_desc(const track_t *t, uint32_t id)
 {
     if (id >= P_E0 && id <= P_E7) {                   /* the engine asked for (t->engine follows after a fade) */

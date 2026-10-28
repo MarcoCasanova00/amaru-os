@@ -73,34 +73,49 @@ static const preset_t DIGITAL_PRESETS[] = {
     {"PAD", {5, 2, 1, 3, 40, 90, 10, 0}, {80, 90, 110, 95}, 0, 0, FX(0, 60, 30, 70), PAT(5)},
     {"MARIMBA", {4, 4, 1, 1, 60, 30, 0, 0}, {0, 80, 0, 60}, 0, 0, FX(0, 0, 25, 40), PAT(3)},
     {"FUNK KEY", {3, 1, 3, 5, 90, 25, 20, 0}, {0, 45, 30, 30}, 0, 0, FX(0, 20, 30, 20), PAT(6)},
-    /* AMARU (appended): the Mycelium-derived voices the DIGITAL engine keeps, on the four-operator
-     * grammar (ALG R2 R3 R4 INDEX MODDEC FDBK -). No sample of the reference project is used */
-    {"ROOT BASS", {0, 1, 1, 1, 55, 40, 10, 0}, {0, 70, 60, 20}, 0, 1, FX(10, 0, 5, 8), PAT(2)},
-    {"SPORE TALK", {3, 2, 3, 4, 85, 45, 15, 0}, {5, 80, 50, 40}, 12, 1, FX(10, 30, 35, 45), PAT(6)},
-    {"HYPHA BLIP", {4, 1, 2, 3, 90, 20, 0, 0}, {0, 40, 0, 30}, 0, 0, FX(0, 20, 40, 40), PAT(3)},
-    {"BARK GROWL", {0, 1, 2, 3, 100, 60, 40, 0}, {10, 70, 60, 50}, 20, 1, FX(35, 10, 20, 30), PAT(4)},
-    {"MOSS DRONE", {5, 1, 2, 1, 40, 100, 5, 0}, {90, 100, 120, 110}, 10, 0, FX(0, 70, 30, 80), PAT(5)},
-    {"GILL METAL", {2, 7, 9, 11, 110, 30, 30, 0}, {0, 80, 20, 60}, 0, 0, FX(20, 30, 40, 60), PAT(7)},
-    {"FUNGAL DROP", {1, 4, 2, 1, 70, 25, 0, 0}, {0, 60, 0, 45}, 0, 0, FX(0, 30, 50, 50), PAT(3)},
-    {"NIGHT SPORE", {6, 1, 1, 2, 30, 95, 8, 0}, {80, 95, 115, 100}, 8, 0, FX(0, 60, 30, 70), PAT(5)},
-    {"ACID FOAM", {1, 1, 3, 1, 120, 35, 55, 0}, {0, 50, 30, 20}, 30, 1, FX(30, 20, 45, 20), PAT(1)},
-    {"SWAMP CHIRP", {3, 2, 4, 8, 100, 18, 10, 0}, {0, 45, 0, 35}, 0, 0, FX(10, 25, 40, 45), PAT(7)},
-    {"METAL HIT", {2, 3, 7, 11, 127, 45, 45, 0}, {0, 70, 10, 55}, 0, 0, FX(30, 10, 20, 35), PAT(7)},
-    {"RUST IMPACT", {0, 1, 5, 9, 115, 55, 60, 0}, {0, 65, 0, 50}, 10, 0, FX(45, 20, 10, 25), PAT(7)},
-    {"HITECH ZAP", {1, 8, 2, 1, 105, 15, 20, 0}, {0, 35, 0, 25}, 0, 0, FX(15, 40, 45, 35), PAT(3)},
-    {"LASER FALL", {6, 2, 3, 4, 95, 40, 15, 0}, {0, 55, 0, 40}, 0, 0, FX(0, 45, 55, 50), PAT(4)},
-    {"LIQUID FM", {5, 1, 1, 3, 60, 85, 25, 0}, {40, 90, 100, 80}, 10, 0, FX(0, 65, 40, 65), PAT(6)},
-    {"SPORE BURST", {7, 1, 2, 4, 120, 20, 35, 0}, {0, 50, 0, 35}, 0, 0, FX(10, 35, 35, 55), PAT(13)},
+    /* AMARU: the Mycelium originals verbatim (the SLOOP hip-hop / Forest sketches), on the
+     * four-operator grammar (ALG R2 R3 R4 INDEX MODDEC FDBK -), with their XP extras (GLIDE,
+     * TRANSPOSE, LFO rate / LFO > filter / pitch / shape, VOICE...). No sample is used */
+    {"ROOT BASS", {0, 1, 1, 2, 30, 28, 5, 0}, {0, 38, 0, 12}, 0, 1, FX(0, 0, 0, 0), XP(P_TRANS + 1, -24, P_VOICE + 1, V_MONO)},
+    {"SPORE TALK", {0, 2, 4, 6, 78, 46, 28, 0}, {0,68,42,42}, 0, 0, FX(8, 0, 25, 14), XP(P_LD_SHP + 1, 24, P_LRATE + 1, 62)},
+    {"HYPHA BLIP", {3, 4, 7, 10, 68, 24, 12, 0}, {0,54,0,36}, 0, 0, FX(0, 0, 32, 20)},
+    {"BARK GROWL", {1, 1, 5, 8, 96, 55, 52, 0}, {0,70,48,44}, 0, 0, FX(14, 0, 18, 12), XP(P_LD_SHP + 1, 30, P_LRATE + 1, 45)},
+    {"MOSS DRONE", {4, 0, 6, 11, 38, 105, 9, 0}, {16,95,106,88}, 0, 0, FX(0, 24, 30, 46), XP(P_LD_SHP + 1, 12, P_LRATE + 1, 22)},
+    {"GILL METAL", {2, 8, 10, 13, 92, 30, 26, 0}, {0,60,0,44}, 0, 0, FX(0, 0, 28, 18)},
+    {"FUNGAL DROP", {0, 1, 3, 7, 88, 36, 36, 0}, {0,64,0,42}, 0, 0, FX(6, 0, 30, 24), XP(P_ED_PIT + 1, 24)},
+    {"NIGHT SPORE", {5, 0, 4, 9, 48, 88, 16, 0}, {8,80,78,78}, 0, 0, FX(0, 16, 26, 42), XP(P_LD_SHP + 1, 18, P_LRATE + 1, 32)},
+    {"ACID FOAM", {0, 2, 5, 7, 110, 30, 64, 0}, {0,68,38,44}, 0, 0, FX(18,0,24,12), XP(P_LD_SHP+1,38,P_LRATE+1,76)},
+    {"SWAMP CHIRP", {3, 1, 6, 9, 104, 24, 48, 0}, {0,58,18,40}, 0, 0, FX(12,0,28,16), XP(P_ED_PIT+1,32,P_LD_SHP+1,22,P_LRATE+1,67)},
+    {"METAL HIT", {2, 10, 12, 14, 112, 22, 46, 0}, {0,58,0,50}, 0, 0, FX(8,0,14,26), XP(P_ED_PIT+1,12)},
+    {"RUST IMPACT", {1, 0, 9, 13, 120, 38, 92, 0}, {0, 70, 0, 48}, 0, 0, FX(26,0,12,38), XP(P_ED_PIT+1,54)},
+    {"HITECH ZAP", {0, 3, 11, 14, 124, 16, 76, 0}, {0,46,0,28}, 0, 0, FX(16,0,18,10), XP(P_ED_PIT+1,68)},
+    {"LASER FALL", {3, 2, 8, 12, 100, 52, 44, 0}, {0,72,0,44}, 0, 0, FX(12,0,32,20), XP(P_ED_PIT+1,88,P_LD_SHP+1,14,P_LRATE+1,80)},
+    {"LIQUID FM", {1, 1, 4, 8, 94, 42, 40, 0}, {0,70,42,46}, 0, 0, FX(8,0,28,16), XP(P_LD_SHP+1,44,P_LRATE+1,58)},
+    {"SPORE BURST", {5, 3, 7, 11, 118, 18, 84, 0}, {0,54,0,36}, 0, 0, FX(18,0,22,24), XP(P_ED_PIT+1,40)},
+    {"RHODES", {4, 1, 1, 14, 26, 35, 0, 0}, {0, 85, 35, 55}, 0, 0, FX(0, 30, 12, 26), XP(P_LD_AMP + 1, 26, P_LRATE + 1, 84)},
+    {"DX RHODES", {4, 1, 1, 14, 85, 45, 0, 0}, {0, 82, 40, 55}, 0, 0, FX(0, 45, 20, 30)},
+    {"WURLI", {4, 1, 2, 3, 62, 35, 8, 0}, {0, 75, 30, 45}, 0, 0, FX(10, 20, 10, 20), XP(P_LD_AMP + 1, 16, P_LRATE + 1, 89)},
+    {"CLAV", {3, 1, 3, 5, 90, 25, 20, 0}, {0, 58, 34, 18}, 0, 0, FX(10, 10, 6, 10)},
+    {"M1 PIANO", {4, 1, 2, 13, 74, 30, 12, 0}, {0, 86, 30, 48}, 0, 0, FX(0, 24, 14, 26)},
+    {"AFRO KEYS", {4, 1, 1, 7, 40, 50, 0, 0}, {0, 82, 40, 60}, 0, 0, FX(0, 30, 26, 36)},
+    {"TRAP BELL", {4, 8, 1, 4, 80, 70, 0, 0}, {0, 92, 0, 70}, 0, 0, FX(0, 0, 30, 40)},
+    {"MUSIC BOX", {4, 4, 3, 9, 45, 75, 0, 0}, {0, 90, 0, 75}, 0, 0, FX(0, 10, 32, 45)},
+    /* MARIMBA skipped: preset 6 above is already Mycelium's MARIMBA (only its FX tail differs) */
+    {"KALIMBA", {4, 4, 1, 6, 52, 24, 0, 0}, {0, 78, 0, 58}, 0, 0, FX(0, 0, 26, 38)},
+    {"PLUGG BELL", {4, 3, 1, 4, 56, 60, 0, 0}, {0, 90, 0, 82}, 0, 0, FX(0, 22, 36, 56)},
+    {"GLASS PAD", {4, 2, 1, 5, 34, 100, 0, 0}, {62, 92, 112, 92}, 0, 0, FX(0, 50, 26, 62), XP(P_LD_PIT + 1, 1, P_LRATE + 1, 40)},
+    {"FM BASS", {0, 1, 1, 1, 34, 40, 8, 0}, {0, 60, 70, 25}, 0, 1, FX(0, 0, 0, 6), XP(P_GLIDE + 1, 36, P_TRANS + 1, -24)},
 };
-#define FM4_NPRESETS 24u
+#define FM4_NPRESETS 36u
 _Static_assert(NELEM(DIGITAL_PRESETS) == FM4_NPRESETS, "DIGITAL presets");
 /* DIGITAL preset k -> the FM6 factory preset (= its PTCH) that covers that sound */
 static const uint8_t FM4_TO_FM6[FM4_NPRESETS] = {
     0, 1, 2, 3, 6, 4, 5, 7,                         /* E.PIANO BELL BASS BRASS ORGAN PAD MARIMBA FUNK KEY */
-    2, 7, 7, 3, 4, 1, 5, 4, 7, 5, 1, 3, 7, 1, 4, 5 /* ROOT BASS SPORE TALK HYPHA BLIP BARK GROWL MOSS DRONE
+    2, 7, 7, 3, 4, 1, 5, 4, 7, 5, 1, 3, 7, 1, 4, 5, /* ROOT BASS SPORE TALK HYPHA BLIP BARK GROWL MOSS DRONE
                                                      * GILL METAL FUNGAL DROP NIGHT SPORE ACID FOAM SWAMP CHIRP
                                                      * METAL HIT RUST IMPACT HITECH ZAP LASER FALL LIQUID FM
                                                      * SPORE BURST */
+    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8             /* RHODES .. FM BASS (24..35): no factory cover, FM6's OWN */
 };
 
 /* EDIT: the ranges are the stores' (a value of engine 1 is clamped to them before it converts) */
@@ -217,15 +232,22 @@ static uint32_t fm4_outlevel(int32_t ms)
     return best;
 }
 
-/* the DIGITAL factory preset nearest to these EDIT values (ALG first) */
-static uint32_t fm4_nearest(const int16_t *e)
+/* the DIGITAL factory preset nearest to these values (ALG first; the ENV and ENV -> FLT values break the ties
+ * between presets with the same EDIT values -- CLAV and FUNK KEY, for one, and Mycelium's sketches share values
+ * with them: the track then takes its own preset's PTCH, not the earlier one's) */
+static uint32_t fm4_nearest(const int16_t *p)
 {
+    const int16_t *e = &p[P_E0];
     uint32_t k, i, best = 0;
     int32_t bd = 0x7FFFFFFF;
     for (k = 0; k < FM4_NPRESETS; k++) {
-        int32_t d = ((e[0] & 7) != DIGITAL_PRESETS[k].e[0]) * 1000;
+        const preset_t *pr = &DIGITAL_PRESETS[k];
+        int32_t d = ((e[0] & 7) != pr->e[0]) * 1000;
         for (i = 1; i < 7u; i++)
-            d += fm4_abs(e[i] - DIGITAL_PRESETS[k].e[i]) * (i < 4u ? 8 : 1);
+            d += fm4_abs(e[i] - pr->e[i]) * (i < 4u ? 8u : 1u);
+        for (i = 0; i < 4u; i++)
+            d += fm4_abs(p[P_ATK + i] - pr->env[i]);
+        d += fm4_abs(p[P_ED_FLT] - pr->fenv) * 2;
         if (d < bd)
             bd = d, best = k;
     }
@@ -236,7 +258,7 @@ static uint32_t fm4_nearest(const int16_t *e)
  * FM6's (see the top) and the OP ENV values their defaults. -> the FM6 factory preset of PTCH */
 static uint32_t fm4_convert(int16_t *p, uint8_t *v)
 {
-    uint32_t alg = (uint32_t)p[P_E0] & 7u, car, k, near = fm4_nearest(&p[P_E0]);
+    uint32_t alg = (uint32_t)p[P_E0] & 7u, car, k, near = fm4_nearest(p);
     int32_t idx = clamp(p[P_E4], 0, 127), fenv = clamp(p[P_ED_FLT], -64, 63), sus = clamp(p[P_SUS], 0, 127);
     int32_t ipk = clamp(idx + fenv, 0, 127), isus = clamp(idx / 4 + fenv * sus / 127, 0, 127), fb = FM4_MUTE;
     int32_t t_att = fm4_samples(p[P_ATK]), t_mod = fm4_samples(p[P_E5]);

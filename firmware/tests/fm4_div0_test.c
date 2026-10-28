@@ -25,7 +25,7 @@
 /* fm4_convert as it was before #61's fix (1.0.3): the reference for the values */
 static uint32_t fm4_convert_ref(int16_t *p, uint8_t *v)
 {
-    uint32_t alg = (uint32_t)p[P_E0] & 7u, car, k, near = fm4_nearest(&p[P_E0]);
+    uint32_t alg = (uint32_t)p[P_E0] & 7u, car, k, near = fm4_nearest(p);
     int32_t idx = clamp(p[P_E4], 0, 127), fenv = clamp(p[P_ED_FLT], -64, 63), sus = clamp(p[P_SUS], 0, 127);
     int32_t ipk = clamp(idx + fenv, 0, 127), isus = clamp(idx / 4 + fenv * sus / 127, 0, 127), fb = FM4_MUTE;
     int32_t t_att = fm4_samples(p[P_ATK]), t_mod = fm4_samples(p[P_E5]);

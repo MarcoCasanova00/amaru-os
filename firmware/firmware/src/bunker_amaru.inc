@@ -23,6 +23,8 @@ static void amaru_sound_apply(track_t *t, const amaru_sound_t *s)
     t->p[P_DLY] = s->dly;
     t->p[P_REV] = s->rev;
     t->p[P_DIST] = s->dist;
+    if (s->engine == E_DRUM && s->dist > 0)
+        t->p[P_E7] = s->dist;        /* the genre's drive -> the drum kit's DRV soft-clip (P_E7) */
     t->p[P_VOICE] = s->voice;
     t->p[P_LRATE] = 16;
     t->p[P_LWAVE] = 0;

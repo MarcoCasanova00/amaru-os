@@ -214,8 +214,9 @@ static const struct {
 #undef T_
 #define NPATTERNS (sizeof PATTERNS / sizeof PATTERNS[0])
 
-/* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are):
- * ANALOG ACID, DIGITAL FM BASS, FM6 PAD, DRUM KIT */
-static const uint8_t TRK_DEF[NPART][3] = {{ENGI_ANALOG, 4, 0}, {ENGI_DIGITAL, 2, 0},
-                                          {ENGI_FM6, 4, 0}, {ENGI_DRUM, 0, 0}};
+/* the parts at power-on (engine, preset, PATTERNS[n - 1] in the sequencer, 0 = empty: all are), one per role (the
+ * UI's AIR MELODY ROOT SPARK, in that order): AIR a pad (ANALOG SOFT PAD), MELODY a lead (DIGITAL BRASS), ROOT a
+ * bass (FM6 FM BASS), SPARK the drums */
+static const uint8_t TRK_DEF[NPART][3] = {{ENGI_ANALOG, 4, 0}, {ENGI_DIGITAL, 3, 0},
+                                          {ENGI_FM6, 2, 0}, {ENGI_DRUM, 0, 0}};
 static uint32_t trk_def_engine(uint32_t i) { return TRK_DEF[i % NPART][0]; }

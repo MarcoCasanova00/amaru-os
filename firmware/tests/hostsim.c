@@ -191,11 +191,11 @@ static uint32_t started_since(const track_t *t, uint32_t a0)
     return n;
 }
 
-/* the demo song: T1 ANALOG ACID (16 steps), T2 the power-on pad (TRK_DEF: FM6 PAD; DIGITAL PAD until it was
- * retired) (32 steps, tied chords), T3 LOFI PULSE LD
+/* the demo song: T1 ANALOG ACID (16 steps), T2 the power-on lead (TRK_DEF: DIGITAL BRASS; FM6 BRASS with
+ * DIGITAL retired) (32 steps, tied chords), T3 LOFI PULSE LD
  * (12 steps: 3 against 4), T4 DRUM drums (16 steps, up to 3 notes a step); 120 BPM, 8 bars. Bars 5..6:
  * live recording: a clap into the drums just before step 4 (quantised onto it, not triggered twice),
- * MIDI ch 3 into the lead, a two-key chord on the keys into an empty pad step. solo: 0 = the mix,
+ * MIDI ch 3 into the lead, a two-key chord on the keys into an empty step. solo: 0 = the mix,
  * 1..4 = that track only. Writes DIR/NAME; returns the number of failed checks. */
 static int tracks_demo(const char *dir, const char *name, uint32_t solo)
 {
@@ -310,7 +310,7 @@ static int tracks_demo(const char *dir, const char *name, uint32_t solo)
         printf("tracks: recording: drums step 4 = %u notes (kick snare hat) + clap 39: %s, hits when step 4 played right "
                "after: %u (want 3: the clap is not triggered twice) %s\n", s4->n, clap ? "yes" : "no", clap_hits,
                ok_clap ? "ok" : "FAIL");
-        printf("tracks: recording: MIDI ch 3 -> lead step 1 = %u (want 84) %s; keys -> pad step 14 = %u notes %u %u %s\n",
+        printf("tracks: recording: MIDI ch 3 -> lead step 1 = %u (want 84) %s; keys -> step 14 = %u notes %u %u %s\n",
                l1->note[0], ok_lead ? "ok" : "FAIL", p14->n, p14->note[0], p14->note[1], ok_keys ? "ok" : "FAIL");
         printf("tracks: voices sounding at most %u (budget %u) %s; given up to another part %u; %u samples near full "
                "scale\n", bmax, NVOICE, bmax <= NVOICE ? "ok" : "FAIL", voice_kills - kills0, clips);

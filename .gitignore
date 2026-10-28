@@ -1,1 +1,41 @@
-dist/
+# Build artifacts
+build/
+*.bin
+*.dis
+*.fwsc
+*.elf
+*.o
+*.so
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Node modules
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Evidence and session directories
+session-*/
+*.evidence*
+
+# Other unnecessary files
+*.map
+*.manifest

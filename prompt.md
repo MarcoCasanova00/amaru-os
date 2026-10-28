@@ -14,12 +14,32 @@ drums, synthesis, JIANT FM GEN) comes first. Tests come last (they take time/tok
 
 ---
 ## 📊 CURRENT STATUS
-- **Main commit:** `0b97e9e` (latest) — Cherry-picked milestone A + documentation
+- **Main commit:** `54db624` (latest) — sound import (Mycelium ANALOG / DIGITAL verbatim), DRUM kit
+  presets, GEN's four-bar SONG form
 - **Branches:** `main` (everything), `gh-pages` (web emulator only), `alpha` (old, ignore)
 - `engine-rework` has been deleted (its changes merged into main); do not recreate
-- **Milestone A (engine retirement):** complete. Both builds 497,884 B default and 498,332 B baseline.
-- **Milestones B, C, D (sound engine import + GEN port + web rebuild):** remaining work
-- Baseline tests pass nothing new burned in; project_test PM_SYMP fixed to `3` in session 2.
+- **Milestone A (engine retirement):** complete. AMARU build 500,172 B (`build/felucca.bin`);
+  RETIRED=1 baseline 498,332 B. Flash-fit is checked by `utilities/target_budget.py`; there is no
+  FM-1 hardware here, so no on-device verification yet (do not claim one).
+- **Milestone B (sound import):** ANALOG 32 presets (Mycelium's 21 verbatim, XP extras applied),
+  DIGITAL 36 presets (Mycelium's 29 verbatim -- MARIMBA skipped, slot 6 already is it), DRUM 15 kit
+  presets (808 909 606 CR-78 707 + DEEP TIGHT PERC + PSY FOREST HITECH + JUNGLE TECHNO HARDTEKK),
+  FM6 8 factory patches + the DIGITAL conversion (`fm4_convert.c`, `fm4_nearest` weighs the ENV so
+  CLAV does not become FUNK KEY).
+- **Milestone C (GEN):** 9 genres, JIANT's drum maps / bass archetypes / progressions adapted to the
+  four tracks; SONG is a four-bar phrase (break, then the build back); jungle / DnB / breakbeat stay
+  off the quarters. `tests/amaru_gen_test.c` holds these invariants.
+- **Milestone D (web emulator):** not rebuilt yet.
+- **Power-on sounds (TRK_DEF):** fixed to the four roles -- AIR SOFT PAD (ANALOG 4), MELODY BRASS
+  (DIGITAL 3 -> FM6 BRASS), ROOT FM BASS (FM6 2), SPARK DRUM KIT. The four-engine patch had left
+  DIGITAL BASS on MELODY and FM6 PAD on ROOT (no lead at power-on); the hostsim TRACKS chord test
+  caught it (a mono preset cannot record two keys).
+- **Tests after the retirement:** built with FELUCCA_RETIRED=0 as it ships. `tests/golden.txt` was
+  re-baselined (the four-engine preset sets; the retired engines' renders are gone);
+  `ui_test` and `regress` no longer call SAMPLE's `sample_next` / `sample_render` when
+  `FELUCCA_SAMPLE=0` (the sample-wave check and the one-shot interpolation check are skipped);
+  `regress`'s voice-budget checks use FM6 (cap 6) instead of the retired VOICE engine (cap 4);
+  `project_test` PM_SYMP -> `3`.
 
 ---
 ## 🔑 PRIORITIES (READ FIRST)
@@ -55,7 +75,7 @@ drums, synthesis, JIANT FM GEN) comes first. Tests come last (they take time/tok
   - JIANT fork: `/home/maltomare/JIANT-fork/firmware/src/`
 
   ⚠️ **If these directories don't exist on your machine**, search the web for the public source
-  repositories via **firmawarehub.com** (search e.g. "firmawarehub.com amaru mycelium carnac").
+  repositories via **thefirmwarehub.com** (search e.g. "thefirmwarehub.com amaru mycelium carnac").
   The community source repos are typically published there. The essential artifacts needed:
     - Mycelium's ANALOG + DIGITAL preset tables (with `XP` extras) in `eng_analog.c` / `eng_digital.c`;
     - Mycelium's drum kit definitions in `drum_synth.c` + `felucca_drumkits.h`;
@@ -68,43 +88,48 @@ drums, synthesis, JIANT FM GEN) comes first. Tests come last (they take time/tok
 ---
 ## 🚧 TASK LIST (ordered — do in sequence)
 
-### Task 1 — Preset Import (Most Urgent, Sound Identity)
-**Problem:** Mycelium presets use `XP(pairs)`; AMARU's `preset_t` has no XP field.
-**Solution:** Either (A) extend preset_t; (B) apply via amaru_sound_t; (C) partial import.
-**Goal:** ALL Mycelium ANALOG (21) + DIGITAL (29) presets land verbatim, with GLIDE, TRANSPOSE,
-ENV→PITCH, LFO rate / LFO→filter / LFO→pitch / LFO→shape faithfully applying. Carnac presets
-may be re-authored as parameter-shape recipes (parameter combos + LFO + envelopes).
+### Task 1 — Preset Import (DONE — kept as the record)
+**Problem (was):** Mycelium presets use `XP(pairs)`; AMARU's `preset_t` had no XP field.
+**What landed:** `preset_t.x[8]` + `XP()` in `engines/src/felucca_engine.h`; `preset_extras()` in
+`src/params.c` (Mycelium's `id = x[i] - 1`, clamp to `TP[id]`), called by `ui.c apply_preset_to()`
+after the sends. ANALOG: 21 Mycelium presets verbatim at 0..12 + 15 appended (32). DIGITAL:
+`src/fm4_convert.c DIGITAL_PRESETS` 36 (Mycelium's 29 verbatim at 8..23 and 24..35; MARIMBA at
+24.. was skipped because slot 6 already is that preset), `FM4_NPRESETS 36`, `FM4_TO_FM6[36]` with
+the appended ones on `FM6_OWN`. `fm4_nearest` weighs ENV / ENV->FLT too (CLAV and FUNK KEY share
+every EDIT value). Verified by `tests/fm4_test.c` (presets, routing, pitch, centroid, level,
+envelope) and `tests/fm4_div0_test.c` (UBSan; built with `-DFELUCCA_FM4=0`).
 
-**Current sound-engine gaps:**
-- `amaru_sound_apply()` only follows the standard presets (XP not applied)
-- Mycelium's 808 BOOM uses `P_TRANS+1,-24` (essential for authentic 808 sound)
-- `apply_preset_to()` (ui.c:1347) doesn't know about XP extra params
-- LIBRARY approach has equal risk — auth and store + upload needs research
+**Files:** `firmware/firmware/src/ui.c` (`apply_preset_to`), `src/params.c` (`preset_extras`),
+      `src/fm4_convert.c`, `engines/src/felucca_engine.h`, `engines/src/eng_analog.c`.
 
-**Files:** `firmware/firmware/src/ui.c` (`apply_preset_to` at line 1347),
-      `firmware/firmware/src/core.h` (FELUCCA_* macros), `firmware/firmware/src/eng_analog.c`,
-      `firmware/firmware/src/eng_digital.c` (vendor's `engines/src/...` vs Mycelium's `firmware/src/...`).
-
-### Task 2 — Drum Engine Flesh-out (sound engine essential)
-Mycelium has 15 synthesized drums; verify all kit definitions exist in AMARU DRUM engine.
-Ensure drift / tone / decay / drive parameters all survive edit/upload round-trip.
-Verify `DW` etc. regressions avoided.
+### Task 2 — Drum Engine (DONE for the kits; verify on device later)
+DRUM has the five machines the model table is made of (KIT 80 10 66 55 77 = 808 909 606 CR-78
+707), the 1.5.6 combos (DEEP TIGHT PERC) and Mycelium's three originals (PSY FOREST HITECH), now
+all offered as named presets, plus JUNGLE TECHNO HARDTEKK shaped with Mycelium's own numbers
+(`tools/gen_drumkits.py`: JUNGLE kick drive 50, TECHNO drive 96). `tests/drum_test.c` covers every
+lane of every kit, TONE / DECAY / TUNE / SNAP, the corners, the choke, the GM map, lane LEVEL, and
+now that every preset applies and sounds. Parameters live in `t->p[]` (P_E0..P_E7) and projects /
+user presets store P_COUNT values, so they round-trip by construction. Mycelium's 35 kits are not
+ported as data: AMARU re-authors them as piece-combos on its own 8-lane engine (a choice made
+before this task list; do not replace the engine without a plan).
 
 ### Task 3 — Sample Data (Optional for now)
 Only SLICE engine uses SMP_DATA (5 sets ~126KB, currently unused because SLICE off in AMARU).
 Options: gate on FELUCCA_SAMPLE_DATA, or use "alias" pattern — user wants samples though, so
 only trim if needed to free flash budget. Bias TOWARD importing Mycelium samples vs. trimming.
 
-### Task 4 — JIANT GEN Review + 4-channel Port
+### Task 4 — JIANT GEN Review + 4-channel Port (largely DONE; review further by ear)
 JIANT's GEN (gen_tables.c + gen.c · 2869 lines / 688-line tables) produces good coherent songs per genre.
-Review the drum patterns, parameter values, and form. Only the D&B row is the original (Jiant-fork Genesis) — some top-up;
-Drum & Bass (`DM_DNB` map) is the reference template. Genre table at gen_tables.c:461.
-Port to AMARU's 4-track (SPARK, ROOT, AIR, MELODY) 4-engine (ANALOG/DIGITAL/DRUM/FM6).
+AMARU's `src/amaru_gen.c` ports the parts that fit four tracks: JIANT's drum maps (verbatim for
+TRIBE MENTAL ACIDCORE HARDTEKK TEKNO PSY BREAKS DNB; JUNGLE authored), hat cells, ghost ranks,
+fills, bass archetypes, progressions, pad / lead styles, the per-genre amounts and sound recipes.
+SONG (64 steps = 4 bars) now shapes the phrase: break in bar 3, build with the roll in bar 4;
+jungle / DnB / breakbeat never fall on four quarters (`tests/amaru_gen_test.c`).
+Still open: JIANT's arp / harmony-family / humanise layers, its 32-bar FM_CLUB arc (AMARU has four
+bars), and a listen-through of every genre's throw.
 Every target genre must have its own drum signature:
-  - JUNGLE / DnB / BREAKBEAT TEKNO: NON-square patterns (no 4-on-4)
+  - JUNGLE / DnB / BREAKBEAT TEKNO: NON-square patterns (no 4-on-4) — held by the test
   - others: genre-appropriate
-AMARU's `amaru_gen.c` ships with 9 genres already implemented and AMARU-shaped; review its gaps
-(a fuller review point is laid out in `HANDOFF.md` §SPECIFIC IMPLEMENTATION GAPS (3)).
 
 ### Task 5 (later) — Test Re-baseline
 `tests/run_tests.sh`. Note pre-existing failures observed: phys_test 2, noise_test 10, mod_test 3,

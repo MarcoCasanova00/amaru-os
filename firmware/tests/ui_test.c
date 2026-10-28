@@ -3005,6 +3005,7 @@ static int test_product_ux(void)
         ok &= changed;
     }
     bad += check("all palettes: active column is subtle, stable-size, no zoom over graph", ok);
+#if FELUCCA_SAMPLE                                 /* (the AMARU build retires SAMPLE: no zone, no decode) */
     ui_power_on(); set_engine_of(TSEL, 4); open_family(FAM_EDIT);
     memset(&sample_wave, 0, sizeof sample_wave); last_note = 60;
     voice_t voices[NVOICE]; memcpy(voices, TSEL->v, sizeof voices);
@@ -3023,6 +3024,9 @@ static int test_product_ux(void)
     }
     ok &= !memcmp(lo, sample_wave.lo, sizeof lo) && !memcmp(hi, sample_wave.hi, sizeof hi);
     bad += check("sample waveform is bounded, matches audio IMA decode and leaves voices intact", ok);
+#else
+    bad += check("sample waveform: SAMPLE retired from this build (FELUCCA_SAMPLE=0)", 1);
+#endif
     ui_power_on(); return bad;
 }
 

@@ -250,10 +250,10 @@ static void job_slicer(const job_t *j)
     phrase(t, 60);
 }
 
-/* the 4-track mix: T1 ANALOG ACID, T2 the power-on pad (TRK_DEF: FM6 PAD since DIGITAL was retired; DIGITAL PAD
- * before) (tied chords), T3 LOFI lead (12 steps against 16),
+/* the 4-track mix: T1 ANALOG ACID, T2 the power-on lead (TRK_DEF: DIGITAL BRASS; FM6 BRASS since DIGITAL was
+ * retired) (tied chords), T3 LOFI lead (12 steps against 16),
  * T4 DRUM drums (SAMPLE PERC until 1.0.2); 120 BPM, 4 bars (the hostsim TRACKS demo without the recording), stop, the tail.
- * arg 1: with the SLICER (GATE on the pad, STUT on the acid line and the drums, SWING 20 %) */
+ * arg 1: with the SLICER (GATE on the lead, STUT on the acid line and the drums, SWING 20 %) */
 static void job_song(const job_t *j)
 {
     static const uint8_t ACID[16] = {45, 45, 57, 45, 0, 48, 45, 55, 45, 0, 57, 52, 45, 48, 0, 50};
@@ -479,7 +479,7 @@ static void midi_pkt(uint32_t st, uint32_t d1, uint32_t d2)   /* as usb.c: the q
  * fades within its one block), the VOICE part at most 4; then all off: every voice free */
 static int chk_budget(char *msg, uint32_t n)
 {
-    static const uint8_t E[NPART][2] = {{0, 1}, {1, 1}, {5, 1}, {4, 0}};   /* (SAMPLE PERC until 1.0.2) */
+    static const uint8_t E[NPART][2] = {{0, 1}, {1, 1}, {12, 1}, {10, 0}};   /* ANALOG, DIGITAL, FM6 (cap 6), DRUM */
     uint8_t held[NPART][128] = {{0}};
     uint32_t p, k, worst = 0, vworst = 0, fading = 0, kills0 = voice_kills;
     host_tracks_init();
@@ -518,10 +518,10 @@ static int chk_budget(char *msg, uint32_t n)
                 trk_note_off(&trk[p], k);
     rel_at = fpos;
     finish();
-    snprintf(msg, n, "4 POLY parts, random notes: at most %u voices active (budget %u), VOICE part at most %u (cap 4), "
+    snprintf(msg, n, "4 POLY parts, random notes: at most %u voices active (budget %u), FM6 part at most %u (cap 6), "
              "%u voices taken, %u still fading after their block, all free %.2f s after the note-offs",
              worst, NVOICE, vworst, voice_kills - kills0, fading, R.free_s);
-    return worst <= NVOICE && vworst <= 4u && !fading && R.free_s >= 0 && voice_kills > kills0;
+    return worst <= NVOICE && vworst <= FM6_POLY && !fading && R.free_s >= 0 && voice_kills > kills0;
 }
 
 /* MIDI packets in one audio block can reuse a voice before its stolen tail fades. */
@@ -731,6 +731,7 @@ static int chk_mode_release(char *msg, uint32_t n)
     return !bad;
 }
 
+#if FELUCCA_SAMPLE
 static int chk_sample_end(char *msg, uint32_t n)
 {
     static const int32_t SAMPLE[4] = {12000, -12000, 32767, -32768};
@@ -770,6 +771,7 @@ static int chk_sample_end(char *msg, uint32_t n)
              cases);
     return !bad;
 }
+#endif /* FELUCCA_SAMPLE */
 
 /* a stolen voice fades: plain sines (filter open, no sends) on 3 parts; part 1 holds 7 notes, part 2 one,
  * then parts 2 and 3 take voices in turn. The largest sample step in the 2 blocks of each take must stay
@@ -861,7 +863,7 @@ static int chk_voice_cap(char *msg, uint32_t n)
     for (mode = 0; mode < 2u; mode++) {
         track_t *t = &trk[0];
         host_tracks_init();
-        host_preset(t, 5, 0);
+        host_preset(t, 12, 0);                         /* FM6: the engine with a per-part cap (6) left */
         t->p[P_VOICE] = mode ? V_UNISON : V_POLY;
         t->p[P_AMODE] = 0;
         for (k = 0; k < 8u; k++)
@@ -880,9 +882,9 @@ static int chk_voice_cap(char *msg, uint32_t n)
         if (!parts_free())
             most[mode] = 99;
     }
-    snprintf(msg, n, "VOICE engine, 8 keys: at most %u voices in POLY, %u in UNISON (cap 4); freed after release",
+    snprintf(msg, n, "FM6 engine, 8 keys: at most %u voices in POLY, %u in UNISON (cap 6); freed after release",
              most[0], most[1]);
-    return most[0] == 4u && most[1] == 4u;
+    return most[0] == 6u && most[1] == 6u;
 }
 
 /* no hanging notes: 6 s of random MIDI note-ons / offs on channels 1..4 (the parts), 5, 10 and 16 (ignored
@@ -1089,7 +1091,9 @@ int main(int argc, char **argv)
     add(J_CHECK, "voices: budget after a live mode change")->check = chk_mode_budget;
     add(J_CHECK, "voices: budget after voice mode changes")->check = chk_cap_mode_budget;
     add(J_CHECK, "voices: note-offs after live voice mode changes")->check = chk_mode_release;
+#if FELUCCA_SAMPLE
     add(J_CHECK, "samples: high-rate one-shot ends")->check = chk_sample_end;
+#endif
     add(J_CHECK, "voices: a stolen voice fades")->check = chk_steal_fade;
     add(J_CHECK, "voices: MONO keeps its note")->check = chk_keep_mono;
     add(J_CHECK, "voices: LEGATO keeps its note")->check = chk_keep_legato;

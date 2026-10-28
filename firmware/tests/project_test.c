@@ -380,7 +380,7 @@ int main(void)
             q.t[0].p[P_E0 + i] = E0[i];
             q.t[1].p[P_E0 + i] = E1[i];
             q.t[2].p[P_E0 + i] = OLD_KIT[i];
-            q.t[3].p[P_E0 + i] = (int16_t)(i ? 30 : PM_SYMP);
+            q.t[3].p[P_E0 + i] = (int16_t)(i ? 30 : 3);
         }
         q.phys = 1;
         for (i = 1; i < NSTEP; i++)                     /* (the other steps rests) */

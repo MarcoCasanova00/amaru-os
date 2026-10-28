@@ -55,6 +55,10 @@
 <header>
   <h1>AMARU · Song Editor</h1>
   <span class="sub">4 tracks · 64 steps · JSON import/export</span>
+  <nav style="display:flex;gap:8px;margin-left:8px">
+    <a href="../" style="color:var(--accent);text-decoration:none;font-size:13px">· Emulator</a>
+    <a href="../install.html" style="color:var(--accent);text-decoration:none;font-size:13px">· Installer</a>
+  </nav>
   <span style="flex:1"></span>
   <button onclick="exportJSON()">Export JSON</button>
   <label style="font-size:12px;color:var(--dim)">Import
@@ -110,8 +114,12 @@
 </div>
 
 <footer>
-  AMARU Song Editor — JSON model independent of the device; change sync hooks in <code>state.deviceSync</code>.<br>
-  Autosaves to <code>localStorage</code>.
+  AMARU Song Editor — <b>offline-only: it never writes to the FM-1</b> (no MIDI/USB/flash).
+  JSON import/export touches only this browser's data and files.<br>
+  The reserved <code>state.deviceSync</code> hook, if ever wired, must go only through the
+  firmware's validated project/preset protocol (A/B sectors + CRC + commit records), never raw
+  flash and never the bootloader header — see <code>docs/SAFETY.md</code>. Autosaves to
+  <code>localStorage</code>.
 </footer>
 
 <script>
@@ -136,6 +144,47 @@ function emptyStep(){
 function emptyTrack(){
   return { engine:0, preset:0, transpose:0, params:{}, steps: Array.from({length:NSTEPS}, emptyStep) };
 }
+function clamp(v,lo,hi){ v = +v; return isNaN(v) ? lo : Math.max(lo, Math.min(hi, v)); }
+/* Normalize an imported song so it always matches the model's bounds. This keeps
+ * the editor's data clean even for hand-edited JSON; it is the first line of
+ * safety before any (optional) device write. The editor itself never writes to
+ * the FM-1. */
+function normalizeSong(s){
+  if(!s || typeof s !== "object") return newSong();
+  s.format = "AMARU-SONG"; s.version = 1;
+  s.bpm = clamp(s.bpm, 40, 220);
+  s.swing = clamp(s.swing, 0, 12);
+  s.root = clamp(s.root, 0, 11) % 12;
+  if(!Array.isArray(s.song) || !s.song.length) s.song = ["A","A","B","C"];
+  s.song = s.song.slice(0,32).map(x => "ABCD".includes(x) ? x : "A");
+  const tracks = {};
+  TRACKS.forEach(t=>{
+    const src = s.tracks && s.tracks[t] ? s.tracks[t] : {};
+    const tr = {
+      engine: clamp(src.engine,0,3), preset: clamp(src.preset,0,127),
+      transpose: clamp(src.transpose,-60,60), params: (src.params && typeof src.params==="object") ? src.params : {},
+      steps: Array.from({length:NSTEPS}, emptyStep)
+    };
+    (Array.isArray(src.steps)? src.steps : []).forEach((st,i)=>{
+      if(i>=NSTEPS) return;
+      const d = tr.steps[i];
+      if(st && typeof st==="object"){
+        d.time = clamp(st.time,0,2);
+        d.vel = clamp(st.vel,0,127);
+        d.flags = clamp(st.flags,0,3);
+        d.prob = clamp(st.prob,0,100);
+        d.rtch = clamp(st.rtch,0,3);
+        d.hit = clamp(st.hit,0,255);
+        d.acc = clamp(st.acc,0,255) & d.hit;
+        d.n = (Array.isArray(st.n)? st.n : []).map(n=>clamp(n,0,127)).slice(0,4);
+        if(d.n.length) d.time = 0;
+      }
+    });
+    tracks[t] = tr;
+  });
+  s.tracks = tracks;
+  return s;
+}
 function newSong(){
   const tracks = {};
   TRACKS.forEach(t => tracks[t] = emptyTrack());
@@ -153,7 +202,7 @@ function save(){ try{ localStorage.setItem("amaru-editor", JSON.stringify(state.
 function load(){
   try{
     const s = JSON.parse(localStorage.getItem("amaru-editor"));
-    if(s && s.format === "AMARU-SONG") state.song = s;
+    if(s && s.format === "AMARU-SONG") state.song = normalizeSong(s);
   }catch(e){}
 }
 
@@ -174,7 +223,7 @@ document.getElementById("importFile").addEventListener("change", function(ev){
     try{
       const s = JSON.parse(r.result);
       if(!s || s.format !== "AMARU-SONG") throw new Error("not an AMARU song");
-      state.song = s;
+      state.song = normalizeSong(s);
       renderAll();
       save();
     }catch(e){ alert("Import failed: " + e.message); }

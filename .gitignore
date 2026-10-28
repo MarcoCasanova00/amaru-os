@@ -39,3 +39,7 @@ session-*/
 # Other unnecessary files
 *.map
 *.manifest
+
+# stray generated audio
+*.wav
+!firmware/assets/samples-cc0/**

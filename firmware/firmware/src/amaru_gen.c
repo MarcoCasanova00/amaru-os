@@ -155,8 +155,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_TRIBE, BA_BOUNCE, BA_PSY}, 33, KICK_INTERLOCK,
       {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_STAB, VM_QUART, LD_HOOK,
       {40, 40, 90, 95},
-      { ASND("AMARY QRIA", E_FM6, 4, 58, 110, 96, 40, 45, 90, 0, AMV_LEGATO),   /* Carnac 3 - Amazon green breath */
-        ASND("MAYA PLUCK", E_ANALOG, 8, 70, 0, 55, 10, 40, 55, 0, AMV_POLY),
+      { ASND("AMARY QRIA", E_FM6, 4, 52, 110, 96, 40, 45, 90, 0, AMV_LEGATO),   /* Carnac 3 - Amazon green breath */
+        ASND("MAYA PLUCK", E_ANALOG, 8, 50, 0, 55, 10, 40, 55, 20, AMV_POLY),
         ASND("AMARU BASS", E_ANALOG, 2, 44, 0, 35, 0, 10, 20, 12, AMV_MONO),
         ASND("GREEN KIT", E_DRUM, DP_909, 64, 0, 30, 0, 12, 14, 96, AMV_POLY) }, 1, 55, 1 },   /* Mycelium TEKNO: the 909, driven */
 
@@ -165,8 +165,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_MENTAL, BA_ROLL16, BA_PSY}, 33, KICK_SUSTAIN,
       {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_DRONE, VM_PLANE, LD_OSTINATO,
       {20, 30, 85, 95},
-      { ASND("TUPAC SHADOW", E_DIGITAL, 5, 58, 70, 112, 35, 35, 100, 0, AMV_POLY),  /* Carnac 4: the hearth's dark noise, far reverb */
-        ASND("AZTEC SIREN", E_ANALOG, 6, 82, 8, 78, 20, 45, 60, 18, AMV_MONO),
+      { ASND("TUPAC SHADOW", E_DIGITAL, 5, 46, 70, 112, 35, 35, 100, 24, AMV_POLY),  /* Carnac 4: the hearth's dark noise, far reverb */
+        ASND("AZTEC SIREN", E_ANALOG, 6, 58, 8, 78, 20, 45, 60, 30, AMV_MONO),
         ASND("MENTAL SUB", E_ANALOG, 7, 36, 0, 60, 0, 12, 25, 0, AMV_MONO),
         ASND("MENTAL DRUMS", E_DRUM, DP_909, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 2, 35, 1 },
 
@@ -175,8 +175,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_HARDTEKK, BA_PUMP8, BA_ROLL16}, 33, KICK_DOUBLE,
       {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_STAB, VM_POWER, LD_SPARSE,
       {20, 25, 100, 100},
-      { ASND("HARDTEKK PAD", E_ANALOG, 3, 66, 12, 55, 20, 25, 45, 25, AMV_POLY),
-        ASND("HARDTEKK STAB", E_ANALOG, 6, 76, 0, 32, 8, 20, 35, 40, AMV_POLY),
+      { ASND("HARDTEKK PAD", E_ANALOG, 3, 54, 12, 55, 20, 25, 45, 30, AMV_POLY),
+        ASND("HARDTEKK STAB", E_ANALOG, 6, 56, 0, 32, 8, 20, 35, 52, AMV_POLY),
         ASND("HARDTEKK BASS", E_ANALOG, 4, 52, 0, 26, 0, 5, 12, 35, AMV_MONO),
         ASND("MYC BLOWN", E_DRUM, DP_HARDTEKK, 60, 0, 24, 0, 10, 12, 105, AMV_POLY) }, 1, 10, 0 }, /* Mycelium BLOWN: the short driven kick, drive 72..105 */
 
@@ -185,8 +185,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_ACID, BA_ACIDCORE, BA_ROLL16}, 33, KICK_ANSWER,
       {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_STAB, VM_POWER, LD_MECH,
       {20, 25, 100, 100},
-      { ASND("ACID MIST", E_DIGITAL, 5, 72, 35, 90, 20, 28, 80, 0, AMV_POLY),
-        ASND("SILBURY WAIL", E_ANALOG, 4, 88, 0, 96, 20, 45, 20, 60, AMV_LEGATO),  /* Carnac 20: the wailing register, SH-2 drive 60 */
+      { ASND("ACID MIST", E_DIGITAL, 5, 56, 35, 90, 20, 28, 80, 26, AMV_POLY),
+        ASND("SILBURY WAIL", E_ANALOG, 4, 66, 0, 96, 20, 45, 20, 72, AMV_LEGATO),  /* Carnac 20: the wailing register, SH-2 drive 60 */
         ASND("SILBURY MOUND", E_ANALOG, 4, 44, 0, 30, 0, 10, 12, 60, AMV_LEGATO), /* Carnac 20: driven resonant SH-2, tied glide, an octave down */
         ASND("CORE DRUMS", E_DRUM, DP_TECHNO, 64, 0, 26, 0, 12, 20, 0, AMV_POLY) }, 2, 20, 0 },
 
@@ -195,8 +195,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_JUNGLE, BA_DNB, BA_AROUND}, 31, KICK_INTERLOCK,
       {PR_I_VI, PR_MINOR4, PR_ONE}, 2, PAD_DUB, VM_RICH, LD_MOTIF,
       {45, 35, 95, 95},
-      { ASND("JUNGLE CHOIR", E_FM6, 4, 55, 60, 105, 30, 32, 92, 0, AMV_POLY),
-        ASND("JUNGLE STAB", E_ANALOG, 8, 74, 0, 46, 12, 38, 55, 0, AMV_POLY),
+      { ASND("JUNGLE CHOIR", E_FM6, 4, 48, 60, 105, 30, 32, 92, 0, AMV_POLY),
+        ASND("JUNGLE STAB", E_ANALOG, 8, 52, 0, 46, 12, 38, 55, 24, AMV_POLY),
         ASND("JUNGLE SUB", E_ANALOG, 7, 30, 0, 70, 0, 8, 18, 0, AMV_MONO),
         ASND("JUNGLE DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 0, 70, 0 },
 
@@ -205,8 +205,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_DNB, BA_JUNGLE, BA_WOBBLE}, 29, KICK_DOUBLE,
       {PR_I_VI, PR_DEEP4, PR_ONE}, 2, PAD_SPARSE, VM_RICH, LD_SPARSE,
       {50, 30, 95, 95},
-      { ASND("DNB PAD", E_FM6, 4, 60, 55, 110, 28, 30, 88, 0, AMV_POLY),
-        ASND("DNB REESE", E_DIGITAL, 3, 80, 0, 55, 18, 36, 45, 18, AMV_MONO),
+      { ASND("DNB PAD", E_FM6, 4, 52, 55, 110, 28, 30, 88, 0, AMV_POLY),
+        ASND("DNB REESE", E_DIGITAL, 3, 60, 0, 55, 18, 36, 45, 32, AMV_MONO),
         ASND("DNB SUB", E_ANALOG, 7, 28, 0, 80, 0, 6, 15, 0, AMV_MONO),
         ASND("DNB DRUMS", E_DRUM, DP_JUNGLE, 64, 0, 30, 0, 14, 28, 0, AMV_POLY) }, 0, 65, 0 },
 
@@ -215,8 +215,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_ACID, BA_JUNGLE, BA_AROUND}, 33, KICK_INTERLOCK,
       {PR_ONE, PR_I_IV, PR_I_VI}, 2, PAD_STAB, VM_RICH, LD_OSTINATO,
       {45, 40, 90, 95},
-      { ASND("BREAK PAD", E_ANALOG, 11, 58, 45, 95, 30, 28, 78, 0, AMV_POLY),
-        ASND("BREAK STAB", E_ANALOG, 8, 78, 0, 40, 10, 30, 45, 18, AMV_POLY),
+      { ASND("BREAK PAD", E_ANALOG, 11, 48, 45, 95, 30, 28, 78, 10, AMV_POLY),
+        ASND("BREAK STAB", E_ANALOG, 8, 52, 0, 40, 10, 30, 45, 28, AMV_POLY),
         ASND("BREAK BASS", E_ANALOG, 2, 46, 0, 38, 0, 8, 18, 18, AMV_MONO),
         ASND("BREAK DRUMS", E_DRUM, DP_707, 64, 0, 28, 0, 14, 26, 0, AMV_POLY) }, 0, 60, 0 },
 
@@ -225,8 +225,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_ROLL16, BA_PSY, BA_BOUNCE}, 33, KICK_SUSTAIN,
       {PR_ONE, PR_PHRY, PR_I_VII}, 4, PAD_DRONE, VM_PLANE, LD_ARP,
       {30, 30, 85, 95},
-      { ASND("TECHNO PAD", E_FM6, 4, 62, 50, 100, 25, 30, 80, 0, AMV_POLY),
-        ASND("TECHNO LEAD", E_ANALOG, 0, 82, 0, 50, 20, 40, 45, 10, AMV_MONO),
+      { ASND("TECHNO PAD", E_FM6, 4, 52, 50, 100, 25, 30, 80, 0, AMV_POLY),
+        ASND("TECHNO LEAD", E_ANALOG, 0, 54, 0, 50, 20, 40, 45, 26, AMV_MONO),
         ASND("TECHNO BASS", E_DIGITAL, 2, 48, 0, 42, 8, 20, 20, 22, AMV_MONO),
         ASND("TECHNO DRUMS", E_DRUM, DP_TECHNO, 64, 0, 30, 0, 12, 24, 0, AMV_POLY) }, 1, 30, 0 },
 
@@ -235,8 +235,8 @@ static const amaru_genre_t GENRES[AMARU_NGENRES] = {
       {BA_PSY, BA_ROLL16, BA_PUMP8}, 33, KICK_SUSTAIN,
       {PR_PHRY, PR_TRANCE, PR_ANDAL}, 4, PAD_TRANCE, VM_RICH, LD_ARP,
       {100, 45, 100, 100},
-      { ASND("ORACLE CHOIR", E_FM6, 4, 66, 90, 110, 35, 40, 92, 0, AMV_POLY),      /* Carnac 3: the menhir-thud strike, the vowel opens */
-        ASND("PSY LEAD", E_ANALOG, 0, 92, 0, 55, 30, 50, 55, 12, AMV_UNISON),
+      { ASND("ORACLE CHOIR", E_FM6, 4, 58, 90, 110, 35, 40, 92, 0, AMV_POLY),      /* Carnac 3: the menhir-thud strike, the vowel opens */
+        ASND("PSY LEAD", E_ANALOG, 0, 58, 0, 55, 30, 50, 55, 30, AMV_UNISON),
         ASND("PSY ROLL", E_ANALOG, 4, 52, 0, 30, 10, 22, 22, 18, AMV_MONO),
         ASND("PSY DRUMS", E_DRUM, DP_PSY, 64, 0, 28, 0, 12, 24, 0, AMV_POLY) }, 0, 50, 0 }
 };

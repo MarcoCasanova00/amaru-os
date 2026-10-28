@@ -566,6 +566,55 @@ static void kick_speaker(void)
 }
 
 /* ------------------------------------------------------------- keys --- */
+static void presets(void)
+{
+    /* every DRUM preset applies its kit and knobs, has a name of its own, and the kit sounds */
+    uint32_t k, i, bad = 0, silent = 0, dup = 0;
+    const engine_t *e = &ENG_DRUM;
+    for (k = 0; k < e->npresets; k++) {
+        const preset_t *pr = &e->presets[k];
+        for (i = 0; i < 8u; i++)
+            if (pr->e[i] < 0 || pr->e[i] > 127)
+                bad++;
+        if (pr->e[0] < 0 || pr->e[0] >= DK_COUNT)
+            bad++;
+        for (i = 0; i < k; i++)
+            if (!strcmp(e->presets[i].name, pr->name))
+                dup++;
+        host_tracks_init();
+        host_preset(&trk[0], ENGI_DRUM, k);
+        for (i = 0; i < 8u; i++)
+            if (trk[0].p[P_E0 + i] != pr->e[i])
+                bad++;
+        {
+            int32_t peak = 0;
+            song.octave = 0;
+            trk_note_on(&trk[0], 36, 110);
+            for (i = 0; i < FS / 5u; i += CTL) {
+                int32_t b[CTL];
+                uint32_t j;
+                memset(b, 0, sizeof b);
+                track_render(&trk[0], b, CTL);
+                for (j = 0; j < CTL; j++)
+                    if (b[j] > peak)
+                        peak = b[j];
+                    else if (-b[j] > peak)
+                        peak = -b[j];
+            }
+            silent += peak < 200;
+        }
+    }
+    if (bad)
+        printf("drum_test: PRESETS FAIL %u values off the table\n", bad);
+    if (dup)
+        printf("drum_test: PRESETS FAIL %u names repeated\n", dup);
+    if (silent)
+        printf("drum_test: PRESETS FAIL %u presets render no kick\n", silent);
+    printf("drum_test: presets: %u kits named once each, every value applies and sounds: %s\n", e->npresets,
+           bad || dup || silent ? "FAIL" : "ok");
+    fails += bad || dup || silent;
+}
+
 static void keys(void)
 {
     /* the first C (key 7) is the GM kick: key -> drum under KIT STD (KICK PUNCH, ROUND) */
@@ -1391,6 +1440,7 @@ int main(int argc, char **argv)
     choke();
     kick_speaker();
     keys();
+    presets();
     kits();
     kit_keys();
     retired();

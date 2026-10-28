@@ -328,7 +328,24 @@ static const preset_t DRUM_PRESETS[] = {
     {"PSY KICK", {DK_PSY, 64, 64, 64, 64, 100, 0, 12}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 22), PAT(12)},
     {"FOREST", {DK_FOREST, 60, 58, 70, 62, 100, 1, 8}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(12)},
     {"HITECH", {DK_HITECH, 66, 70, 52, 72, 110, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
+    /* AMARU: the five machines the kits are made of, named as Mycelium names them (808 909 606 VINTAGE 80S), so
+     * the presets offer them by name and not only by the KIT knob. TONE DECY SNAP DRV are the machines' character
+     * (a long swelling 808, the 909's punch, the 606's short room, the CR-78's soft box, the 707's bright click) */
+    {"808 KIT", {DK_80, 64, 64, 76, 58, 100, 1, 20}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 20), PAT(12)},
+    {"909 KIT", {DK_77, 64, 66, 58, 70, 104, 0, 26}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 16), PAT(12)},
+    {"606 KIT", {DK_10, 64, 62, 54, 62, 100, 0, 12}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
+    {"CR-78 KIT", {DK_66, 64, 66, 62, 56, 96, 0, 8}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 10), PAT(12)},
+    {"707 KIT", {DK_55, 64, 68, 56, 72, 102, 0, 22}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
+    /* AMARU: the genre kits GEN asks for, as Mycelium's own kits shape them (tools/gen_drumkits.py): JUNGLE's
+     * 909 with short hats, a 50 drive kick and a snappier snare (drive 40); TECHNO's kick driven 96 with a rumble
+     * and dark hats; HARDTEKK's short driven kick and cluster hats */
+    {"JUNGLE KIT", {DK_77, 64, 62, 44, 82, 108, 0, 50}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(12)},
+    {"TECHNO KIT", {DK_77, 64, 52, 70, 74, 104, 1, 96}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 22), PAT(12)},
+    {"HARDTEKK KIT", {DK_HITECH, 66, 66, 40, 88, 112, 0, 72}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 10), PAT(12)},
 };
+
+/* amaru_gen.c's DP_* enum indexes this table in order (GEN's drum recipes): keep the order, append only */
+_Static_assert(NELEM(DRUM_PRESETS) == 15u, "DRUM presets: amaru_gen.c DP_* order");
 
 static const engine_t ENG_DRUM = {
     .name = "DRUM",

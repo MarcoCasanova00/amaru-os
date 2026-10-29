@@ -736,18 +736,19 @@ $("go").addEventListener("click", async () => {
   busy(true); bar(0); $("log").textContent = "";
   const midi = await openMidi();
   if (!midi) { busy(false); return; }
-  const max = Math.max(1, Math.ceil(state.image.length / 512));
+  const blocks = Math.max(1, Math.ceil(state.image.length / 512));   // image blocks the device can ask for
+  const writeMax = blocks * 2;                                       // step 2 reads the image, then writes it
   const step = (k, a) => {
     if (k === "start") {
       live(true); document.title = "Installing — do not unplug · AMARU";
       say("Found " + a + " — verifying the package…"); bar(2);
     } else if (k === "verify") {
-      say("Verifying — DO NOT UNPLUG · block " + a); bar(2 + 28 * Math.min(1, a / max));
+      say("Verifying — DO NOT UNPLUG · block " + a); bar(2 + 28 * Math.min(1, a / 40));
     } else if (k === "loader") {
       say("Accepted — switching to update mode. Keep the cable connected…"); bar(32);
     } else if (k === "write") {
-      const p = 34 + 64 * Math.min(1, a / max);
-      say("Writing — DO NOT UNPLUG · block " + a + " of about " + max + " (" + Math.floor(p) + "%)"); bar(p);
+      const p = 34 + 64 * Math.min(1, a / writeMax);
+      say("Writing — DO NOT UNPLUG · block " + a + " (" + Math.floor(p) + "%)"); bar(p);
     } else if (k === "reboot") {
       say("Written — restarting the FM-1. Do not unplug…"); bar(99);
     } else if (k === "done") {

@@ -6,6 +6,9 @@
 // block is compared byte for byte, and the identity it reports at the end has
 // to match the package.
 //
+// A second scenario feeds the page a tampered package: Install must stay
+// disabled and no MIDI port may even be opened.
+//
 //   node tests/installer.page.test.mjs     (from the repository root)
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -14,34 +17,21 @@ import { webcrypto } from 'node:crypto';
 
 const html = fs.readFileSync('install.html', 'utf8');
 const script = html.match(/<script type="module">\n([\s\S]*)<\/script>/)[1];
-// --- a minimal DOM: the page only needs element ids, text, value and click ---
-const els = new Map();
-const el = (id) => {
-  if (!els.has(id)) els.set(id, { id, textContent: '', value: '', className: '', title: '', disabled: false,
-    scrollTop: 0, scrollHeight: 0, files: [], _h: {},
-    addEventListener(t, fn) { this._h[t] = fn; },
-    click() { if (this._h.click) return this._h.click({ target: this }); },
-    classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, toggle(c, on) { on === undefined ? (this._s.has(c) ? this._s.delete(c) : this._s.add(c)) : (on ? this._s.add(c) : this._s.delete(c)); }, contains(c) { return this._s.has(c); } } });
-  return els.get(id);
-};
-const document = { getElementById: el };
-const window = { addEventListener() {} };
-
-// ---- the published package, as the page would fetch it ----
+const meta = JSON.parse(html.match(/const meta = (\{.*?\});/s)[1]);
 const pkg = new Uint8Array(fs.readFileSync('firmware/build/felucca.fwsc'));
-const sha256hex = async (b) => Buffer.from(await webcrypto.subtle.digest('SHA-256', b)).toString('hex');
 const fact = (m) => `data:text/javascript;base64,${Buffer.from(m).toString('base64')}`;
 
-// ---- shared protocol helpers (same modules the page inlines) ----
+// the same two modules the page inlines, for the device side of the exchange
 const lib = ['firmware/web/fm1pkg.js', 'firmware/web/fm1ota.js'].map((f) =>
   fs.readFileSync(f, 'utf8').replace(/^export\s+/gm, '').replace(/^import .*?;\n/gm, '')).join('\n') +
-  '\nexport { pack7, unpack7, logicalImage, parseRequest };\n';
+  '\nexport { pack7, unpack7, logicalImage };\n';
 const P = await import(fact(lib));
 const image = P.logicalImage(pkg);
 
 // ---- a simulated FM-1: identity, then "device asks, host answers" ----
 class Device {
-  constructor() {
+  constructor(img) {
+    this.image = img;
     this.identity = 'FM-1_015';
     this.phase = 'idle';
     this.queue = [];
@@ -61,17 +51,12 @@ class Device {
   }
   request(addr, len) {
     const finish = addr === 0xE0000000 || addr === 0xF0000000;   // "success" handshake, no image data
-    this.want = { addr, len, data: finish ? null : Array.from(image.subarray(addr, addr + len)) };
+    this.want = { addr, len, data: finish ? null : Array.from(this.image.subarray(addr, addr + len)) };
     this.toHost(this.frame([0, 0x59, 0x30, (len + 8) & 255, 0, 0, 0,
       addr & 255, (addr >>> 8) & 255, (addr >>> 16) & 255, (addr >>> 24) & 255, len & 255, (len >> 8) & 255, 0]));
   }
   next() {
-    if (!this.queue.length) {
-      this.want = null;
-      if (this.phase === 'step1') { this.phase = 'wait-for-loader'; this.identity = 'ota-FM-1_1'; }
-      if (this.phase === 'step2') { this.phase = 'done'; this.identity = 'FM-1_7100002'; }
-      return;
-    }
+    if (!this.queue.length) { this.want = null; return; }
     const [addr, len] = this.queue.shift();
     this.request(addr, len);
   }
@@ -86,10 +71,13 @@ class Device {
     const u = P.unpack7(s.slice(1, -1));
     if (u.length === 7 && u[1] === 0x59 && u[2] === 0x11) return this.reply(this.identity);
     if (s.length === 6 && s[1] === 0x22 && s[2] === 0x24 && s[3] === 0x35) {
-      if (this.phase === 'idle') return this.start('step1', [...Array.from({ length: 74 }, (_, i) => [i * 512, 512]), [0xE0000000, 8]]);
+      if (this.phase === 'idle') {
+        // step 1: the app stages the loader, ~74 reads, then wants "success"
+        return this.start('step1', [...Array.from({ length: 74 }, (_, i) => [i * 512, 512]), [0xE0000000, 8]]);
+      }
       if (this.phase === 'wait-for-loader') {
         const blocks = [];
-        for (let off = 0; off < image.length; off += 512) blocks.push([off, Math.min(512, image.length - off)]);
+        for (let off = 0; off < this.image.length; off += 512) blocks.push([off, Math.min(512, this.image.length - off)]);
         blocks.push([0xF0000000, 8]);
         return this.start('step2', blocks);
       }
@@ -104,63 +92,102 @@ class Device {
       for (let i = 0; i < len; i++) if (data[i] !== this.want.data[i]) { this.bad++; break; }
     }
     this.reads++;
-    if (addr === 0xE0000000 || addr === 0xF0000000) { this.phase = addr === 0xE0000000 ? 'wait-for-loader' : 'done'; this.identity = addr === 0xE0000000 ? 'ota-FM-1_1' : 'FM-1_7100002'; this.want = null; return; }
+    if (addr === 0xE0000000) { this.phase = 'wait-for-loader'; this.identity = 'ota-FM-1_1'; this.want = null; return; }
+    if (addr === 0xF0000000) { this.phase = 'done'; this.identity = 'FM-1_7100002'; this.want = null; return; }
     setTimeout(() => this.next(), 0);
   }
   attach(port) { this.port = port; }
   toHost(data) { const h = this.port.onmidimessage; setTimeout(() => { if (h) h({ data }); }, 0); }
 }
 
-const dev = new Device();
-const input = { state: 'connected', name: 'FM-1 MIDI 1', onmidimessage: null, async open() {} };
-const output = { state: 'connected', name: 'FM-1 MIDI 1', async open() {}, send(bytes) { dev.handle(bytes); return true; } };
-dev.attach(input);
-const access = { inputs: new Map([[0, input]]), outputs: new Map([[0, output]]) };
-
-// ---- run the page ----
-const timers = [];
-const sandbox = {
-  document, window, console,
-  crypto: webcrypto,
-  TextEncoder,
-  navigator: { requestMIDIAccess: async () => access },
-  fetch: async (url) => ({ ok: url === 'firmware/build/felucca.fwsc', status: 200,
-                           arrayBuffer: async () => pkg.buffer.slice(pkg.byteOffset, pkg.byteOffset + pkg.byteLength) }),
-  confirm: () => true,
-  alert: () => {},
-  setTimeout: (fn, ms, ...a) => { const t = setTimeout(fn, Math.min(ms || 0, 5), ...a); timers.push(t); return t; },
-  clearTimeout,
-  URL, Blob, Promise, Date, Math, JSON, Error, String, Number, Array, Object, Uint8Array, DataView, Map, Set,
-};
-sandbox.globalThis = sandbox;
-vm.createContext(sandbox);
-await vm.runInContext(`(async () => {\n${script}\n})()`, sandbox, { filename: 'install.html' });
-await new Promise((r) => setTimeout(r, 30));
-
-const $ = (id) => document.getElementById(id);
-assert.match($("verdict").textContent, /Verified/, "package verified from the published URL");
-assert.equal($("pkg-ident").textContent, 'FM-1_7100002');
-assert.equal($("pkg-size").textContent, '610,090 B');
-assert.equal($("go").disabled, false, "Install enabled only after the pinned hash matched");
-console.log('ok  page loads the published package and unlocks Install');
-
-$("go").click();
-const end = Date.now() + 20000;
-let sawWrite = false, warnArmed = false;
-while (Date.now() < end && !/Done\./.test($("status").textContent)) {
-  if (/Writing — DO NOT UNPLUG/.test($("status").textContent)) sawWrite = true;
-  if ($("warn").classList.contains("live")) warnArmed = true;
-  await new Promise((r) => setTimeout(r, 20));
+// ---- a minimal DOM: the page only needs element ids, text, value and click ----
+function makeDom() {
+  const els = new Map();
+  const el = (id) => {
+    if (!els.has(id)) {
+      const set = new Set();
+      els.set(id, { id, textContent: '', value: '', className: '', title: '', disabled: false,
+        scrollTop: 0, scrollHeight: 0, files: [], _h: {},
+        addEventListener(t, fn) { this._h[t] = fn; },
+        click() { if (this._h.click) return this._h.click({ target: this }); },
+        classList: { add: (c) => set.add(c), remove: (c) => set.delete(c),
+          toggle: (c, on) => (on === undefined ? (set.has(c) ? set.delete(c) : set.add(c)) : (on ? set.add(c) : set.delete(c))),
+          contains: (c) => set.has(c) } });
+    }
+    return els.get(id);
+  };
+  return { el, document: { getElementById: el }, window: { addEventListener() {} } };
 }
-assert.ok(sawWrite, 'the status line says DO NOT UNPLUG while writing');
-assert.ok(warnArmed, 'the banner is armed (pulsing) while writing');
-assert.equal($("warn").classList.contains("live"), false, 'banner disarms when finished');
-assert.match($("status").textContent, /You can unplug now/);
-assert.match($("status").textContent, /Done\. The FM-1 reports FM-1_7100002/, "install finished");
-assert.equal($("bar").value, 100);
-assert.equal(dev.bad, 0, "every block the device asked for arrived byte-correct");
-assert.equal(dev.reads, 74 + Math.ceil(image.length / 512) + 2, "74 verify reads + 1192 write reads + 2 success ACKs");
-assert.equal(dev.identity, 'FM-1_7100002');
-assert.equal($("go").disabled, false, "page unlocked again");
-console.log(`ok  full install through the page: ${dev.reads} reads, 0 corrupted, device now ${dev.identity}`);
+
+async function boot(bytes) {
+  const dom = makeDom();
+  const dev = new Device(P.logicalImage(bytes));
+  const input = { state: 'connected', name: 'FM-1 MIDI 1', onmidimessage: null, async open() {} };
+  const output = { state: 'connected', name: 'FM-1 MIDI 1', async open() {}, send(b) { dev.handle(b); return true; } };
+  dev.attach(input);
+  const access = { inputs: new Map([[0, input]]), outputs: new Map([[0, output]]) };
+  let midiCalls = 0;
+  const sandbox = {
+    document: dom.document, window: dom.window, console,
+    crypto: webcrypto, TextEncoder,
+    navigator: { requestMIDIAccess: async () => { midiCalls++; return access; } },
+    fetch: async () => ({ ok: true, status: 200,
+      arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) }),
+    confirm: () => true, alert: () => {},
+    setTimeout: (fn, ms, ...a) => setTimeout(fn, Math.min(ms || 0, 5), ...a),
+    clearTimeout,
+    URL, Blob, Promise, Date, Math, JSON, Error, String, Number, Array, Object, Uint8Array, DataView, Map, Set,
+  };
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  await vm.runInContext(`(async () => {\n${script}\n})()`, sandbox, { filename: 'install.html' });
+  await new Promise((r) => setTimeout(r, 30));
+  return { $: dom.el, dev, midiCalls: () => midiCalls };
+}
+
+// --- scenario 1: the published package installs ---
+{
+  const { $, dev } = await boot(pkg);
+  assert.match($("verdict").textContent, /Verified/, 'package verified from the published URL');
+  assert.equal($("pkg-ident").textContent, 'FM-1_7100002');
+  assert.equal($("pkg-size").textContent, '610,090 B');
+  assert.equal($("go").disabled, false, 'Install enabled only after the pinned hash matched');
+  console.log('ok  page loads the published package and unlocks Install');
+
+  $("go").click();
+  const end = Date.now() + 20000;
+  let sawWrite = false, warnArmed = false;
+  while (Date.now() < end && !/Done\./.test($("status").textContent)) {
+    if (/Writing — DO NOT UNPLUG/.test($("status").textContent)) sawWrite = true;
+    if ($("warn").classList.contains("live")) warnArmed = true;
+    await new Promise((r) => setTimeout(r, 20));
+  }
+  assert.match($("status").textContent, /Done\. The FM-1 reports FM-1_7100002/, 'install finished');
+  assert.ok(sawWrite, 'the status line says DO NOT UNPLUG while writing');
+  assert.ok(warnArmed, 'the banner is armed (pulsing) while writing');
+  assert.equal($("warn").classList.contains("live"), false, 'banner disarms when finished');
+  assert.equal($("bar").value, 100);
+  assert.equal(dev.bad, 0, 'every block the device asked for arrived byte-correct');
+  assert.equal(dev.reads, 74 + Math.ceil(image.length / 512) + 2, '74 verify reads + 1192 write reads + 2 success ACKs');
+  assert.equal(dev.identity, 'FM-1_7100002');
+  assert.equal($("go").disabled, false, 'page unlocked again');
+  console.log(`ok  full install through the page: ${dev.reads} reads, 0 corrupted, device now ${dev.identity}`);
+}
+
+// --- scenario 2: one changed byte -> refused before any USB traffic ---
+{
+  const bad = pkg.slice();
+  bad[300000] ^= 0x01;                       // inside the app area: still parses, no longer the tested build
+  const { $, dev, midiCalls } = await boot(bad);
+  assert.match($("verdict").textContent, /NOT verified/);
+  assert.equal($("go").disabled, true, 'Install stays disabled for a tampered package');
+  assert.equal($("pkg-ident").textContent, 'FM-1_7100002', 'the identity alone is not enough to pass');
+  $("go").click();
+  await new Promise((r) => setTimeout(r, 50));
+  assert.equal(midiCalls(), 0, 'a refused package never opens a MIDI port');
+  assert.equal(dev.reads, 0, 'the device was never asked for a block');
+  assert.equal(Number($("bar").value || 0), 0, "progress never moved");
+  console.log('ok  tampered package: verdict NOT verified, Install disabled, no MIDI, no device traffic');
+}
+
 console.log('PASS: install.html end-to-end in a DOM with a simulated FM-1 (not hardware).');

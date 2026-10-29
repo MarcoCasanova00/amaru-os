@@ -631,7 +631,7 @@ class Updater {
 }
 
 const $ = (id) => document.getElementById(id);
-const meta = {"version": "0.4", "product": "FM-1_7100002", "size": 610090, "sha256": "ed8f179dc35ffb57f832a93908720720ebfae303afa765509d6084a165baefa5", "pkg": "firmware/build/felucca.fwsc"};
+const meta = {"version": "0.4", "product": "FM-1_7100002", "size": 610090, "sha256": "c80a6d30254619f9e088a8221d5e660b370b92d370d6032a418ece9fcb45f13e", "pkg": "firmware/build/felucca.fwsc"};
 const state = { image: null, ready: false, busy: false };
 const say = (s) => { $("status").classList.remove("bad"); $("status").textContent = s; };
 const sayBad = (s) => { live(false); $("status").classList.add("bad"); $("status").textContent = s; };

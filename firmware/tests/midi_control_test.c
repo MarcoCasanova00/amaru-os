@@ -880,6 +880,13 @@ static int pc_test(void)
         ok &= !memcmp(was.p, t->p, sizeof was.p) && t->preset == was.preset && t->eng_req == e;
     }
     bad += check("  every engine: 0.. its presets in PRESETS' order (no alias twice); past the last ignored", ok);
+    set_engine_of(t, ENGI_SAMPLE);                      /* retired: loads as ANALOG */
+    ok = t->eng_req == ENGI_ANALOG;
+    pc(0, 1); frame();
+    ok &= t->eng_req == ENGI_ANALOG && str_eq(ENGINES[ENGI_ANALOG]->presets[t->preset].name, "SOFT PAD");
+    pc(0, 4); frame();
+    ok &= t->eng_req == ENGI_ANALOG && str_eq(ENGINES[ENGI_ANALOG]->presets[t->preset].name, "ACID");
+    bad += check("  SAMPLE (retired): the track loads as ANALOG; PC 1 / 4 pick ANALOG's sounds", ok);
 
     /* DRUM: the kits as KIT steps through them */
     {

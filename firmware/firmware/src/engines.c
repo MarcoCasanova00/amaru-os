@@ -80,11 +80,7 @@ static const engine_t *const ENGINES[NENGINES] = {
 #endif
     &ENG_RETIRED,                /* 2 PHASE (retired) */
     &ENG_RETIRED,                /* 3 LOFI (retired) */
-#if FELUCCA_SAMPLE
-    &ENG_SAMPLE,                 /* 4 SAMPLE */
-#else
     &ENG_RETIRED,                /* 4 SAMPLE (retired) */
-#endif
     &ENG_RETIRED,                /* 5 VOICE (retired) */
     &ENG_RETIRED,                /* 6 TRIO (retired) */
     &ENG_RETIRED,                /* 7 WHEEL (retired) */
@@ -153,7 +149,6 @@ static const char *snd_missing(const track_t *t, uint32_t *code)
 static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
     ENGI_ANALOG,                 /* 0 ANALOG */
     ENGI_DIGITAL,                /* 1 DIGITAL */
-    ENGI_SAMPLE,                 /* 4 SAMPLE */
     ENGI_FM6,                    /* 12 FM6 */
     ENGI_DRUM,                   /* 10 DRUM */
 };

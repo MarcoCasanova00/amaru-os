@@ -37,9 +37,6 @@
                                   * mix_block). 0 (FELUCCA_CPU2=0 build.py): none of it (no core 1 stack, waiting loop,
                                   * buffers or menu row). (The same default: core.h) */
 #endif
-#ifndef FELUCCA_SAMPLE
-#define FELUCCA_SAMPLE 1         /* SAMPLE engine + its factory sets (AMARU: adds the TEKNO hard-percussion kit) */
-#endif
 #define FM1_CPU1_USED FELUCCA_CPU2   /* hal/fm1_sys.h: the second core is built in; every reset holds it first (its
                                       * waiting loop is in RAM the ROM and the SPL use at boot) */
 #ifndef FELUCCA_VERSION

@@ -72,7 +72,7 @@ Every object uses an **A/B sector pair** with CRC + commit records, so a power c
 
 CPU budget (`tests/target_budget.py`): **0 over-budget render targets**. The audio engine set is ANALOG / DIGITAL / DRUM / FM6 — the retired engines (incl. SAMPLE) stay compiled out so the render loops remain the verified, in-budget ones.
 
-Imported TEKNO EPROM dumps are preserved under `firmware/assets/tekno-import/` but deliberately **not compiled into flash** (see its README). The Vermona SK86 *character* is captured instead in a new DRUM engine kit (`TEKNO`, kit 13) — pure parameter data in the existing, in-budget engine, so zero CPU cost.
+Imported TEKNO EPROM dumps are preserved under `firmware/assets/tekno-import/` but deliberately **not compiled into flash** (see its README).
 
 ---
 

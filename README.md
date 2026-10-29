@@ -1,12 +1,11 @@
-# AMARU OS 0.4
+# AMARU OS
 
-**Hard-tekno generative firmware for the M-VAVE FM-1.** Four-track song generator, monochrome Bunker HOME identity with Mesoamerican accents, and a hardened USB installer that never touches the boot block.
+**Hard-tekno generative firmware for the M-VAVE FM-1.** Four-track song generator, Bunker HOME identity, and a USB installer that never touches the boot block.
 
-<p align="center">
-  <img src="firmware/web/emu/logos/logo-splash.png" alt="AMARU OS splash — canary-yellow suns, temple-step marks, green monochrome garden">
-</p>
+[![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
+[![Emulator](https://img.shields.io/badge/try%20it-in%20the%20browser-ff7a00.svg)](https://marcocasanova00.github.io/amaru-os/)
 
-**AMARU OS** is an open-source, deterministic generative firmware for the M-VAVE FM-1 synthesiser (JieLi AC791N). It turns the FM-1 into a live hard-tekno groove box: four tracks (AIR / MELODY / ROOT / SPARK), nine first-class genres (tribe tekno, mental tekno, hardtekk, acidcore, jungle, drum & bass, breakbeat tekno, techno, psytrance), and a GEN page that renders full 64-step songs from one SEED value.
+AMARU OS turns your FM-1 into a live hard-tekno groove box. It is a **deterministic, seed-driven four-track generative engine** — pick a genre, dial a SEED, and the GEN page renders a complete 64-step song across AIR (pad/chorus), MELODY (lead), ROOT (bass), and SPARK (drums). Same seed, same settings, same song, every time.
 
 Built on Bunker Evolved 1.0. Licensed GPL-3.0-only.
 
@@ -19,104 +18,83 @@ Built on Bunker Evolved 1.0. Licensed GPL-3.0-only.
 
 ---
 
-## Specifications
+## The sound package
 
-| Category | Detail |
+**Drums (SPARK track)** — thirteen kits spanning hard and classic electronic percussion:
+
+- **TEKNO** — dry, percussive, brutal: hard kick, cracking snare, tight clap, metallic hats, dry tom, hard rim, short bell
+- **GABBER** — heavy saturated kick, cracking noisy snare, metal hats
+- **HARDTEKK / HITECH** — short driven kick, cluster hats
+- **DEEP / TIGHT / PERC** — model-kit percussion from the Felucca pieces
+- **80 / 10 / 66 / 55 / 77** — the classic box kits
+- **PSY / FOREST** — AMARU-appended model kits
+
+**808 presets** — `808 BASS BOOM`, `808 BASS DIRTY`, `808 BASS SLIDE`.
+
+**Synthesis engines** (four active): **ANALOG**, **DIGITAL** (FM4-style), **FM6**, and **DRUM**. Retired engines stay compiled out so the render loops stay tight.
+
+**Genres** — tribe tekno, mental tekno, hardtekk, acidcore, jungle, drum & bass, breakbeat tekno, techno, psytrance. DnB and breakbeats are not four-on-the-floor.
+
+**32 hard-tekno worlds** — curated at the GEN recipe layer, replacing the 112 ambient worlds.
+
+---
+
+## GEN page — one seed, one song
+
+| Knob | Role |
 |---|---|
-| **Platform** | M-VAVE FM-1 (JieLi AC791N / WL82) |
-| **Version** | AMARU OS 0.4 — identity `FM-1_7100002` |
-| **Tracks** | 4: AIR (pad/chorus), MELODY (lead), ROOT (bass), SPARK (drums) |
-| **Genres** | tribe tekno, mental tekno, hardtekk, acidcore, jungle, drum & bass, breakbeat tekno, techno, psytrance |
-| **DRUM kit** | TEKNO (kit 13): Vermona SK86 character — dry, percussive, brutal; hard kick, cracking snare, tight clap, metallic hats, dry tom, hard rim, short bell |
-| **Synthesis engines** | ANALOG, DIGITAL (FM4-style), FM6, DRUM — four active engines; retired engines stay compiled out |
-| **Display** | Strictly monochrome: GRN/BLK, WHT/BLK, AMB/BLK palettes + canary-yellow Bunker HOME garden accents (bottom corners, clear of top-band text) |
-| **Splash screen** | Unchanged AMARU original 96×96 monochrome splash |
-| **Flash image** | 501,660 B (app-area cap 602,112 B — ~100 KB free) |
-| **CPU budget** | 0 over-budget render targets (verified) |
-| **RAM static** | 53,044 B / 73,728 B |
-| **Pool (voices/patterns)** | 328,924 B / 368,640 B |
-| **User presets** | 32 slots (2 banks) |
-| **Projects** | 4 slots + autosave |
-| **License** | GPL-3.0-only |
+| **GENRE** | tribe / mental / hardtekk / acid core / jungle / drum&bass / breakbeat / techno / psytrance |
+| **SEED** | any number 0–9999 — a stable, repeatable song |
+| **ENERGY** | 0–100 — full adds extra hats and ghosts, empty strips them back |
+| **FORM** | `LOOP` (1 bar) / `PARTS` (2 bars) / `SONG` (4 bars) |
+
+**OCT+** advances the seed and plays a new take. **OCT-** resets to the base value. **PLAY** runs or stops the sequencer. **REC** records a take.
+
+The track sound name shows the recipe's source at a glance: `MYC PUNCHY`, `MYC BLOWN`, `GREEN KIT`, `TEKNO KIT`, `HYPOGEUM CHANT`, `ORACLE CHOIR`, `SILBURY WAIL`, and more.
 
 ---
 
-## What makes AMARU different
+## Installing (at your own risk)
 
-**Deterministic generative engine (GEN page).**  
-One SEED (0–9999) + GENRE + ENERGY + FORM produces an exact, repeatable 64-step, four-bar song. OCT+ advances the seed and plays a new take; OCT- resets to the base value. Same seed, same settings — same song, every time.
+1. **Coming from another custom firmware (Felucca, Baud Girl, or any other)? Return to official V15 first**, then install AMARU. Writing straight over another custom firmware has bricked an FM-1.
+2. Open **[install.html](https://marcocasanova00.github.io/amaru-os/install.html)** in Chrome or Edge, with the FM-1 connected directly by a **data** USB cable. Close other MIDI apps.
+3. Press **Install**, allow MIDI (SysEx), and wait for **Done** (about a minute). The status stays armed the whole write and disarms only at Done.
+4. **Do not unplug while writing.** If interrupted, replug and press Install again — it resumes from the start.
 
-**TEKNO DRUM kit, in-budget.**  
-The Vermona SK86 EPROM character (hard kick, cracking snare, tight clap, metallic hats, dry tom, hard rim, short bell) is captured as a pure-parameter DRUM engine kit — zero new render code, zero CPU cost. No samples compiled into flash; the raw dumps stay preserved under `firmware/assets/tekno-import/`.
+The installer checks the FM-1 first and writes only over official V15 or AMARU. It offers the **approved** version only: every change is checked in the [emulator](https://marcocasanova00.github.io/amaru-os/) first, and only then reaches the installer.
 
-**Monochrome Bunker HOME identity.**  
-Green/black terminal garden with two canary-yellow suns and temple-step marks in the bottom corners. The accents never overlap the world names; the splash screen is untouched. Monochrome palette break is allowed *only* for these marks.
+Offline: `python3 tools/fm1_install.py build/felucca.fwsc`.
 
-**No functionality removed.**  
-The 112 ambient worlds were replaced by 32 hard-tekno worlds at the GEN recipe layer, but nothing was taken away — the four engines, the four palettes, the GROW/EVOLVE workflow, and the Bunker HOME identity are all preserved and extended.
-
-**Flash safety by design.**  
-- The FM-1's recovery lives in an **unflashable ROM bootloader**: OCT− held on power-on (or two crash loops) boots a minimal updater reporting as `FM-1_000`. It runs before any flashed app and cannot be disabled by firmware.
-- AMARU writes **only** the app area `[0x4000, 0x93000)`. The bootloader head `[0, 0x4000)` is provably untouched (`ldr_test`).
-- Packages are validated by **identity + size + SHA-256** before any transfer. Foreign or damaged packages are refused before any write.
-- The device **pulls** the image with `0x30` read requests (M-UPGRADE); the host never pushes raw data. Nothing is committed until the device confirms `success`.
-- Every flash sector is erased, programmed, read back, and compared (retry up to 2×) before the next sector.
-
-**Zero-cost optimization.**  
-The build fits with margin via engine retirement + `gc-sections` — no risky trimming. The retired SAMPLE engine stays compiled out specifically to keep the CPU budget clean.
+**Recovery:** hold **OCT−** while switching the FM-1 on — the device enters update mode and listens for rescue. See [`docs/RESCUE.md`](docs/RESCUE.md) and [`docs/SAFETY.md`](docs/SAFETY.md). AMARU must **never** disable this handler.
 
 ---
 
-## Try it now (no download)
+## Changelog
 
-Open [https://marcocasanova00.github.io/amaru-os/](https://marcocasanova00.github.io/amaru-os/) in Chrome or Edge, click **Einschalten**, and connect the FM-1 over a data USB cable for the live version. No driver install.
-
-**Web ecosystem** — all cross-linked, all showing the AMARU logo:
-
-| Page | Purpose |
-|---|---|
-| `/` | Emulator — full FM-1 simulation in the browser |
-| `/install.html` | Installer — WebMIDI USB flashing with progress bar and "DO NOT UNPLUG" guard |
-| `/editor/` | Song editor — create/modify songs, JSON import/export, backup/restore |
-| `/verify.html` | Package verifier — identity/size/SHA-256 check only, no flash actions |
-
----
-
-## Install to FM-1
-
-1. **Back up your music first** — editor → Backup (settings, projects, presets, FM6 patches, samples).
-2. Open **install.html** in Chrome/Edge. Hard-reload so it picks up the pinned package (`FM-1_7100002`, SHA-256 `f082a9e5…`).
-3. Connect the FM-1 directly by a **data** USB cable. Close other MIDI apps.
-4. Press **Install**, allow MIDI (SysEx), and wait for **Done** (about a minute). The status stays armed/pulsing the whole write and disarms only at Done.
-5. **Do not unplug while writing.** If interrupted, replug and press Install again — it resumes from the start.
-
-**Recovery:** hold **OCT−** while switching the FM-1 on → update mode → press Install again. See [`docs/RESCUE.md`](docs/RESCUE.md) and [`docs/SAFETY.md`](docs/SAFETY.md) for the full flash-safety record.
-
----
-
-## What's new in 0.4
-
-- **TEKNO DRUM kit** (kit 13) — Vermona SK86 character, pure parameter data, in-budget
-- **TEKNO KIT** factory preset + `TEKNO KIT` genre recipe
-- Monochrome Bunker HOME rework: canary-yellow suns + temple-step marks (bottom corners)
+### 0.4
+- TEKNO drum kit and TEKNO KIT preset added
+- Monochrome Bunker HOME rework — canary accents in the bottom corners, splash untouched
 - 32 hard-tekno worlds (replacing 112 ambient), curated at the GEN recipe layer
 - 808 presets renamed `808 BASS BOOM / DIRTY / SLIDE`
-- Flash-fit verified (501,660 B), CPU budget clean (0 over-budget targets)
-- Brick-safety gates re-verified: `ota_test` PASS, `ldr_test` PASS, head `[0,0x4000)` untouched
+- Flash-fit verified; CPU budget clean; brick-safety gates re-verified (`ota_test`, `ldr_test`)
+
+### Earlier
+- Built on Bunker Evolved 1.0; genre concept from JIANT; timbral shapes from Carnac OS / Mycelium FM-1 (numbers only)
 
 ---
 
-## Credits
+## About
 
-- **AMARU OS** — Marco Casanova. Original artwork (logos, splash, 16×16 AMARU icon set).
-- **Bunker Evolved 1.0** — Hügelton Instruments (GPL-3.0-only): foundation, GROW/EVOLVE workflow, four-track architecture.
-- **JIANT** (GPL-3.0-only): genre concept and generator grammar rules.
-- **Carnac OS / Mycelium FM‑1** (GPL‑3.0): timbral parameter shapes — numbers only, no binaries imported.
-- **Felucca** (MIT): WebMIDI M-UPGRADE installer protocol (`fm1pkg.js`, `fm1ota.js`).
-- **M-VAVE** and **FM-1** are trademarks of their respective owners.
+AMARU OS is an alternative firmware for the M-VAVE FM-1, made for playing live and building whole songs without a computer.
+
+- **Emulator**: https://marcocasanova00.github.io/amaru-os/
+- **Installer**: https://marcocasanova00.github.io/amaru-os/install.html
+- **Editor**: https://marcocasanova00.github.io/amaru-os/editor/
+- **Verifier**: https://marcocasanova00.github.io/amaru-os/verify.html
+- **Flash safety**: `docs/SAFETY.md`
+- **Rescue**: `docs/RESCUE.md`
+- **Releases**: https://github.com/MarcoCasanova00/amaru-os/releases
+
+AMARU OS is an independent community firmware. It is not affiliated with or endorsed by M-VAVE, Bunker Evolved, JIANT, Carnac OS, or Mycelium FM-1. Installing custom firmware is at the user's risk; keep the stock image and a verified recovery path.
 
 See [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) and `LICENSE` for full attribution.
-
----
-
-*AMARU OS 0.4 — GPL-3.0-only. Flash safety record: `docs/SAFETY.md`. Hardware rescue: `docs/RESCUE.md`.*

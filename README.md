@@ -2,6 +2,10 @@
 
 **Hard-tekno generative firmware for the M-VAVE FM-1.** Four-track song generator, Bunker HOME identity, and a USB installer that never touches the boot block.
 
+<p align="center">
+  <img src="firmware/web/emu/logos/logo-splash.png" alt="AMARU OS splash — monochromatic Bunker HOME identity with canary-yellow Mesoamerican accents">
+</p>
+
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
 [![Emulator](https://img.shields.io/badge/try%20it-in%20the%20browser-ff7a00.svg)](https://marcocasanova00.github.io/amaru-os/)
 

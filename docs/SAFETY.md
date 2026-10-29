@@ -53,11 +53,13 @@ realistic outcome of a bad flash is a simple re-flash via OCT− rescue.
 
 ## 2. Persistent storage
 
-Verified against the `release` build (image 501,340 B, flash-fit passes; app-area cap 602,112 B).
+Verified against the `release` build (image 501,660 B, flash-fit passes; app-area cap 602,112 B).
 The CPU budget (`tests/target_budget.py`) is clean: 0 over-budget render targets. The audio engine
 set is ANALOG/DIGITAL/DRUM/FM6 — the retired engines (incl. SAMPLE) stay compiled out, so the
 render loops are the verified, in-budget ones. Imported TEKNO EPROM dumps are preserved under
-`firmware/assets/tekno-import/` but deliberately not compiled into flash (see its README).
+`firmware/assets/tekno-import/` but deliberately not compiled into flash (see its README). The
+Vermona SK86 *character* is instead captured in a new DRUM engine kit (`TEKNO`, kit 13) — pure
+parameter data in the existing, in-budget engine, so no CPU cost.
 
 | Resource | Availability |
 |---|---|

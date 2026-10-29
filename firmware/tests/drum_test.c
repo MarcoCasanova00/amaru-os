@@ -940,7 +940,7 @@ static void cost(void)
 
 /* --------------------------------------------------------- the model kits --- */
 static const char *const KITN[DV_NKIT] = {"80", "10", "66", "55", "77", "DEEP", "TIGHT", "PERC",
-                                          "PSY", "FOREST", "HITECH", "GABBER"};
+                                          "PSY", "FOREST", "HITECH", "GABBER", "TEKNO"};
 static const char *const LANEN[DV_NLANE] = {"KICK", "SNARE", "CLAP", "HATCL", "HATOP", "TOM", "RIM", "BELL"};
 #define KLEN (FS * 6u)
 
@@ -975,6 +975,8 @@ static const float KTGT[DV_NKIT][DV_NLANE][2] = {
      {0.500, 13024}, {0.200, 3480}, {0.010, 2421}, {0.110, 5821}},
     {{0.240, 399}, {0.050, 10507}, {0.150, 4339}, {0.090, 13073},    /* GABBER: 55 66 80 55 55 55 80 55 */
      {0.500, 13024}, {0.200, 3480}, {0.020, 4241}, {0.110, 5821}},
+    {{0.200, 911}, {0.050, 10560}, {0.090, 4565}, {0.060, 13065},   /* TEKNO: Vermona SK86 character */
+     {0.280, 12993}, {0.140, 3688}, {0.010, 2421}, {0.100, 5747}},
 };
 static const float KLVL[DV_NLANE] = {-14.5f, -18.2f, -24.2f, -27.4f, -23.8f, -13.6f, -22.5f, -21.0f};
 
@@ -1322,8 +1324,8 @@ static uint64_t seq_hash(const uint8_t (*ev)[3], uint32_t nev, uint32_t frames, 
 static void retired(void)
 {
     static const uint8_t MAP[4] = {DK_STD, DK_66, DK_10, DK_77};
-    static const uint8_t ORDER[13] = {DK_STD, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP, DK_TIGHT, DK_PERC,
-                                      DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER};
+    static const uint8_t ORDER[14] = {DK_STD, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP, DK_TIGHT, DK_PERC,
+                                      DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER, DK_TEKNO};
     const param_desc_t *d = &ENG_DRUM.edit[0];
     uint32_t r, n, k, bad = 0, same = 0;
     int16_t kick;
@@ -1357,23 +1359,23 @@ static void retired(void)
     bad += same != 6u;
     for (r = 0; r < DK_COUNT; r++) {                    /* the knob: from every value, both ways */
         int32_t v = (int32_t)r;
-        for (k = 0; k < 13u; k++) {
-            v = param_turn(d, v, k < 6u ? 1 : -1);
+        for (k = 0; k < 14u; k++) {
+            v = param_turn(d, v, k < 7u ? 1 : -1);
             bad += v >= DK_HAND && v <= DK_HCYM;
         }
     }
     {
         int32_t v = DK_STD, i;
-        for (i = 0; i < 13; i++) {                      /* STD 80 10 66 55 77 DEEP TIGHT PERC PSY FOREST HITECH GABBER */
+        for (i = 0; i < 14; i++) {                      /* STD 80 10 66 55 77 DEEP TIGHT PERC PSY FOREST HITECH GABBER TEKNO */
             bad += v != ORDER[i];
             v = param_turn(d, v, 1);
         }
-        bad += v != DK_GABBER || param_turn(d, DK_80, -1) != DK_STD || param_turn(d, DK_STD, -1) != DK_STD;
+        bad += v != DK_TEKNO || param_turn(d, DK_80, -1) != DK_STD || param_turn(d, DK_STD, -1) != DK_STD;
     }
     for (r = 1; r < 4u; r++)
         bad += strcmp(d->names[r], d->names[MAP[r]]) != 0 || enum_orig(d, (int32_t)r) != MAP[r] ||
                param_fit(d, (int32_t)r) != MAP[r];
-    bad += param_fit(d, 99) != DK_GABBER || param_fit(d, -5) != DK_STD || enum_orig(d, DK_55) != DK_55;
+    bad += param_fit(d, 99) != DK_TEKNO || param_fit(d, -5) != DK_STD || enum_orig(d, DK_55) != DK_55;
     bad += param_fit(&TP[P_LEVEL], 77) != 77;
     {   /* a motion event of KIT 2 (CYM): stored and played as 10 */
         host_tracks_init();

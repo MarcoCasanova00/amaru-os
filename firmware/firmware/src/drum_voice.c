@@ -80,7 +80,7 @@ enum {
 };
 /* a lane of a model kit as a type: the kit (1..DV_NKIT) in the high 4 bits, the lane in the low 3 (Felucca's own
  * types: 0 above). Its run (the DVT_* it plays through) is the kit's (DV_KIT) */
-#define DV_NKIT 12                                       /* (1.5.6, #216: DEEP TIGHT PERC after 77; AMARU: PSY FOREST HITECH GABBER) */
+#define DV_NKIT 13                                       /* (1.5.6, #216: DEEP TIGHT PERC after 77; AMARU: PSY FOREST HITECH GABBER + TEKNO) */
 #define DV_KITOF(t) ((uint32_t)(t) >> 4)
 #define DV_KTYPE(kit, lane) ((uint8_t)(((kit) << 4) | (lane)))
 
@@ -191,7 +191,7 @@ typedef struct {
     int16_t v[13];
 } dv_kit_t;
 /* the accent per kit: + (x / 16384) per accent step (75: +4 dB at full, as Felucca's own) */
-static const uint8_t DV_KIT_ACC[DV_NKIT] = {120, 45, 100, 40, 40, 80, 60, 70, 55, 35, 65};
+static const uint8_t DV_KIT_ACC[DV_NKIT] = {120, 45, 100, 40, 40, 80, 60, 70, 55, 35, 65, 100};
 static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
     {   /* 80 */
         /* deep sine, a small drop, long decay */
@@ -402,6 +402,23 @@ static const dv_kit_t DV_KIT[DV_NKIT][DV_NLANE] = {
         {DVT_RIM, 32, 1113, 12, 4599, {360, 12000, 30000, 32000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
         /* 55's wide cymbal on BELL: 0.7 .. 7.6 kHz */
         {DVT_CYM, 50, 1240, 114, 13203, {1701, 4096, 1550, 4096, 22000, 20000, 30, 19661, 8192, 4, 0, 0, 0}},
+    },
+    {   /* TEKNO (AMARU): dry, percussive, brutal — Vermona SK86 character (DBWBP EPROM dumps) */
+        /* hard, short kick: a fast downward drop, a strong click, a tight body */
+        {DVT_PUNCH, 60, 531, 140, 3780, {163, 120, 0, 1600, 0, 1444, 1500, 6000, 0, 0, 0, 0, 0}},
+        /* dry, cracking snare: a bright noise burst over a short shell */
+        {DVT_SNARE, 40, 979, 54, 9840, {107, 0, 100, 120, 6000, 1200, 1907, 8192, 30, 16000, 32767, 32767, 1828}},
+        /* tight clap: fewer teeth, a shorter tail */
+        {DVT_CLAP, 48, 1331, 200, 12160, {0, 4096, 1678, 0, 2000, 30000, 50, 400, 3, 0, 0, 0, 0}},
+        /* open, metallic hats: high metal cluster, fast decay */
+        {DVT_HATC, 45, 1909, 60, 3130, {1996, 5120, 1940, 2042, 4000, 11469, 18022, 3, 3, 0, 0, 0, 0}},
+        {DVT_HATO, 63, 1909, 200, 2170, {1996, 5120, 1940, 2042, 4000, 11469, 18022, 3, 3, 0, 0, 0, 0}},
+        /* dry tom: a quick bend, a short body */
+        {DVT_TOM, 53, 824, 120, 4980, {21, 600, 1523, 9000, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* hard rim: a bright, immediate click (Vermona ~1.5 kHz, ~2.7 ms) */
+        {DVT_RIM, 32, 1441, 13, 8636, {304, 26000, 1000, 4096, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+        /* short, sharp metallic bell/crash */
+        {DVT_CYM, 50, 1240, 80, 14260, {1701, 4096, 1550, 4096, 22000, 20000, 30, 19661, 8192, 4, 0, 0, 0}},
     },
 };
 

@@ -39,7 +39,7 @@ enum { AMV_POLY = 0, AMV_MONO = 1, AMV_LEGATO = 2, AMV_UNISON = 3 };
 
 /* DRUM's preset numbers (src/eng_drum.c DRUM_PRESETS, in order): the kit a genre's drums play */
 enum { DP_STD, DP_DEEP, DP_TIGHT, DP_PERC, DP_PSY, DP_FOREST, DP_HITECH,
-       DP_808, DP_909, DP_606, DP_CR78, DP_707, DP_JUNGLE, DP_TECHNO, DP_HARDTEKK, DP_GABBER };
+       DP_808, DP_909, DP_606, DP_CR78, DP_707, DP_JUNGLE, DP_TECHNO, DP_HARDTEKK, DP_GABBER, DP_TEKNO };
 
 /* ------------------------------------------------------------- drum maps --- */
 /* A lane's 16 steps as levels: '.' 0, '1'..'9' 26 a step (9 = 234), 'X' 255. A step

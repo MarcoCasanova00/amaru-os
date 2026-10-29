@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMARU OS · Install to FM-1</title>
+<link rel="icon" href="logos/logo-splash.png" type="image/png">
+<style>
+  :root { --bg:#050705; --panel:#0a120a; --line:#2a402a; --fg:#7cff5b; --dim:#9cff9b;
+          --bad:#ff5b5b; --amber:#ffd24a; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif; }
+  a { color:var(--fg); }
+  .wrap { display:flex; align-items:stretch; gap:14px; max-width:1060px; margin:0 auto; padding:22px 14px 40px; }
+  .pillar { width:120px; flex:0 0 120px; background:url("logos/pillar.png") center top/contain no-repeat; filter:grayscale(1) contrast(1.4); opacity:.75; }
+  .pillar.r { transform:scaleY(-1); opacity:.5; }
+  main { flex:1; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:20px 22px 26px; }
+  header { text-align:center; border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:16px; }
+  header img { width:110px; border:2px solid var(--fg); padding:3px; background:#000; }
+  .strap { font-size:11px; letter-spacing:2px; color:var(--dim); margin:8px 0 2px; }
+  h1 { font-size:20px; margin:6px 0 0; letter-spacing:.5px; }
+  h1 span { color:var(--dim); font-weight:400; }
+  nav { display:flex; justify-content:center; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12px; letter-spacing:.6px; }
+  nav a { text-decoration:none; border-bottom:1px solid transparent; }
+  nav a:hover, nav a[aria-current] { border-color:var(--fg); }
+  h2 { font-size:12px; letter-spacing:1.6px; text-transform:uppercase; color:var(--dim); margin:22px 0 8px; font-weight:600; }
+  table.pkg { width:100%; border-collapse:collapse; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+  table.pkg th { text-align:left; width:96px; color:var(--dim); font-weight:400; padding:4px 8px 4px 0; }
+  table.pkg td { padding:4px 0; word-break:break-all; }
+  #verdict { margin-top:10px; font-size:12px; padding:8px 10px; border:1px solid var(--line); border-radius:4px; color:var(--dim); }
+  #verdict.ok { border-color:var(--fg); color:var(--fg); }
+  #verdict.bad { border-color:var(--bad); color:var(--bad); }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  button { font:inherit; font-weight:600; border:0; border-radius:4px; padding:11px 16px; cursor:pointer; }
+  #go { background:var(--fg); color:#0b100a; font-size:15px; }
+  #go:disabled { opacity:.3; cursor:not-allowed; }
+  #detect { background:transparent; color:var(--fg); border:1px solid var(--line); }
+  #detect:disabled { opacity:.35; cursor:not-allowed; }
+  progress { width:100%; height:6px; margin-top:14px; appearance:none; border:0; background:#0f1a0f; }
+  progress::-webkit-progress-bar { background:#0f1a0f; }
+  progress::-webkit-progress-value { background:var(--fg); }
+  progress::-moz-progress-bar { background:var(--fg); }
+  #status { margin-top:10px; font-size:13px; min-height:1.6em; }
+  #log { margin:10px 0 0; max-height:180px; overflow:auto; font-family:ui-monospace,Menlo,monospace; font-size:11px;
+         color:#6fbf6f; background:#040704; border:1px solid #142014; border-radius:4px; padding:8px; white-space:pre-wrap; }
+  #log:empty { display:none; }
+  ol.steps { margin:0; padding-left:20px; }
+  ol.steps li { margin:3px 0; }
+  .warn { border:2px solid var(--bad); background:#2a0a0a; color:#ff8d8d; padding:10px 12px; border-radius:4px;
+          font-weight:700; font-size:13px; margin:16px 0 0; }
+  .note { font-size:12px; color:var(--dim); }
+  code { font-family:ui-monospace,Menlo,monospace; }
+  details { margin-top:10px; }
+  summary { cursor:pointer; font-size:12px; color:var(--dim); }
+  input[type=file] { color:var(--dim); font-size:12px; margin-top:8px; }
+  footer { text-align:center; font-size:11px; color:#4f7a4f; margin-top:22px; border-top:1px solid var(--line); padding-top:12px; }
+  @media (max-width:820px) { .pillar { display:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="pillar" aria-hidden="true"></div>
+  <main>
+    <header>
+      <img src="logos/logo-splash.png" alt="AMARU">
+      <p class="strap">TRIBE · MENTAL TEKNO · JUNGLIST · AZTEC · INCA · SOUND SYSTEM</p>
+      <h1>AMARU OS <span>· firmware installer</span></h1>
+      <nav>
+        <a href="./">Emulator</a>
+        <a href="install.html" aria-current="page">Install</a>
+        <a href="editor/">Editor</a>
+        <a href="verify.html">Verify package</a>
+      </nav>
+    </header>
+
+    <h2>1 · Package</h2>
+    <table class="pkg">
+      <tr><th>Source</th><td id="pkg-name">loading…</td></tr>
+      <tr><th>Identity</th><td id="pkg-ident">—</td></tr>
+      <tr><th>Size</th><td id="pkg-size">—</td></tr>
+      <tr><th>SHA-256</th><td id="pkg-sha">—</td></tr>
+    </table>
+    <div id="verdict">checking…</div>
+    <details>
+      <summary>Use a local .fwsc instead</summary>
+      <p class="note">Only the exact published AMARU build is accepted: identity, size and SHA-256 must all match.</p>
+      <input type="file" id="file" accept=".fwsc">
+    </details>
+
+    <h2>2 · Install</h2>
+    <ol class="steps">
+      <li>Chrome or Edge, FM-1 connected directly by a **data** USB cable.</li>
+      <li>Close other MIDI apps (editors, DAWs, other browser tabs using MIDI).</li>
+      <li>Back up your music first: <a href="editor/">editor → Backup</a>.</li>
+      <li>Press <b>Install</b>, allow MIDI, and wait for <b>Done</b>. About a minute.</li>
+    </ol>
+    <div class="row">
+      <button id="go" disabled>Install AMARU 0.4</button>
+      <button id="detect">Detect device</button>
+    </div>
+    <progress id="bar" max="100" value="0"></progress>
+    <div id="status">Loading the published package…</div>
+    <pre id="log"></pre>
+
+    <p class="warn">DO NOT UNPLUG WHILE WRITING · RECOVERY: HOLD OCT− WHILE SWITCHING ON</p>
+    <p class="note">The device asks for the firmware block by block; nothing is committed until it confirms. If an install is
+      interrupted, replug the cable and press Install again — it resumes from the start. AMARU installs over official V15 or
+      over AMARU; no intermediate firmware is needed.</p>
+
+    <footer>
+      AMARU OS 0.4 · FM-1_7100002 · GPL-3.0-only · M-VAVE and FM-1 are trademarks of their respective owners.<br>
+      Update protocol: the FM-1 pulls the package with 0x30 read requests (M-UPGRADE), it is never pushed raw data.
+    </footer>
+  </main>
+  <div class="pillar r" aria-hidden="true"></div>
+</div>
+
+<script type="module">
+/*LIB*/
+
+const $ = (id) => document.getElementById(id);
+const meta = /*META*/;
+const state = { image: null, ready: false, busy: false };
+const say = (s) => { $("status").textContent = s; };
+const log = (s) => { $("log").textContent += s + "\n"; $("log").scrollTop = $("log").scrollHeight; };
+const bar = (p) => { $("bar").value = Math.max(0, Math.min(100, p)); };
+const busy = (on) => { state.busy = on; $("go").disabled = on || !state.ready; $("detect").disabled = on; $("file").disabled = on; };
+window.addEventListener("beforeunload", (e) => { if (state.busy) { e.preventDefault(); e.returnValue = "An install is running."; } });
+
+async function accept(src, bytes) {
+  let prod = "", sha = "";
+  try { prod = productOf(bytes); } catch (_) { prod = ""; }
+  try { sha = await sha256hex(bytes); } catch (_) { sha = ""; }
+  const ok = prod === meta.product && bytes.length === meta.size && sha === meta.sha256;
+  $("pkg-name").textContent = src;
+  $("pkg-ident").textContent = prod || "(not an FM-1 package)";
+  $("pkg-size").textContent = bytes.length.toLocaleString("en-US") + " B";
+  $("pkg-sha").textContent = sha ? sha.slice(0, 16) + "…" + sha.slice(-8) : "—";
+  $("pkg-sha").title = sha;
+  const v = $("verdict");
+  v.className = ok ? "ok" : "bad";
+  v.textContent = ok
+    ? "Verified — this is the published AMARU " + meta.version + " build (" + prod + ")."
+    : "NOT verified — identity, size or SHA-256 does not match the published AMARU " + meta.version + " build. Flashing stays disabled.";
+  if (!ok) { log("expected " + meta.product + " " + meta.size + " B " + meta.sha256.slice(0, 16) + "…"); }
+  state.image = ok ? logicalImage(bytes) : null;
+  state.ready = ok;
+  $("go").disabled = !ok || state.busy;
+}
+
+async function loadPublished() {
+  try {
+    const r = await fetch(meta.pkg, { cache: "no-cache" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    await accept("published build · " + meta.pkg, new Uint8Array(await r.arrayBuffer()));
+    if (state.ready) say("Ready. Connect the FM-1 and press Install.");
+  } catch (e) {
+    say("Could not load the published package (" + e.message + "). Choose the .fwsc file under “Use a local .fwsc instead”.");
+  }
+}
+
+$("file").addEventListener("change", async (e) => {
+  const f = e.target.files[0];
+  if (f) await accept(f.name, new Uint8Array(await f.arrayBuffer()));
+});
+
+async function openMidi() {
+  if (!navigator.requestMIDIAccess) { say("This browser has no WebMIDI. Use Chrome or Edge."); return null; }
+  try { return await navigator.requestMIDIAccess({ sysex: true }); }
+  catch (_) { say("MIDI (SysEx) permission denied. Allow MIDI for this site in the address bar, then retry."); return null; }
+}
+
+$("detect").addEventListener("click", async () => {
+  if (state.busy) return;
+  const midi = await openMidi(); if (!midi) return;
+  say("Looking for the FM-1…");
+  try {
+    const up = new Updater(midi, log);
+    const dev = (await up.find((id) => !IS_OTA(id))) || (await up.find((id) => !IS_OTA(id), true));
+    if (dev) {
+      const name = dev.name || "(unnamed port)";
+      dev.link.close();
+      say("Found " + dev.id.text + " on “" + name + "”. Ready to install.");
+      return;
+    }
+    const ota = (await up.find((id) => IS_OTA(id))) || (await up.find((id) => IS_OTA(id), true));
+    if (ota) { ota.link.close(); say("Found " + ota.id.text + " — the FM-1 is in update mode. Press Install to finish."); return; }
+    say("No FM-1 answered. Check the data cable, close other MIDI apps, and try again.");
+  } catch (e) { say("Detect failed: " + (e && e.message ? e.message : e)); }
+});
+
+const ERRORS = {
+  denied: "MIDI (SysEx) permission was denied. Allow MIDI for this site, then retry.",
+  notfound: "FM-1 not found. Use a data USB cable, close other MIDI apps, then retry.",
+  model: "The connected device is not an FM-1: ",
+  stopped: "The device stopped answering: nothing was written. Replug and press Install again.",
+  lost: "The USB connection dropped. Replug and press Install again.",
+  noloader: "The update loader did not appear. Replug and press Install again — the device stays in update mode until finished.",
+  noreturn: "The device did not come back after writing. Power-cycle it.",
+  mismatch: "Written, but the device reports a different version: ",
+  badreq: "The device asked for an invalid block. Nothing was written; retry or use the verifier.",
+};
+
+$("go").addEventListener("click", async () => {
+  if (!state.image || state.busy) return;
+  if (!confirm("Write AMARU " + meta.version + " (" + meta.product + ") to the FM-1?\n\n" +
+      "• Back up your music in the editor first.\n" +
+      "• Do not unplug the USB cable while writing (about a minute).\n" +
+      "• Recovery: hold OCT− while switching the FM-1 on.")) return;
+  busy(true); bar(0); $("log").textContent = "";
+  const midi = await openMidi();
+  if (!midi) { busy(false); return; }
+  const max = Math.max(1, Math.ceil(state.image.length / 512));
+  const step = (k, a) => {
+    if (k === "start") { say("Found " + a + ". Verifying the package…"); bar(2); }
+    else if (k === "verify") { say("Verifying — block " + a); bar(2 + 28 * Math.min(1, a / max)); }
+    else if (k === "loader") { say("Accepted. Switching to update mode…"); bar(32); }
+    else if (k === "write") { say("Writing — block " + a + " of about " + max); bar(34 + 64 * Math.min(1, a / max)); }
+    else if (k === "reboot") { say("Written. Restarting the FM-1…"); bar(99); }
+    else if (k === "done") { bar(100); say("Done. The FM-1 reports " + a + " — AMARU " + meta.version + " is installed."); }
+  };
+  try {
+    const up = new Updater(midi, log);
+    const ota = (await up.find((id) => IS_OTA(id))) || (await up.find((id) => IS_OTA(id), true));
+    if (ota) {
+      say("The FM-1 is already in update mode (" + ota.id.text + "). Finishing the write…");
+      ota.link.close();
+      if (!(await up.resume(state.image, step, meta.product))) { say(ERRORS.stopped); }
+    } else {
+      await up.install(state.image, meta.product, step);
+    }
+  } catch (e) {
+    const msg = (e && e.code && ERRORS[e.code]) ? ERRORS[e.code] + (e.detail || "") : "Install failed: " + (e && e.message ? e.message : e);
+    say(msg);
+    log(String((e && e.stack) || e));
+  } finally { busy(false); }
+});
+
+loadPublished();
+</script>
+</body>
+</html>

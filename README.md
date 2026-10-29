@@ -72,8 +72,21 @@ Hold **OCT−** while switching the FM-1 on — the device enters update mode an
 
 - Emulator: https://marcocasanova00.github.io/amaru-os/
 - Song editor: https://marcocasanova00.github.io/amaru-os/editor/ (create/modify songs, JSON import/export)
-- Package verifier: https://marcocasanova00.github.io/amaru-os/install.html
-  (hash-and-size check only, no flash actions)
+- Installer: https://marcocasanova00.github.io/amaru-os/install.html
+  (WebMIDI, Chrome/Edge: installs the pinned release package over USB)
+- Package verifier: https://marcocasanova00.github.io/amaru-os/verify.html
+  (identity/size/SHA-256 check only, no flash actions)
+
+`install.html` and `verify.html` are **generated** — do not edit them by hand. They inline
+`firmware/web/fm1pkg.js` + `firmware/web/fm1ota.js`, so the page always speaks the same
+M-UPGRADE protocol as the firmware (the device pulls the package with `0x30` read requests;
+the host never pushes raw data). Rebuild after a firmware change with:
+
+```
+python3 tools/build_pages.py            # pins identity, size and SHA-256 of build/felucca.fwsc
+node tests/installer.test.mjs           # protocol + pins
+node tests/installer.page.test.mjs      # the page, end to end, against a simulated FM-1
+```
 - Releases: https://github.com/MarcoCasanova00/amaru-os/releases
 - Firmware Hub: https://thefirmwarehub.com (submission planned post-release)
 - Flash safety & storage: `docs/SAFETY.md`

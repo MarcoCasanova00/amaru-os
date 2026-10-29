@@ -34,6 +34,15 @@ AMARU is installed as a validated **`.fwsc`** package built with the proper upda
 loader (`fm1pkg_make`). Raw `.bin` is never flashed. The M-UPGRADE handshake
 verifies identity before any write.
 
+The published installer (`install.html`) is generated from `firmware/web/fm1pkg.js`
+and `firmware/web/fm1ota.js` by `tools/build_pages.py`, and it pins the identity,
+size and SHA-256 of the exact released package. The device **pulls** the image with
+`0x30` read requests; the page answers them. It never streams raw data at the
+device, which is what a 0.4 page once did and why a flash could appear to do
+nothing while the device waited in update mode. `tests/installer.test.mjs` and
+`tests/installer.page.test.mjs` replay the whole exchange against a simulated
+FM-1 and compare every block with the released `.fwsc`.
+
 ### The only "true brick" scenarios
 
 A permanent brick requires physically damaging the ROM/flash controller, or an
@@ -94,6 +103,8 @@ build is already optimized via engine retirement + `gc-sections`.
 ## 5. Verification checklist (host)
 
 - `amaru_gen_test` — all genres/forms valid, deterministic (~PASS)
+- `installer.test.mjs` — installer/verifier pins + M-UPGRADE read protocol (~PASS)
+- `installer.page.test.mjs` — install.html end to end against a simulated FM-1 (~PASS)
 - `ldr_test` — loader update safety (~PASS)
 - `ota_test` — OTA staging windows (~PASS)
 - `storage_test`, `project_test`, `upreset_test` — persistence (~PASS)

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMARU OS · Verify package</title>
+<link rel="icon" href="logos/logo-splash.png" type="image/png">
+<style>
+  :root { --bg:#050705; --panel:#0a120a; --line:#2a402a; --fg:#7cff5b; --dim:#9cff9b; --bad:#ff5b5b; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif; }
+  a { color:var(--fg); }
+  .wrap { max-width:820px; margin:0 auto; padding:22px 14px 40px; }
+  main { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:20px 22px 26px; }
+  header { text-align:center; border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:16px; }
+  header img { width:110px; border:2px solid var(--fg); padding:3px; background:#000; }
+  .strap { font-size:11px; letter-spacing:2px; color:var(--dim); margin:8px 0 2px; }
+  h1 { font-size:20px; margin:6px 0 0; }
+  h1 span { color:var(--dim); font-weight:400; }
+  nav { display:flex; justify-content:center; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12px; letter-spacing:.6px; }
+  nav a { text-decoration:none; border-bottom:1px solid transparent; }
+  nav a:hover, nav a[aria-current] { border-color:var(--fg); }
+  p { margin:0 0 10px; }
+  input[type=file] { color:var(--dim); font-size:13px; }
+  #drop { border:1px dashed var(--line); border-radius:6px; padding:26px 16px; text-align:center; margin:14px 0; }
+  #drop.hot { border-color:var(--fg); }
+  #verdict { font-weight:700; padding:10px 12px; border:1px solid var(--line); border-radius:4px; margin:14px 0; }
+  #verdict.ok { border-color:var(--fg); color:var(--fg); }
+  #verdict.bad { border-color:var(--bad); color:var(--bad); }
+  table { width:100%; border-collapse:collapse; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+  th { text-align:left; width:130px; color:var(--dim); font-weight:400; padding:4px 8px 4px 0; vertical-align:top; }
+  td { padding:4px 0; word-break:break-all; }
+  .note { font-size:12px; color:var(--dim); margin-top:14px; }
+  footer { text-align:center; font-size:11px; color:#4f7a4f; margin-top:18px; border-top:1px solid var(--line); padding-top:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+  <header>
+    <img src="logos/logo-splash.png" alt="AMARU">
+    <p class="strap">TRIBE · MENTAL TEKNO · JUNGLIST · AZTEC · INCA · SOUND SYSTEM</p>
+    <h1>AMARU OS <span>· package verifier</span></h1>
+    <nav>
+      <a href="./">Emulator</a>
+      <a href="install.html">Install</a>
+      <a href="editor/">Editor</a>
+      <a href="verify.html" aria-current="page">Verify package</a>
+    </nav>
+  </header>
+
+  <p>Drop a released AMARU <code>.fwsc</code> here. This page only reads the file in your browser:
+    it does not flash and sends nothing to a server.</p>
+
+  <div id="drop">
+    <input type="file" id="file" accept=".fwsc">
+    <div class="note">or drag the file onto this box</div>
+  </div>
+
+  <div id="verdict">waiting for a file…</div>
+  <table>
+    <tr><th>Identity</th><td id="ident">—</td></tr>
+    <tr><th>Size</th><td id="size">—</td></tr>
+    <tr><th>SHA-256</th><td id="sha">—</td></tr>
+    <tr><th>Expected</th><td id="exp">—</td></tr>
+  </table>
+
+  <p class="note">Expected values are the published AMARU 0.4 release: identity <code id="e-ident"></code>,
+    <span id="e-size"></span> bytes. A mismatch means the file is not the tested build — do not flash it.
+    Install from <a href="install.html">install.html</a>.</p>
+
+  <footer>AMARU OS 0.4 · FM-1_7100002 · GPL-3.0-only<br>
+    M-VAVE and FM-1 are trademarks of their respective owners.</footer>
+</main>
+</div>
+
+<script type="module">
+/*LIB*/
+
+const $ = (id) => document.getElementById(id);
+const meta = /*META*/;
+$("e-ident").textContent = meta.product;
+$("e-size").textContent = meta.size.toLocaleString("en-US");
+
+async function check(file) {
+  if (!file) return;
+  const v = $("verdict");
+  v.className = ""; v.textContent = "reading…";
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let prod = "", sha = "";
+  try { prod = productOf(bytes); } catch (_) { prod = ""; }
+  try { sha = await sha256hex(bytes); } catch (_) { sha = ""; }
+  $("ident").textContent = prod || "(not an FM-1 package)";
+  $("size").textContent = bytes.length.toLocaleString("en-US") + " B";
+  $("sha").textContent = sha || "—";
+  $("exp").textContent = meta.product + " · " + meta.size.toLocaleString("en-US") + " B · " + meta.sha256;
+  const ok = prod === meta.product && bytes.length === meta.size && sha === meta.sha256;
+  v.className = ok ? "ok" : "bad";
+  v.textContent = ok ? "VERIFIED — this is the published AMARU " + meta.version + " build."
+                     : "MISMATCH — not the published AMARU " + meta.version + " build. Do not flash it.";
+}
+
+$("file").addEventListener("change", (e) => check(e.target.files[0]));
+const drop = $("drop");
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("hot"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("hot"));
+drop.addEventListener("drop", (e) => {
+  e.preventDefault(); drop.classList.remove("hot");
+  check(e.dataTransfer.files && e.dataTransfer.files[0]);
+});
+</script>
+</body>
+</html>

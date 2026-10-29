@@ -1,25 +1,133 @@
-import assert from 'node:assert/strict';import fs from 'node:fs';
-const source=fs.readFileSync('dist/install/fm1ota.js','utf8');
-const {Updater,pack7,unpack7,parseIdentity,Link}=await import('data:text/javascript;base64,'+Buffer.from(source+'\nexport {parseIdentity,Link};').toString('base64'));
-const realTimeout=globalThis.setTimeout;globalThis.setTimeout=(fn,ms,...args)=>realTimeout(fn,Math.min(ms,2),...args);
-function request(addr,len=32){let b=[0,89,48,8,0,0,0,addr&255,(addr>>>8)&255,(addr>>>16)&255,(addr>>>24)&255,len&255,(len>>>8)&255,(len>>>16)&255];let sum=b.slice(6).reduce((a,b)=>a+b,0);b.push(~sum&255);return [240,...pack7(b),247];}
-function link(packets,{lost=false,sendOK=true}={}){return {lost,closed:false,sent:[],async read(){return packets.shift()||null;},send(p){this.sent.push(p);return sendOK;},close(){this.closed=true;}};}
-for(let n=0;n<1024;n++){let a=Array.from({length:n%513},(_,i)=>(i*131+n)&255);assert.deepEqual(unpack7(pack7(a)),a);}
-assert.equal(parseIdentity([0,...Array(40).fill(0)]),null);
-const inp={state:'connected'},out={state:'connected',send(){}};const l=new Link(inp,out);for(let i=0;i<10000;i++)inp.onmidimessage({data:[240,1,247]});assert.equal(l.q.length,128);l.close();assert.equal(inp.onmidimessage,null);
-const u=new Updater({}),image=new Uint8Array(1024);
-for(const [addr,len] of [[1020,16],[0,513],[0,0],[0xffffffff,32]])await assert.rejects(u.serve(link([request(addr,len)]),image,0xf0000000,1),e=>e.code==='badreq');
-let c=link([request(0,512),request(512,512),request(0xf0000000)]);assert.equal((await u.serve(c,image,0xf0000000,1)).finished,true);assert.equal(c.sent.length,3);
-assert.equal((await u.serve(link([],{lost:true}),image,0xf0000000,1)).lost,true);
-assert.equal((await u.serve(link([request(0xf0000000)],{sendOK:false}),image,0xf0000000,1)).finished,false);
-for(const from of ['FM-1_014','FM-1_015','FM-1_7010200','FM-1_7100001']) for(const expected of ['FM-1_7100002','FM-1_7010200']){
- const first=link([request(0),request(0xe0000000)]),second=link([request(0),request(0xf0000000)]),back=link([]);let stages=[];
- const test=new Updater({});test.find=async()=>({id:{model:'FM-1',text:from},link:first});let replies=[{id:{model:'ota-FM-1',text:'ota-FM-1_1'},link:second},{id:{model:'FM-1',text:expected},link:back}];test.waitFor=async()=>replies.shift();
- if(expected==='FM-1_7100002')assert.equal(await test.install(image,'FM-1_7100002',s=>stages.push(s)),expected);
- else await assert.rejects(test.install(image,'FM-1_7100002',s=>stages.push(s)),e=>e.code==='mismatch');
- assert(first.closed&&second.closed&&back.closed);assert.equal(stages.includes('done'),expected==='FM-1_7100002');
+// The published AMARU installer/verifier pages, tested against the real package.
+//
+// The firmware installs by *pulling*: the device sends 0x30 read requests and the
+// host answers with the package image. This test decodes the frames the generated
+// page would send and compares them with the released .fwsc, so a page that
+// pushes raw data (the 0.4 web installer bug) cannot pass again.
+//
+//   node tests/installer.test.mjs        (from the repository root)
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const read = (f) => fs.readFileSync(f, 'utf8');
+const strip = (f) => read(f).replace(/^export\s+/gm, '').replace(/^import .*?;\n/gm, '');
+
+const lib = strip('firmware/web/fm1pkg.js') + '\n' + strip('firmware/web/fm1ota.js') +
+  '\nexport { Updater, pack7, unpack7, parseIdentity, productOf, logicalImage, sha256hex, IS_OTA };\n';
+const M = await import('data:text/javascript;base64,' + Buffer.from(lib).toString('base64'));
+
+const html = read('install.html');
+const meta = JSON.parse(html.match(/const meta = (\{.*?\});/s)[1]);
+const pkg = new Uint8Array(fs.readFileSync('firmware/build/felucca.fwsc'));
+const image = M.logicalImage(pkg);
+
+// --- the page ships the tested build, and only that build ---
+const sha = await M.sha256hex(pkg);
+assert.equal(meta.product, M.productOf(pkg));
+assert.equal(meta.product, 'FM-1_7100002');
+assert.equal(meta.size, 610090);
+assert.equal(meta.sha256, sha);
+assert.equal(meta.pkg, 'firmware/build/felucca.fwsc');
+assert.ok(html.includes('firmware/web') === false, 'the page is self-contained');
+assert.ok(html.includes('new Updater('), 'the page uses the shared updater');
+assert.ok(!/0xF0,\s*0x30,\s*\.\.\.slice/.test(html), 'the page must not push data frames');
+
+const vhtml = read('verify.html');
+const vmeta = JSON.parse(vhtml.match(/const meta = (\{.*?\});/s)[1]);
+assert.deepEqual(vmeta, meta);
+console.log('ok  install.html + verify.html pin', meta.product, meta.size, sha.slice(0, 12) + '…');
+
+// --- the image the device addresses ---
+const manual = new Uint8Array(pkg.length - 20);
+for (let i = 0; i < 20; i++) manual.set(pkg.subarray(i * 0x30, i * 0x30 + 0x2F), i * 0x2F);
+manual.set(pkg.subarray(20 * 0x30), 20 * 0x2F);
+assert.deepEqual(image, manual, 'image = package without the 20 identity marker bytes');
+
+// --- serve(): answer 0x30 read requests, decode what went back to the device ---
+const request = (addr, len, fl = 0) => {
+  const b = [0, 0x59, 0x30, (len + 8) & 255, 0, 0, fl,
+    addr & 255, (addr >>> 8) & 255, (addr >>> 16) & 255, (addr >>> 24) & 255,
+    len & 255, (len >> 8) & 255, 0];
+  b.push(~b.slice(6).reduce((a, x) => a + x, 0) & 255);
+  return [0xF0, ...M.pack7(b), 0xF7];
+};
+const decode = (f) => {
+  const body = M.unpack7(Array.from(f).slice(1, -1));
+  const len = body[11] | (body[12] << 8) | (body[13] << 16);
+  return { addr: (body[7] | (body[8] << 8) | (body[9] << 16) | (body[10] << 24)) >>> 0,
+           data: body.slice(14, 14 + len) };
+};
+
+const packets = [];
+for (let off = 0; off < image.length; off += 512) packets.push(request(off, Math.min(512, image.length - off)));
+packets.push(request(0xE0000000, 6));
+const link = { lost: false, closed: false, out: [], async read() { return packets.shift() || null; },
+               send(f) { this.out.push(f); return true; }, close() { this.closed = true; } };
+let last = 0;
+const r = await new M.Updater({}, () => {}).serve(link, image, 0xE0000000, 50, (n) => { last = n; });
+assert.equal(r.finished, true);
+assert.equal(r.served, Math.ceil(image.length / 512));
+assert.equal(last, r.served);
+for (let i = 0; i < r.served; i++) {
+  const d = decode(link.out[i]); const off = i * 512, n = Math.min(512, image.length - off);
+  assert.equal(d.addr, off);
+  assert.equal(d.data.length, n);
+  assert.deepEqual(Uint8Array.from(d.data), image.subarray(off, off + n));
 }
-const bad=link([request(99999)]);const test=new Updater({});test.find=async()=>({id:{model:'FM-1',text:'FM-1_7010200'},link:bad});await assert.rejects(test.install(image,'FM-1_7100002'),e=>e.code==='badreq');assert(bad.closed);
-const resumeLink=link([request(0xf0000000)]);test.find=async()=>({id:{model:'ota-FM-1'},link:resumeLink});assert(await test.resume(image));assert(resumeLink.closed);
-globalThis.setTimeout=realTimeout;
-console.log('PASS: 1024 binary roundtrips; bounded SysEx queue; malformed frames; zero/oversize/out-of-range reads; disconnect; failed completion ACK; install/identity mismatch; cleanup on error; loader resume. Simulated protocol, not hardware.');
+console.log(`ok  ${r.served} blocks served byte-for-byte from the 610,070 B image (0xE0000000 finish ack)`);
+
+// --- install(): orchestration, identity gate, cleanup ---
+const quiet = { lost: false, async read() { return null; }, send() { return true; }, close() {} };
+const fake = (from, back) => {
+  const u = new M.Updater({});
+  u.find = async () => ({ id: { model: 'FM-1', text: from }, link: quiet });
+  u.serve = async () => ({ served: 74, finished: true, lost: false });
+  const replies = [{ model: 'ota-FM-1', text: 'ota-FM-1_1' }, { model: 'FM-1', text: back }];
+  u.waitFor = async (f) => { for (const id of replies) if (f(id)) return { id, link: quiet }; return null; };
+  return u;
+};
+const stages = [];
+assert.equal(await (await fake('FM-1_015', 'FM-1_7100002')).install(image, meta.product, (k) => stages.push(k)),
+             'FM-1_7100002', 'V15 -> AMARU 0.4 is the supported route');
+assert.equal(stages[0], 'start');
+assert.ok(['loader', 'done'].every((k) => stages.includes(k)));
+await assert.rejects((await fake('FM-1_7100002', 'FM-1_7010200')).install(image, meta.product),
+                     (e) => e.code === 'mismatch');
+console.log('ok  install(): V15 and AMARU accepted; a device reporting another build is refused');
+
+// --- find(): named ports, and the loose fallback for odd driver names ---
+const idFrame = (text) => {
+  const b = [0, 0x59, 0x11, 0, 0, 0, ...Array.from({ length: 27 }, (_, i) => (i < text.length ? text.charCodeAt(i) : 0))];
+  b.push(~b.slice(6).reduce((a, x) => a + x, 0) & 255);
+  return [0xF0, ...M.pack7(b), 0xF7];
+};
+const port = (name, reply) => ({ name, reply, state: 'connected', opened: 0, async open() { this.opened++; }, onmidimessage: null });
+const access = (ports) => ({
+  inputs: new Map(ports.map((p, i) => [i, Object.assign(port(p.in, p.reply), {})])),
+  outputs: new Map(ports.map((p, i) => [i, Object.assign(port(p.out, null), { sent: [], send(b) { this.sent.push(b); } })])),
+});
+const wire = (a) => {
+  const ins = [...a.inputs.values()], outs = [...a.outputs.values()];
+  ins.forEach((i, k) => {
+    const out = outs[k]; if (!out) return;
+    out.send = ((orig) => (bytes) => {
+      orig.call(out, bytes);
+      if (i.reply) setTimeout(() => i.onmidimessage({ data: i.reply }), 0);
+      return true;
+    })(out.send);
+  });
+};
+const fm = idFrame('FM-1_7100002');
+const named = access([{ in: 'FM-1 MIDI 1', out: 'FM-1 MIDI 1', reply: fm }]); wire(named);
+assert.ok(await new M.Updater(named).find((id) => !M.IS_OTA(id)));
+const mixed = access([{ in: 'Launchpad', out: 'Launchpad', reply: null },
+                      { in: 'M-VAVE Composite', out: 'M-VAVE Composite', reply: fm }]); wire(mixed);
+assert.ok(await new M.Updater(mixed).find((id) => !M.IS_OTA(id)));
+const split = access([{ in: 'Device Port A', out: 'Device Port B', reply: fm }]); wire(split);
+assert.equal(await new M.Updater(split).find((id) => !M.IS_OTA(id)), null, 'no probing unless asked');
+assert.ok(await new M.Updater(split).find((id) => !M.IS_OTA(id), true), 'probeAll pairs split in/out names');
+const silent = access([{ in: 'Random Synth', out: 'Random Synth', reply: null }]); wire(silent);
+assert.equal(await new M.Updater(silent).find((id) => !M.IS_OTA(id), true), null, 'silent gear is never selected');
+console.log('ok  find(): named port, named among others, loose pairing, silent gear rejected');
+
+console.log('PASS: installer/verifier pages + M-UPGRADE protocol (simulated device, not hardware).');

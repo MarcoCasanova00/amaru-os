@@ -12,6 +12,18 @@ const UPGRADE = [0xF0, 0x22, 0x24, 0x35, 0x7F, 0xF7];
 const MAXDATA = 512;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const IS_OTA = (id) => /^ota-/i.test(id.model);
+const looksLikeFm1 = (n) => /fm-1|felucca|ota|composite|sinco|usb-midi/i.test(n || "");
+
+// the FM-1 presents the same name on both directions; some drivers append a
+// direction suffix ("… MIDI 1", "… (out)"), so compare a normalised base name
+function pairWith(input, outs, loose) {
+  const exact = outs.find((o) => o.name === input.name);
+  if (exact) return exact;
+  if (!loose) return null;
+  const base = (s) => String(s || "").replace(/[^a-z0-9]/gi, "").toLowerCase();
+  const b = base(input.name);
+  return outs.find((o) => { const ob = base(o.name); return ob === b || ob.includes(b) || b.includes(ob); }) || outs[0] || null;
+}
 
 // errors carry a code the pages translate: notfound, model, stopped, noloader, lost, noreturn,
 // mismatch (detail: the identity the device reports), badreq
@@ -114,13 +126,17 @@ export class Updater {
     this.log = log || (() => {});
   }
 
-  // every in/out pair with the same port name that answers the handshake
-  async find(filter) {
-    const outs = [...this.access.outputs.values()];
-    for (const input of this.access.inputs.values()) {
-      if (input.state === "disconnected") continue;
-      if (!/fm-1|felucca|ota|composite|sinco|usb-midi/i.test(input.name || "")) continue;   // never probe other gear
-      const output = outs.find((o) => o.name === input.name && o.state !== "disconnected");
+  // every in/out pair with the same port name that answers the handshake.
+  // probeAll also tries ports whose name does not look like an FM-1 (the port
+  // name differs between OS drivers and USB layouts). Only a parsed identity
+  // reply can select a device, so a probe never picks up other gear.
+  async find(filter, probeAll = false) {
+    const outs = [...this.access.outputs.values()].filter((o) => o.state !== "disconnected");
+    const list = [...this.access.inputs.values()]
+      .filter((i) => i.state !== "disconnected" && (probeAll || looksLikeFm1(i.name)))
+      .sort((a, b) => (looksLikeFm1(a.name) ? 0 : 1) - (looksLikeFm1(b.name) ? 0 : 1));
+    for (const input of list) {
+      const output = pairWith(input, outs, probeAll);
       if (!output) continue;
       try { await input.open(); await output.open(); } catch (_) { continue; }
       const link = new Link(input, output);

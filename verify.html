@@ -1,43 +1,368 @@
-<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>AMARU OS – Package Safety Checker</title><style>body{font:14px system-ui;background:#0b100a;color:#7cff5b;margin:24px}h1{color:#7cff5b}
-.card{background:#0a120a;border:1px solid #2a402a;padding:24px;max-width:900px;border-radius:8px}
-button{background:#7cff5b;color:#0b100a;border:none;padding:8px 12px;border-radius:4px;cursor:pointer}
-.status{margin:12px 0;font-family:monospace;font-size:12px;color:#9cff9b} pre{white-space:pre-wrap;word-break:break-all}</style>
-<div class=card><h1>AMARU OS — Package Safety Checker (pre-install)</h1><p>
-This tool does <b>not</b> flash firmware. It verifies a released AMARU <code>.fwsc</code>
-package against the recorded identity/size/SHA-256 before any external site writes to your FM-1.
-It is the last sanity step before installing at <a href="https://thefirmwarehub.com/">The Firmware Hub</a> or via WebMIDI.
-</p><input type=file id=f accept=".fwsc"><div class=status id=s>no file selected.</div>
-<pre id=o></pre><script>
-const expected = { identity:'FM-1_7100002', size:610090,
- sha256:'ed8f179dc35ffb57f832a93908720720ebfae303afa765509d6084a165baefa5'.toLowerCase() };
-document.getElementById('f').addEventListener('change', async e => {
-  const s=document.getElementById('s'), o=document.getElementById('o');
-  const file=e.target.files[0]; if(!file){ s.textContent='no file'; return; }
-  s.textContent='checking...';
-  const buf=await file.arrayBuffer();
-  const view=new DataView(buf);
-  // Identity stored in first 12 bytes as length-prefixed ASCII string
-  let identLen=view.getUint8(0);
-  let ident='';
-  for(let i=1;i<1+identLen;i++) ident += String.fromCharCode(view.getUint8(i));
-  s.textContent=`identity: ${ident} ; size: ${buf.byteLength} bytes`;
-  const sha=await sha256(buf);
-  o.textContent = `Identity: ${ident}\nSize: ${buf.byteLength}\nSHA-256: ${sha}\n\n`+
-    `Expected identity: ${expected.identity}\nExpected size: ${expected.size}\nExpected SHA-256: ${expected.sha256}\n\n`+
-    `USB-keyboard descriptor present: ${hasHidDescriptor(buf) ? 'YES (amber-key on hub)' : 'no (clean)'}\n`;
-  const ok = ident===expected.identity && buf.byteLength===expected.size && sha===expected.sha256;
-  s.textContent = ok ? '✅ VERIFIED — safe to install via hub' :
-                      '⚠️ MISMATCH — do not flash; re-download the release asset';
-  s.style.color = ok ? '#7cff5b' : '#ff5b5b';
-});
-async function sha256(buf){const d=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-function hasHidDescriptor(buf){
-  const m = buf.byteLength>200? buf.slice(0,200):buf; // quick scan for USB HID keyboard/mouse class 0x03
-  let saw=0;
-  const v=new DataView(m);
-  for(let i=0;i<m.byteLength-1;i++) if(v.getUint8(i)===0x03) saw++;
-  return saw>=3;  // heuristic only
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMARU OS · Verify package</title>
+<link rel="icon" href="logos/logo-splash.png" type="image/png">
+<style>
+  :root { --bg:#050705; --panel:#0a120a; --line:#2a402a; --fg:#7cff5b; --dim:#9cff9b; --bad:#ff5b5b; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif; }
+  a { color:var(--fg); }
+  .wrap { max-width:820px; margin:0 auto; padding:22px 14px 40px; }
+  main { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:20px 22px 26px; }
+  header { text-align:center; border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:16px; }
+  header img { width:110px; border:2px solid var(--fg); padding:3px; background:#000; }
+  .strap { font-size:11px; letter-spacing:2px; color:var(--dim); margin:8px 0 2px; }
+  h1 { font-size:20px; margin:6px 0 0; }
+  h1 span { color:var(--dim); font-weight:400; }
+  nav { display:flex; justify-content:center; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:12px; letter-spacing:.6px; }
+  nav a { text-decoration:none; border-bottom:1px solid transparent; }
+  nav a:hover, nav a[aria-current] { border-color:var(--fg); }
+  p { margin:0 0 10px; }
+  input[type=file] { color:var(--dim); font-size:13px; }
+  #drop { border:1px dashed var(--line); border-radius:6px; padding:26px 16px; text-align:center; margin:14px 0; }
+  #drop.hot { border-color:var(--fg); }
+  #verdict { font-weight:700; padding:10px 12px; border:1px solid var(--line); border-radius:4px; margin:14px 0; }
+  #verdict.ok { border-color:var(--fg); color:var(--fg); }
+  #verdict.bad { border-color:var(--bad); color:var(--bad); }
+  table { width:100%; border-collapse:collapse; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+  th { text-align:left; width:130px; color:var(--dim); font-weight:400; padding:4px 8px 4px 0; vertical-align:top; }
+  td { padding:4px 0; word-break:break-all; }
+  .note { font-size:12px; color:var(--dim); margin-top:14px; }
+  footer { text-align:center; font-size:11px; color:#4f7a4f; margin-top:18px; border-top:1px solid var(--line); padding-top:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<main>
+  <header>
+    <img src="logos/logo-splash.png" alt="AMARU">
+    <p class="strap">TRIBE · MENTAL TEKNO · JUNGLIST · AZTEC · INCA · SOUND SYSTEM</p>
+    <h1>AMARU OS <span>· package verifier</span></h1>
+    <nav>
+      <a href="./">Emulator</a>
+      <a href="install.html">Install</a>
+      <a href="editor/">Editor</a>
+      <a href="verify.html" aria-current="page">Verify package</a>
+    </nav>
+  </header>
+
+  <p>Drop a released AMARU <code>.fwsc</code> here. This page only reads the file in your browser:
+    it does not flash and sends nothing to a server.</p>
+
+  <div id="drop">
+    <input type="file" id="file" accept=".fwsc">
+    <div class="note">or drag the file onto this box</div>
+  </div>
+
+  <div id="verdict">waiting for a file…</div>
+  <table>
+    <tr><th>Identity</th><td id="ident">—</td></tr>
+    <tr><th>Size</th><td id="size">—</td></tr>
+    <tr><th>SHA-256</th><td id="sha">—</td></tr>
+    <tr><th>Expected</th><td id="exp">—</td></tr>
+  </table>
+
+  <p class="note">Expected values are the published AMARU 0.4 release: identity <code id="e-ident"></code>,
+    <span id="e-size"></span> bytes. A mismatch means the file is not the tested build — do not flash it.
+    Install from <a href="install.html">install.html</a>.</p>
+
+  <footer>AMARU OS 0.4 · FM-1_7100002 · GPL-3.0-only<br>
+    M-VAVE and FM-1 are trademarks of their respective owners.</footer>
+</main>
+</div>
+
+<script type="module">
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments
+//
+// FM-1 .fwsc packages in the browser: the package identity and the image the
+// device reads during an update.
+
+const BLOCKS = 20, BLK = 0x30, KEEP = 0x2F;
+const STOCK_V15_SHA256 = "db1642b2b6fa5c2cccb11ffd13878068bb28601678d3644049f99dc40e7edb8a";
+const STOCK_APP_SIZE = 0x8DFBC;
+const STOCK_V15_SIZE = 699956;
+
+const T = new Uint16Array(256);
+for (let i = 0; i < 256; i++) {
+  let c = i << 8;
+  for (let k = 0; k < 8; k++) c = c & 0x8000 ? (c << 1) ^ 0x1021 : c << 1;
+  T[i] = c & 0xFFFF;
 }
-</script></div>
-<p>Pair with <a href="https://thefirmwarehub.com/">The Firmware Hub</a> or hold OCT− at power-on for USB rescue. No files are uploaded anywhere; all hashing runs locally in your browser.</p>
+
+function crc16(d, crc = 0) {
+  for (let i = 0; i < d.length; i++) crc = ((crc << 8) & 0xFFFF) ^ T[((crc >> 8) ^ d[i]) & 0xFF];
+  return crc;
+}
+
+function enc(buf, off, size, key = 0xFFFF) {
+  for (let i = 0; i < size; i++) {
+    buf[off + i] ^= key & 0xFF;
+    key = ((key * 2) ^ (key & 0x8000 ? 0x1021 : 0)) & 0xFFFF;
+  }
+}
+
+function sfc(buf, off, size, base, key) {
+  for (let i = 0; i < size; i += 32) enc(buf, off + i, Math.min(size - i, 32), key ^ ((off + i - base) >> 2));
+}
+
+function chipkeyDecode(d) {
+  let sum = 0;
+  for (let i = 0; i < 16; i++) sum += d[i];
+  sum &= 0xFF;
+  sum = sum >= 0xE0 ? 0xAA : sum <= 0x10 ? 0x55 : sum;
+  let k = 0;
+  for (let i = 0; i < 16; i++) if ((d[16 + i] ^ d[15 - i]) < sum) k |= 1 << i;
+  return k;
+}
+
+const align32 = (v) => (v + 31) & ~31;
+const u16 = (b, o) => b[o] | (b[o + 1] << 8);
+const u32 = (b, o) => (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0;
+function w16(b, o, v) { b[o] = v & 0xFF; b[o + 1] = (v >> 8) & 0xFF; }
+function w32(b, o, v) { w16(b, o, v & 0xFFFF); w16(b, o + 2, (v >>> 16) & 0xFFFF); }
+
+class Entry {                                   // JLFS head, 32 bytes
+  constructor(raw, off) {
+    this.hdrOff = off;
+    this.hcrc = u16(raw, off);
+    this.dcrc = u16(raw, off + 2);
+    this.offset = u32(raw, off + 4);
+    this.size = u32(raw, off + 8);
+    this.flags = raw[off + 12];
+    this.resvd = raw[off + 13];
+    this.index = u16(raw, off + 14);
+    this.rawName = raw.slice(off + 16, off + 32);
+    const z = this.rawName.indexOf(0);
+    this.name = String.fromCharCode(...this.rawName.slice(0, z < 0 ? 16 : z));
+    if (crc16(raw.subarray(off + 2, off + 32)) !== this.hcrc) throw new Error(`JLFS header CRC mismatch @${off.toString(16)}`);
+  }
+  packInto(buf) {
+    const o = this.hdrOff;
+    w16(buf, o + 2, this.dcrc); w32(buf, o + 4, this.offset); w32(buf, o + 8, this.size);
+    buf[o + 12] = this.flags; buf[o + 13] = this.resvd; w16(buf, o + 14, this.index);
+    buf.set(this.rawName, o + 16);
+    this.hcrc = crc16(buf.subarray(o + 2, o + 32));
+    w16(buf, o, this.hcrc);
+  }
+}
+
+class Package {
+  constructor(bytes) {
+    this.raw = new Uint8Array(bytes);
+    this.parseUfw();
+    this.flash = this.raw.slice(this.flashFileOff, this.flashFileOff + this.flashSize);
+    this.parseFlash();
+  }
+
+  get product() { return productOf(this.raw); }
+
+  setProduct(name) {
+    if (name.length > BLOCKS) throw new Error("product name too long");
+    for (let i = 0; i < BLOCKS; i++) {
+      const m = i < name.length ? (name.charCodeAt(i) + i + 1) & 0xFF : 0x7D;
+      if (i < name.length && m === 0x7D) throw new Error("product name encodes to the unused marker");
+      this.raw[i * BLK + KEEP] = m;
+    }
+  }
+
+  headerBytes() {
+    const h = new Uint8Array(BLOCKS * KEEP);
+    for (let i = 0; i < BLOCKS; i++) h.set(this.raw.subarray(i * BLK, i * BLK + KEEP), i * KEEP);
+    return h;
+  }
+
+  hdrFileOff(i) { return Math.floor(i / KEEP) * BLK + (i % KEEP); }
+
+  parseUfw() {
+    const h = this.headerBytes();
+    enc(h, 0, 0x40);
+    const hcrc = u16(h, 0), lcrc = u16(h, 2), nent = u16(h, 8);
+    if (crc16(h.subarray(2, 0x40)) !== hcrc) throw new Error("not an FM-1 .fwsc (UFW header CRC mismatch)");
+    this.skew = BLOCKS * BLK - h.length;
+    this.ufw = h;
+    this.nent = nent;
+    const hsize = 0x40 + nent * 0x50;
+    if (crc16(h.subarray(0x40, hsize)) !== lcrc) throw new Error("UFW entry list CRC mismatch");
+    this.entries = [];
+    for (let off = 0x40; off < hsize; off += 0x50) {
+      const e = h.slice(off, off + 0x50);
+      enc(e, 0, 0x50);
+      const z = e.subarray(0x40, 0x50).indexOf(0);
+      this.entries.push({ off, type: u16(e, 0), dcrc: u16(e, 4), dataOff: u32(e, 8), size: u32(e, 12),
+        name: String.fromCharCode(...e.subarray(0x40, z < 0 ? 0x50 : 0x40 + z)), plain: e });
+    }
+    const fl = this.entries.find((e) => e.type === 0);
+    if (!fl) throw new Error("no flash.bin in the package");
+    this.flashEntry = fl;
+    this.flashFileOff = fl.dataOff + this.skew;
+    this.flashSize = fl.size;
+    if (crc16(this.raw.subarray(this.flashFileOff, this.flashFileOff + fl.size)) !== fl.dcrc) throw new Error("flash.bin CRC mismatch");
+  }
+
+  parseFlash() {
+    const dec = this.flash.slice();
+    const h = dec.slice(0, 32);
+    enc(h, 0, 32);
+    if (crc16(h.subarray(2, 32)) !== u16(h, 0)) throw new Error("flash header CRC mismatch");
+    this.chipKey = null; this.appBase = null;
+    for (let off = 32; ; off += 32) {
+      enc(dec, off, 32);
+      const e = new Entry(dec, off);
+      if (e.name === "isd_config.ini") {
+        const blob = dec.subarray(e.offset, e.offset + 34);
+        if (crc16(blob.subarray(0, 32)) === u16(blob, 32)) this.chipKey = chipkeyDecode(blob.subarray(0, 32));
+      }
+      if (e.flags === 0x81 && e.name === "app_dir_head" && this.appBase === null) this.appBase = e.offset;
+      if (e.index) break;
+    }
+    if (this.chipKey === null || this.appBase === null) throw new Error("chip key or app_dir_head not found");
+    const b = this.appBase, k = this.chipKey, end = align32(b + 32);
+    sfc(dec, b, end - b, b, k);
+    const head = new Entry(dec, b);
+    const blkEnd = b + head.size;
+    if (blkEnd > end) sfc(dec, end, blkEnd - end, b, k);
+    this.sfcEnd = Math.max(end, blkEnd);
+    this.cfgLen = 0;
+    const probe = this.flash.slice(b, align32(blkEnd) + 32);
+    sfc(probe, 0, probe.length, 0, k);
+    try {
+      const cfg = new Entry(probe, blkEnd - b);
+      if (cfg.name === "cfg" && blkEnd + cfg.size <= this.flash.length) this.cfgLen = cfg.size;
+    } catch (_) { /* no cfg block */ }
+    if (this.cfgLen) {
+      const region = this.flash.slice(b, blkEnd + this.cfgLen);
+      sfc(region, 0, region.length, 0, k);
+      dec.set(region, b);
+      this.sfcEnd = blkEnd + this.cfgLen;
+    }
+    this.head = head;
+    this.app = null;
+    for (let off = b + 32; ; off += 32) {
+      const e = new Entry(dec, off);
+      if (e.flags === 0x82 && e.name === "app.bin") this.app = e;
+      if (e.index) break;
+    }
+    if (!this.app) throw new Error("app.bin not found in app area");
+    this.appOff = b + this.app.offset;
+    this.dec = dec;
+  }
+
+  // the new app, padded to the stock size (Felucca never changes the layout)
+  setApp(app) {
+    if (app.length > this.app.size) throw new Error(`app is ${app.length} B, the slot is ${this.app.size} B`);
+    const nw = new Uint8Array(this.app.size).fill(0xFF);
+    nw.set(app);
+    const a = this.app, h = this.head, b = this.appBase;
+    this.dec.set(nw, this.appOff);
+    a.dcrc = crc16(nw);
+    a.packInto(this.dec);
+    h.dcrc = crc16(this.dec.subarray(h.hdrOff + 32, h.hdrOff + h.size));
+    h.packInto(this.dec);
+    this.sfcEnd = Math.max(align32(b + 32), b + h.size + this.cfgLen);
+    const region = this.dec.slice(b, this.sfcEnd);
+    sfc(region, 0, region.length, 0, this.chipKey);
+    this.flash.set(region, b);
+  }
+
+  serialize() {
+    const out = this.raw.slice();
+    out.set(this.flash, this.flashFileOff);
+    const fl = this.flashEntry, e = fl.plain.slice();
+    w16(e, 4, crc16(this.flash));
+    enc(e, 0, 0x50);
+    const h = this.ufw.slice();
+    h.set(e, fl.off);
+    const hsize = 0x40 + this.nent * 0x50;
+    w16(h, 2, crc16(h.subarray(0x40, hsize)));
+    w16(h, 0, crc16(h.subarray(2, 0x40)));
+    enc(h, 0, 0x40);
+    for (let i = 0; i < hsize; i++) out[this.hdrFileOff(i)] = h[i];
+    return out;
+  }
+}
+
+// the package identity ("FM-1_904"): one marker byte after each of the first 20 blocks
+function productOf(fwsc) {
+  if (fwsc.length < BLOCKS * BLK) throw new Error("not an FM-1 package (too short)");
+  let s = "";
+  for (let i = 0; i < BLOCKS; i++) {
+    const m = fwsc[i * BLK + KEEP];
+    if (m !== 0x7D) s += String.fromCharCode((m - i - 1) & 0xFF);
+  }
+  return s;
+}
+
+// the image the device addresses during an update: the .fwsc without the 20 marker bytes
+function logicalImage(fwsc) {
+  const out = new Uint8Array(fwsc.length - BLOCKS);
+  for (let i = 0; i < BLOCKS; i++) out.set(fwsc.subarray(i * BLK, i * BLK + KEEP), i * KEEP);
+  out.set(fwsc.subarray(BLOCKS * BLK), BLOCKS * KEEP);
+  return out;
+}
+
+async function sha256hex(bytes) {
+  const d = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+
+// Only the user's unmodified official V15 is accepted for a return to stock.
+// The digest pins every file, loader and flash layout; filenames are not evidence.
+async function validateStockPackage(bytes) {
+  if (bytes.length !== STOCK_V15_SIZE || await sha256hex(bytes) !== STOCK_V15_SHA256)
+    throw new Error("Select the unmodified official FM-1 V15 file (FM-1.fwsc).");
+  const pkg = new Package(bytes);
+  if (pkg.product !== "FM-1_015" || pkg.flashFileOff !== 1044 || pkg.flashSize !== 602112 ||
+      pkg.appBase !== 16384 || pkg.appOff !== 16672 || pkg.app.size !== STOCK_APP_SIZE ||
+      !pkg.entries.some((e) => e.type === 100 && e.name === "ota.bin" && e.size === 19969))
+    throw new Error("The official firmware has an unsupported FM-1 layout.");
+  return { product: pkg.product, image: logicalImage(bytes), sha256: STOCK_V15_SHA256 };
+}
+
+// official V15 + Felucca app -> installable package (Uint8Array)
+async function buildFeluccaPackage(stockBytes, appBytes, product) {
+  const sha = await sha256hex(stockBytes);
+  if (sha !== STOCK_V15_SHA256) throw new Error("this is not the official FM-1 V15 firmware file (FM-1.fwsc)");
+  const pkg = new Package(stockBytes);
+  pkg.setApp(appBytes);
+  pkg.setProduct(product);
+  return pkg.serialize();
+}
+
+const $ = (id) => document.getElementById(id);
+const meta = {"version": "0.4", "product": "FM-1_7100002", "size": 610090, "sha256": "ed8f179dc35ffb57f832a93908720720ebfae303afa765509d6084a165baefa5", "pkg": "firmware/build/felucca.fwsc"};
+$("e-ident").textContent = meta.product;
+$("e-size").textContent = meta.size.toLocaleString("en-US");
+
+async function check(file) {
+  if (!file) return;
+  const v = $("verdict");
+  v.className = ""; v.textContent = "reading…";
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let prod = "", sha = "";
+  try { prod = productOf(bytes); } catch (_) { prod = ""; }
+  try { sha = await sha256hex(bytes); } catch (_) { sha = ""; }
+  $("ident").textContent = prod || "(not an FM-1 package)";
+  $("size").textContent = bytes.length.toLocaleString("en-US") + " B";
+  $("sha").textContent = sha || "—";
+  $("exp").textContent = meta.product + " · " + meta.size.toLocaleString("en-US") + " B · " + meta.sha256;
+  const ok = prod === meta.product && bytes.length === meta.size && sha === meta.sha256;
+  v.className = ok ? "ok" : "bad";
+  v.textContent = ok ? "VERIFIED — this is the published AMARU " + meta.version + " build."
+                     : "MISMATCH — not the published AMARU " + meta.version + " build. Do not flash it.";
+}
+
+$("file").addEventListener("change", (e) => check(e.target.files[0]));
+const drop = $("drop");
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("hot"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("hot"));
+drop.addEventListener("drop", (e) => {
+  e.preventDefault(); drop.classList.remove("hot");
+  check(e.dataTransfer.files && e.dataTransfer.files[0]);
+});
+</script>
+</body>
+</html>

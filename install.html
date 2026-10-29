@@ -36,18 +36,26 @@
   #go:disabled { opacity:.3; cursor:not-allowed; }
   #detect { background:transparent; color:var(--fg); border:1px solid var(--line); }
   #detect:disabled { opacity:.35; cursor:not-allowed; }
-  progress { width:100%; height:6px; margin-top:14px; appearance:none; border:0; background:#0f1a0f; }
+  .meter { display:flex; align-items:center; gap:10px; margin-top:14px; }
+  progress { flex:1; height:10px; appearance:none; border:1px solid var(--line); background:#0f1a0f; }
   progress::-webkit-progress-bar { background:#0f1a0f; }
-  progress::-webkit-progress-value { background:var(--fg); }
+  progress::-webkit-progress-value { background:var(--fg); transition:width .2s linear; }
   progress::-moz-progress-bar { background:var(--fg); }
+  #pct { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--dim); min-width:4ch; text-align:right; }
   #status { margin-top:10px; font-size:13px; min-height:1.6em; }
+  #status.live { font-weight:700; color:var(--amber); }
+  #status.live::before { content:"● "; }
+  #status.bad { color:var(--bad); font-weight:700; }
   #log { margin:10px 0 0; max-height:180px; overflow:auto; font-family:ui-monospace,Menlo,monospace; font-size:11px;
          color:#6fbf6f; background:#040704; border:1px solid #142014; border-radius:4px; padding:8px; white-space:pre-wrap; }
   #log:empty { display:none; }
   ol.steps { margin:0; padding-left:20px; }
   ol.steps li { margin:3px 0; }
   .warn { border:2px solid var(--bad); background:#2a0a0a; color:#ff8d8d; padding:10px 12px; border-radius:4px;
-          font-weight:700; font-size:13px; margin:16px 0 0; }
+          font-weight:700; font-size:13px; margin:16px 0 0; text-align:center; letter-spacing:.3px; }
+  .warn.live { background:#4a0d0d; color:#ffb3b3; animation:pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { border-color:var(--bad); } 50% { border-color:#ffb3b3; box-shadow:0 0 0 2px #4a0d0d; } }
+  @media (prefers-reduced-motion: reduce) { .warn.live { animation:none; } }
   .note { font-size:12px; color:var(--dim); }
   code { font-family:ui-monospace,Menlo,monospace; }
   details { margin-top:10px; }
@@ -98,11 +106,14 @@
       <button id="go" disabled>Install AMARU 0.4</button>
       <button id="detect">Detect device</button>
     </div>
-    <progress id="bar" max="100" value="0"></progress>
-    <div id="status">Loading the published package…</div>
+    <div class="meter">
+      <progress id="bar" max="100" value="0" aria-label="Install progress"></progress>
+      <span id="pct">0%</span>
+    </div>
+    <div id="status" role="status" aria-live="polite">Loading the published package…</div>
     <pre id="log"></pre>
 
-    <p class="warn">DO NOT UNPLUG WHILE WRITING · RECOVERY: HOLD OCT− WHILE SWITCHING ON</p>
+    <p class="warn" id="warn">DO NOT UNPLUG WHILE WRITING · RECOVERY: HOLD OCT− WHILE SWITCHING ON</p>
     <p class="note">The device asks for the firmware block by block; nothing is committed until it confirms. If an install is
       interrupted, replug the cable and press Install again — it resumes from the start. AMARU installs over official V15 or
       over AMARU; no intermediate firmware is needed.</p>
@@ -622,10 +633,24 @@ class Updater {
 const $ = (id) => document.getElementById(id);
 const meta = {"version": "0.4", "product": "FM-1_7100002", "size": 610090, "sha256": "ed8f179dc35ffb57f832a93908720720ebfae303afa765509d6084a165baefa5", "pkg": "firmware/build/felucca.fwsc"};
 const state = { image: null, ready: false, busy: false };
-const say = (s) => { $("status").textContent = s; };
+const say = (s) => { $("status").classList.remove("bad"); $("status").textContent = s; };
+const sayBad = (s) => { live(false); $("status").classList.add("bad"); $("status").textContent = s; };
 const log = (s) => { $("log").textContent += s + "\n"; $("log").scrollTop = $("log").scrollHeight; };
-const bar = (p) => { $("bar").value = Math.max(0, Math.min(100, p)); };
-const busy = (on) => { state.busy = on; $("go").disabled = on || !state.ready; $("detect").disabled = on; $("file").disabled = on; };
+const bar = (p) => {
+  const v = Math.max(0, Math.min(100, p));
+  $("bar").value = v;
+  $("pct").textContent = Math.floor(v) + "%";
+};
+// while a write is running the status line and the banner both stay armed until it is done
+const live = (on) => { $("status").classList.toggle("live", on); $("warn").classList.toggle("live", on); };
+const TITLE = document.title;
+const busy = (on) => {
+  state.busy = on;
+  $("go").disabled = on || !state.ready;
+  $("detect").disabled = on;
+  $("file").disabled = on;
+  if (!on) { live(false); document.title = TITLE; }
+};
 window.addEventListener("beforeunload", (e) => { if (state.busy) { e.preventDefault(); e.returnValue = "An install is running."; } });
 
 async function accept(src, bytes) {
@@ -656,7 +681,7 @@ async function loadPublished() {
     await accept("published build · " + meta.pkg, new Uint8Array(await r.arrayBuffer()));
     if (state.ready) say("Ready. Connect the FM-1 and press Install.");
   } catch (e) {
-    say("Could not load the published package (" + e.message + "). Choose the .fwsc file under “Use a local .fwsc instead”.");
+    sayBad("Could not load the published package (" + e.message + "). Choose the .fwsc file under “Use a local .fwsc instead”.");
   }
 }
 
@@ -666,9 +691,9 @@ $("file").addEventListener("change", async (e) => {
 });
 
 async function openMidi() {
-  if (!navigator.requestMIDIAccess) { say("This browser has no WebMIDI. Use Chrome or Edge."); return null; }
+  if (!navigator.requestMIDIAccess) { sayBad("This browser has no WebMIDI. Use Chrome or Edge."); return null; }
   try { return await navigator.requestMIDIAccess({ sysex: true }); }
-  catch (_) { say("MIDI (SysEx) permission denied. Allow MIDI for this site in the address bar, then retry."); return null; }
+  catch (_) { sayBad("MIDI (SysEx) permission denied. Allow MIDI for this site in the address bar, then retry."); return null; }
 }
 
 $("detect").addEventListener("click", async () => {
@@ -686,8 +711,8 @@ $("detect").addEventListener("click", async () => {
     }
     const ota = (await up.find((id) => IS_OTA(id))) || (await up.find((id) => IS_OTA(id), true));
     if (ota) { ota.link.close(); say("Found " + ota.id.text + " — the FM-1 is in update mode. Press Install to finish."); return; }
-    say("No FM-1 answered. Check the data cable, close other MIDI apps, and try again.");
-  } catch (e) { say("Detect failed: " + (e && e.message ? e.message : e)); }
+    sayBad("No FM-1 answered. Check the data cable, close other MIDI apps, and try again.");
+  } catch (e) { sayBad("Detect failed: " + (e && e.message ? e.message : e)); }
 });
 
 const ERRORS = {
@@ -713,12 +738,22 @@ $("go").addEventListener("click", async () => {
   if (!midi) { busy(false); return; }
   const max = Math.max(1, Math.ceil(state.image.length / 512));
   const step = (k, a) => {
-    if (k === "start") { say("Found " + a + ". Verifying the package…"); bar(2); }
-    else if (k === "verify") { say("Verifying — block " + a); bar(2 + 28 * Math.min(1, a / max)); }
-    else if (k === "loader") { say("Accepted. Switching to update mode…"); bar(32); }
-    else if (k === "write") { say("Writing — block " + a + " of about " + max); bar(34 + 64 * Math.min(1, a / max)); }
-    else if (k === "reboot") { say("Written. Restarting the FM-1…"); bar(99); }
-    else if (k === "done") { bar(100); say("Done. The FM-1 reports " + a + " — AMARU " + meta.version + " is installed."); }
+    if (k === "start") {
+      live(true); document.title = "Installing — do not unplug · AMARU";
+      say("Found " + a + " — verifying the package…"); bar(2);
+    } else if (k === "verify") {
+      say("Verifying — DO NOT UNPLUG · block " + a); bar(2 + 28 * Math.min(1, a / max));
+    } else if (k === "loader") {
+      say("Accepted — switching to update mode. Keep the cable connected…"); bar(32);
+    } else if (k === "write") {
+      const p = 34 + 64 * Math.min(1, a / max);
+      say("Writing — DO NOT UNPLUG · block " + a + " of about " + max + " (" + Math.floor(p) + "%)"); bar(p);
+    } else if (k === "reboot") {
+      say("Written — restarting the FM-1. Do not unplug…"); bar(99);
+    } else if (k === "done") {
+      bar(100);
+      say("Done. The FM-1 reports " + a + " — AMARU " + meta.version + " is installed. You can unplug now.");
+    }
   };
   try {
     const up = new Updater(midi, log);
@@ -732,7 +767,7 @@ $("go").addEventListener("click", async () => {
     }
   } catch (e) {
     const msg = (e && e.code && ERRORS[e.code]) ? ERRORS[e.code] + (e.detail || "") : "Install failed: " + (e && e.message ? e.message : e);
-    say(msg);
+    sayBad(msg);
     log(String((e && e.stack) || e));
   } finally { busy(false); }
 });

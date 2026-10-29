@@ -21,7 +21,7 @@ const el = (id) => {
     scrollTop: 0, scrollHeight: 0, files: [], _h: {},
     addEventListener(t, fn) { this._h[t] = fn; },
     click() { if (this._h.click) return this._h.click({ target: this }); },
-    classList: { add() {}, remove() {} } });
+    classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, toggle(c, on) { on === undefined ? (this._s.has(c) ? this._s.delete(c) : this._s.add(c)) : (on ? this._s.add(c) : this._s.delete(c)); }, contains(c) { return this._s.has(c); } } });
   return els.get(id);
 };
 const document = { getElementById: el };
@@ -146,7 +146,16 @@ console.log('ok  page loads the published package and unlocks Install');
 
 $("go").click();
 const end = Date.now() + 20000;
-while (Date.now() < end && !/Done\./.test($("status").textContent)) await new Promise((r) => setTimeout(r, 20));
+let sawWrite = false, warnArmed = false;
+while (Date.now() < end && !/Done\./.test($("status").textContent)) {
+  if (/Writing — DO NOT UNPLUG/.test($("status").textContent)) sawWrite = true;
+  if ($("warn").classList.contains("live")) warnArmed = true;
+  await new Promise((r) => setTimeout(r, 20));
+}
+assert.ok(sawWrite, 'the status line says DO NOT UNPLUG while writing');
+assert.ok(warnArmed, 'the banner is armed (pulsing) while writing');
+assert.equal($("warn").classList.contains("live"), false, 'banner disarms when finished');
+assert.match($("status").textContent, /You can unplug now/);
 assert.match($("status").textContent, /Done\. The FM-1 reports FM-1_7100002/, "install finished");
 assert.equal($("bar").value, 100);
 assert.equal(dev.bad, 0, "every block the device asked for arrived byte-correct");

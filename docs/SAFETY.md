@@ -53,7 +53,11 @@ realistic outcome of a bad flash is a simple re-flash via OCT− rescue.
 
 ## 2. Persistent storage
 
-Verified against the `release` build (image 515,148 B, flash-fit passes; app-area cap 602,112 B).
+Verified against the `release` build (image 501,340 B, flash-fit passes; app-area cap 602,112 B).
+The CPU budget (`tests/target_budget.py`) is clean: 0 over-budget render targets. The audio engine
+set is ANALOG/DIGITAL/DRUM/FM6 — the retired engines (incl. SAMPLE) stay compiled out, so the
+render loops are the verified, in-budget ones. Imported TEKNO EPROM dumps are preserved under
+`firmware/assets/tekno-import/` but deliberately not compiled into flash (see its README).
 
 | Resource | Availability |
 |---|---|
@@ -75,7 +79,7 @@ cut never loses both copies.
 
 | Resource | Used | Available |
 |---|---|---|
-| RAM static (`.data+.bss`) | 53,444 B | 73,728 B (28% free) |
+| RAM static (`.data+.bss`) | 53,044 B | 73,728 B (28% free) |
 | Pool (voices/patterns) | 328,924 B | 368,640 B (11% free) |
 
 ---

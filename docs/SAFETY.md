@@ -53,7 +53,7 @@ realistic outcome of a bad flash is a simple re-flash via OCT− rescue.
 
 ## 2. Persistent storage
 
-Verified against the `release` build (image 500,556 B, flash-fit passes).
+Verified against the `release` build (image 515,148 B, flash-fit passes; app-area cap 602,112 B).
 
 | Resource | Availability |
 |---|---|
@@ -75,7 +75,7 @@ cut never loses both copies.
 
 | Resource | Used | Available |
 |---|---|---|
-| RAM static (`.data+.bss`) | 53,044 B | 73,728 B (28% free) |
+| RAM static (`.data+.bss`) | 53,444 B | 73,728 B (28% free) |
 | Pool (voices/patterns) | 328,924 B | 368,640 B (11% free) |
 
 ---

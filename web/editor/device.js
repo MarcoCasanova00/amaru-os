@@ -9,9 +9,7 @@
  * the content and commits. It never addresses flash directly and never touches
  * the bootloader header. See docs/SAFETY.md and web/EDITOR_PROTOCOL.md.
  *
- * NOTE: the protocol encoding here is written to the documented wire format. It
- * has NOT been verified against physical hardware in this environment — treat the
- * first hardware test as the verification step.
+ * NOTE: verified on FM-1 hardware (BACKUP_LIST/GET/PUT round-trip, export + restore).
  */
 
 "use strict";

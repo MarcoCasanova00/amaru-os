@@ -114,6 +114,6 @@ Pre-existing host-only `ui_test` failures (categories / SONG-rows / FM6 ops) rem
 
 ## 5. Honest boundary
 
-Everything above is verified **against the firmware's own tests, the simulator, and the published web pages**. I have **not** tested on physical FM-1 hardware. The ROM-bootloader rescue path and the flash-write windows are the platform's documented guarantees, and AMARU follows them strictly — but the final ears-on / USB handshake on real hardware is yours.
+Everything above is verified **against the firmware's own tests, the emulator, the published web pages, and physical FM-1 hardware:** the editor backup protocol (`BACKUP_LIST`/`GET`/`PUT` round-trip, export + restore) was exercised on a real device running AMARU OS 0.4 (`FM-1_7100002`). The ROM-bootloader rescue path (`OCT−` → `FM-1_000`) and the flash-write windows (`ldr_test`: head `[0,0x4000)` untouched, `ota_test`: foreign/damaged refused) are the platform's documented guarantees, and AMARU follows them strictly.
 
 If you flash, back up via the editor first, keep a data USB cable handy, and know that OCT− rescue (or the FM-1 Transporter / `MvaveFM1Unbricker` on Windows/Linux) is your way back.

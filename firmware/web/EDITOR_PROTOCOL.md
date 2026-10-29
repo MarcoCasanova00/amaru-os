@@ -7,6 +7,12 @@ flash writes and live pushes (16-26, 32) have host coverage; that does not estab
 their hardware behavior. The step chance byte, motion (64) and the full backup (65-67) have host
 coverage only (`tests/editor_test.c`, `tests/backup_test.c`, `web/test_backup.mjs`).
 
+**Hardware verification (2026-10-29):** the backup commands (65-67) were exercised on a real FM-1
+running AMARU OS 0.4 (`FM-1_7100002`) — `BACKUP_LIST` (export backup), `BACKUP_GET` (read objects,
+CRC-verified) and `BACKUP_PUT` (restore backup, begin → data → commit) all round-tripped,
+and the device restarted correctly afterwards. The web editor's `web/editor/device.js` is the
+host side of this path.
+
 **v3 (four tracks):** the device has four tracks, each a synth part (since 1.0; before it, track 4
 was a GM drum track: see "Track 4 since 1.0" below). One
 of them is *selected* (ALGORITHM on the device, or `TRACK`). Every v1 / v2 command acts on the

@@ -38,9 +38,10 @@
 #define ENGI_PHYS 9u
 #define ENGI_DRUM 10u
 #define ENGI_FM6 12u
-#define NENG_SHOWN 4u            /* ANALOG DIGITAL FM6 DRUM: PRESETS, the EDIT layer, the editor */
+#define ENGI_SAMPLE 4u
+#define NENG_SHOWN 5u            /* ANALOG DIGITAL SAMPLE FM6 DRUM: PRESETS, the EDIT layer, the editor */
 /* AMARU's four active engines; every other number is retired (silent, never selectable). */
-#define ENG_ACTIVE_MASK ((1u << ENGI_ANALOG) | (1u << ENGI_DIGITAL) | (1u << ENGI_DRUM) | (1u << ENGI_FM6))
+#define ENG_ACTIVE_MASK ((1u << ENGI_ANALOG) | (1u << ENGI_DIGITAL) | (1u << ENGI_SAMPLE) | (1u << ENGI_DRUM) | (1u << ENGI_FM6))
 static int eng_active(uint32_t e) { return e < 32u && ((ENG_ACTIVE_MASK >> e) & 1u); }
 /* the active engine an old sound of e loads as: WHEEL / GRAIN -> DIGITAL, SLICE -> DRUM, the rest -> ANALOG.
  * PHYS MODEL DRUM and SAMPLE PERC migrate first (drum_from_phys / drum_from_perc). */

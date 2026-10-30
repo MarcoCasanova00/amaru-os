@@ -83,6 +83,7 @@ Offline: `python3 tools/fm1_install.py build/felucca.fwsc`.
 - 808 presets renamed `808 BASS BOOM / DIRTY / SLIDE`
 - Flash-fit verified; CPU budget clean; brick-safety gates re-verified (`ota_test`, `ldr_test`)
 - Song editor librarian verified on FM-1 hardware: backup export/restore round-trip (`BACKUP_LIST`/`GET`/`PUT`)
+- Generated drum patterns rebalanced: hats/rims/bells thinned, kick/snare/tom weight kept (four-on-floor genres)
 
 ### Earlier
 - Built on Bunker Evolved 1.0; genre concept from JIANT; timbral shapes from Carnac OS / Mycelium FM-1 (numbers only)

@@ -104,3 +104,5 @@ AMARU OS is an alternative firmware for the M-VAVE FM-1, made for playing live a
 AMARU OS is an independent community firmware. It is not affiliated with or endorsed by M-VAVE, Bunker Evolved, JIANT, Carnac OS, or Mycelium FM-1. Installing custom firmware is at the user's risk; keep the stock image and a verified recovery path.
 
 See [`docs/ATTRIBUTION.md`](docs/ATTRIBUTION.md) and `LICENSE` for full attribution.
+
+You can also try Amaru OS in the browser, no flashing needed, in the free community [FM-1 Emulator](https://fm1-emulator.atst.tools/).

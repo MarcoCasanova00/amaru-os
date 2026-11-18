@@ -2,6 +2,11 @@
  * Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments */
 /* Drum voices: lean fixed-point drums for a kit of 8 lanes. Felucca's own design, voiced by ear.
  *
+ * AMARU: sample lanes (DVT_SAMPLE) play IMA ADPCM drum samples from flash
+ * (DRUM_SAMPLE_DATA, see amaru_drum_samples.h). A lane with sample > 0 plays
+ * the corresponding sample instead of the synthesized voice. Decode is 32-bit
+ * fixed-point, no double precision, runs in the audio interrupt.
+ *
  * Every tuned part is a damped sine (a phase accumulator, the SINE table, a decaying envelope): exact
  * pitch, always stable, no high-Q resonator. Noise is xorshift through dsp.c's trapezoidal SVF or a
  * one-pole. Only 32-bit products in the sample loops. Envelopes:
@@ -72,11 +77,12 @@
  * scale (a soft knee above).
  * Voices whose type uses the metal source take its block (dv_metal_run) in metal. A voice that has rung out
  * (-84 dB) stops computing (live 0) and writes zeros. */
+#include "amaru_drum_samples.h"
 
 enum { DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_RIM, DV_BELL, DV_NLANE };
 enum {
     DVT_PUNCH, DVT_ROUND, DVT_SNARE, DVT_CLAP, DVT_HATC, DVT_HATO, DVT_TOM, DVT_CONGA, DVT_RIM, DVT_CLAVE,
-    DVT_BELL, DVT_CYM, DVT_COUNT
+    DVT_BELL, DVT_CYM, DVT_SAMPLE, DVT_COUNT
 };
 /* a lane of a model kit as a type: the kit (1..DV_NKIT) in the high 4 bits, the lane in the low 3 (Felucca's own
  * types: 0 above). Its run (the DVT_* it plays through) is the kit's (DV_KIT) */
@@ -88,6 +94,8 @@ typedef struct {
     uint8_t type;                                        /* DVT_*, or a model kit's (DV_KTYPE) */
     uint8_t decay, tone, extra, level, accent;           /* 0..127 */
     int16_t tune;                                        /* 1/16 semitone from the designed pitch */
+    uint8_t sample;                                      /* AMARU: 0 = synthesized, 1-3 = sample slot */
+    uint8_t pad;
 } dv_param_t;
 
 typedef struct {                                         /* coefficients (dv_setup); meaning per type, see the run */
@@ -141,6 +149,7 @@ static const struct {
     {1585, 1382, 1715, 30, 32, {64, 64, 64}, 5608},      /* CLAVE  2.5 kHz (1.2..4), tau 3..12 ms */
     {1161, 969, 1353, 300, 59, {64, 64, 64}, 2785},      /* BELL   540 Hz (270..1080), tail tau 30..400 ms */
     {1078, 886, 1270, 3000, 53, {64, 64, 64}, 7583},     /* CYM    metal 400 Hz, ring tau 0.3..3 s */
+    {0, 0, 0, 0, 0, {64, 64, 64}, 0},                    /* SAMPLE IMA ADPCM, no synthesis */
 };
 #define DV_SEED 0x5EED1234
 #define DV_P16(hz_p16) pitch_inc(clamp((hz_p16), 0, 2047))
@@ -1074,6 +1083,11 @@ static void dv_run(const dv_coef_t *c, dv_voice_t *v, const int32_t *metal, int3
     case DVT_BELL:
         dv_bell_run(c, v, y, n);
         break;
+    case DVT_SAMPLE:
+        /* AMARU: handled in eng_drum.c's drum_render; silence here */
+        for (i = 0; i < n; i++)
+            y[i] = 0;
+        break;
     default:
         dv_cym_run(c, v, metal, y, n);
         break;
@@ -1084,6 +1098,8 @@ static void dv_run(const dv_coef_t *c, dv_voice_t *v, const int32_t *metal, int3
 /* the run a type plays through (DVT_*): itself, or its model kit's lane's */
 static uint32_t dv_run_type(uint32_t type)
 {
+    if (type == DVT_SAMPLE)
+        return DVT_SAMPLE;
     return DV_KITOF(type) - 1u < DV_NKIT ? DV_KIT[DV_KITOF(type) - 1u][type & 7u].run : type < DVT_COUNT ? type : 0u;
 }
 
@@ -1098,4 +1114,6 @@ static void dv_default(dv_param_t *p, uint32_t type)
     p->level = 100;
     p->accent = 0;
     p->tune = 0;
+    p->sample = type == DVT_SAMPLE ? 1u : 0u;
+    p->pad = 0;
 }

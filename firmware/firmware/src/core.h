@@ -24,6 +24,9 @@
 #ifndef FELUCCA_FM4
 #define FELUCCA_FM4 1            /* the DIGITAL engine (eng_digital.c, four-operator FM), engine 1: active */
 #endif
+#ifndef FELUCCA_SAMPLE
+#define FELUCCA_SAMPLE 1         /* the SAMPLE engine (eng_sample.c, IMA ADPCM playback): enabled for drum samples */
+#endif
 #ifndef FELUCCA_CPU2
 #define FELUCCA_CPU2 0           /* the second core (src/felucca.c): 1 = built in, MENU > 2ND CORE ON lets it render
                                   * some parts; 0 = none of it */

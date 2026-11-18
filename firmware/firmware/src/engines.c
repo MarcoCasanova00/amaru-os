@@ -80,7 +80,7 @@ static const engine_t *const ENGINES[NENGINES] = {
 #endif
     &ENG_RETIRED,                /* 2 PHASE (retired) */
     &ENG_RETIRED,                /* 3 LOFI (retired) */
-    &ENG_RETIRED,                /* 4 SAMPLE (retired) */
+    &ENG_SAMPLE,                 /* 4 SAMPLE (IMA ADPCM sample playback, active) */
     &ENG_RETIRED,                /* 5 VOICE (retired) */
     &ENG_RETIRED,                /* 6 TRIO (retired) */
     &ENG_RETIRED,                /* 7 WHEEL (retired) */

@@ -33,25 +33,15 @@
  * block) do. A released key does not end a hit.
  *
  * State: 8 lanes per part in the part's engine memory (engines.c eng_mem; drum_kit_of: the parameters, coefficients, voice and metal
- * source of each lane). */
+ * source of each lane).
+ *
+ * AMARU: sample lanes (DVT_SAMPLE) play IMA ADPCM drum samples from flash
+ * (DRUM_SAMPLE_DATA, amaru_drum_samples.h). A lane with key.sample > 0 plays
+ * that sample instead of the synthesized voice. */
 #include "drum_voice.c"
+#include "amaru_drum_samples.h"
 
-/* 1.5.6 (Discussion #216): DEEP TIGHT PERC (9..11), kits put together from the five's pieces (drum_voice.c DV_KIT),
- * appended. Firmware before 1.5.6 clamps 9..11 to 8 (77) when it loads them (param_fit) */
-enum { DK_STD, DK_HAND, DK_CYM, DK_HCYM, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP, DK_TIGHT, DK_PERC,
-       DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER, DK_TEKNO, DK_COUNT };   /* (stored values; AMARU appended PSY FOREST HITECH GABBER + TEKNO) */
-/* the kit a stored KIT value plays: HAND CYM H+CYM (retired after 1.0.4) -> 66 (a conga on TOM), 10 (a cymbal on
- * BELL), 77 (claves on RIM, a cymbal on BELL) */
-static const uint8_t DK_PLAYS[DK_COUNT] = {DK_STD, DK_66, DK_10, DK_77, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP,
-                                           DK_TIGHT, DK_PERC, DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER, DK_TEKNO};
-static uint32_t drum_kit_plays(int32_t v) { return DK_PLAYS[clamp(v, 0, DK_COUNT - 1)]; }
-/* the model kits' pieces where a lane plays another than its own (the lane's name): 1 TOM -> CONGA, 2 RIM -> CLAVE,
- * 4 BELL -> CYM */
-static const uint8_t DK_SWAP[DV_NKIT] = {0, 4, 1, 0, 2 | 4, 4, 0, 1 | 2, 2 | 4, 1, 4, 0, 0};
-static const uint8_t DV_TYPE_LANE[DVT_COUNT] = {
-    DV_KICK, DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_TOM, DV_RIM, DV_RIM, DV_BELL, DV_BELL,
-};
-
+/* IMA ADPCM step table (standard, shared with eng_sample.c) */
 typedef struct {
     dv_param_t key;              /* the parameters the coefficients were set up with */
     dv_coef_t c;
@@ -61,9 +51,121 @@ typedef struct {
     uint8_t role;                /* the drum struck (DVT_*) */
     int8_t st;                   /* its semitones from the designed pitch (the GM map) */
     uint8_t pad;
+    /* AMARU: sample lane state (role == DVT_SAMPLE) */
+    uint32_t sample_off;         /* byte offset into DRUM_SAMPLE_DATA */
+    uint32_t sample_len;         /* ADPCM bytes remaining */
+    int32_t sample_pred;         /* IMA ADPCM predictor */
+    uint8_t sample_idx;          /* IMA ADPCM step index */
 } drum_lane_t;
 
 ENG_MEM_FITS("DRUM", sizeof(drum_lane_t) * DV_NLANE);
+
+static const int16_t ima_step[89] = {
+    7,8,9,10,11,12,13,14,16,17,19,21,23,25,28,31,34,37,41,45,
+    50,55,60,66,73,80,88,97,107,118,130,143,157,173,190,209,230,253,
+    279,307,337,371,408,449,494,544,598,658,724,796,876,963,1060,1166,
+    1282,1411,1552,1707,1878,2066,2272,2499,2749,3024,3327,3660,4026,
+    4428,4871,5358,5894,6484,7132,7845,8630,9493,10442,11487,12635,
+    13899,15289,16818,18500,20350,22385,24623,27086,29794,32767
+};
+static const int8_t ima_idx[16] = {-1,-1,-1,-1,2,4,6,8,-1,-1,-1,-1,2,4,6,8};
+
+/* Decode one IMA ADPCM nibble, update state in place, return 16-bit sample */
+static int16_t ima_nibble(drum_lane_t *L, uint8_t nibble)
+{
+    int32_t step = ima_step[L->sample_idx <= 88 ? L->sample_idx : 88];
+    int32_t vd = step >> 3;
+    if (nibble & 4) vd += step;
+    if (nibble & 2) vd += step >> 1;
+    if (nibble & 1) vd += step >> 2;
+    L->sample_pred = clamp(L->sample_pred + ((nibble & 8) ? -vd : vd), -32768, 32767);
+    L->sample_idx = clamp(L->sample_idx + ima_idx[nibble & 7], 0, 88);
+    return (int16_t)L->sample_pred;
+}
+
+/* AMARU: decode up to `n` IMA ADPCM samples from lane L into `y`.
+ * Each byte = 2 samples (high nibble first). Updates L->sample_off / sample_len.
+ * Returns samples written. */
+static uint32_t drum_sample_run(drum_lane_t *L, int32_t *y, uint32_t n)
+{
+    if (L->sample_len == 0)
+        return 0;
+    uint32_t i = 0;
+    while (i < n && L->sample_len > 0) {
+        uint32_t idx = (DRUM_SAMPLE_DATA + L->sample_off) - DRUM_SAMPLE_DATA;
+        uint8_t b = DRUM_SAMPLE_DATA[idx];
+        int16_t s1 = ima_nibble(L, (b >> 4) & 0x0F);
+        y[i++] = s1;
+        L->sample_off++;
+        L->sample_len--;
+        if (L->sample_len > 0 && i < n) {
+            idx = (DRUM_SAMPLE_DATA + L->sample_off) - DRUM_SAMPLE_DATA;
+            b = DRUM_SAMPLE_DATA[idx];
+            int16_t s2 = ima_nibble(L, b & 0x0F);
+            y[i++] = s2;
+            L->sample_off++;
+            L->sample_len--;
+        }
+    }
+    return i;
+}
+
+/* AMARU: start sample playback on lane L from the selected sample slot. */
+static void drum_sample_start(drum_lane_t *L, uint8_t slot)
+{
+    if (slot == 0 || slot > DRUM_NZONES)
+        return;
+    const drum_zone_t *z = &DRUM_ZONES[slot - 1];
+    L->sample_off = z->off;
+    L->sample_len = z->n;
+    L->sample_pred = 0;
+    L->sample_idx = 0;
+    L->v.trig = 1;
+    L->v.live = 1;
+    L->v.n = 0;
+    L->v.cnt = 0;
+    L->v.ph[0] = 0;
+    L->v.ph[1] = 0;
+    L->v.ph[2] = 0;
+    L->v.e[0] = 0;
+    L->v.e[1] = 0;
+    L->v.e[2] = 0;
+    L->v.q[0] = 0;
+    L->v.q[1] = 0;
+    L->v.s[0] = 0;
+    L->v.s[1] = 0;
+    L->v.s[2] = 0;
+    L->v.s[3] = 0;
+    L->v.s[4] = 0;
+    L->v.rng = 0;
+}
+
+/* AMARU: stop sample playback on lane L. */
+static void drum_sample_stop(drum_lane_t *L)
+{
+    L->sample_len = 0;
+    L->v.live = 0;
+    L->v.trig = 0;
+}
+
+/* 1.5.6 (Discussion #216): DEEP TIGHT PERC (9..11), kits put together from the five's pieces (drum_voice.c DV_KIT),
+ * appended. Firmware before 1.5.6 clamps 9..11 to 8 (77) when it loads them (param_fit) */
+enum { DK_STD, DK_HAND, DK_CYM, DK_HCYM, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP, DK_TIGHT, DK_PERC,
+       DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER, DK_TEKNO, DK_SAMPLE, DK_COUNT };   /* DK_SAMPLE: AMARU drum samples replace synthesis */
+/* the kit a stored KIT value plays: HAND CYM H+CYM (retired after 1.0.4) -> 66 (a conga on TOM), 10 (a cymbal on
+ * BELL), 77 (claves on RIM, a cymbal on BELL) */
+static const uint8_t DK_PLAYS[DK_COUNT] = {DK_STD, DK_66, DK_10, DK_77, DK_80, DK_10, DK_66, DK_55, DK_77, DK_DEEP,
+                                           DK_TIGHT, DK_PERC, DK_PSY, DK_FOREST, DK_HITECH, DK_GABBER, DK_TEKNO, DK_SAMPLE};
+static uint32_t drum_kit_plays(int32_t v) { return DK_PLAYS[clamp(v, 0, DK_COUNT - 1)]; }
+/* the model kits' pieces where a lane plays another than its own (the lane's name): 1 TOM -> CONGA, 2 RIM -> CLAVE,
+ * 4 BELL -> CYM */
+static const uint8_t DK_SWAP[DV_NKIT] = {0, 4, 1, 0, 2 | 4, 4, 0, 1 | 2, 2 | 4, 1, 4, 0, 0};
+static const uint8_t DV_TYPE_LANE[DVT_COUNT] = {
+    DV_KICK, DV_KICK, DV_SNARE, DV_CLAP, DV_HATC, DV_HATO, DV_TOM, DV_TOM, DV_RIM, DV_RIM, DV_BELL, DV_BELL,
+    DV_SNARE,
+};
+
+
 /* 1.4.1: each part's lanes muted (bit l: lane l), the EDIT layer's black keys 1..8 (ui_layer.c EQA_DRUM): a channel
  * mute. The lane plays on as always (hits, keys, MIDI: its voice, the CPU, the choke) and drum_render drops its output,
  * so unmuted it sounds as if it never was. Performance state: not saved, not recorded, no undo; a sound load into the
@@ -72,7 +174,7 @@ static uint8_t drum_mute[NPART];
 
 /* 1..3 named as the kit they play: aliases, never shown or offered (EDITOR_PROTOCOL.md: retired values) */
 static const char *const N_DRUM_KIT[] = {"STD", "66", "10", "77", "80", "10", "66", "55", "77", "DEEP", "TIGHT", "PERC",
-                                         "PSY", "FOREST", "HITECH", "GABBER", "TEKNO"};
+                                         "PSY", "FOREST", "HITECH", "GABBER", "TEKNO", "SAMPLE"};
 static const char *const N_DRUM_KICK[] = {"PUNCH", "ROUND"};
 
 /* General MIDI notes 35..81 -> the drum (DVT_*; DVT_PUNCH: the kick KICK picks) and semitones from its
@@ -224,6 +326,22 @@ static void drum_note_on(track_t *t, voice_t *v)
     if (L->owner == i + 1u)                              /* this voice played another lane: it stops there */
         L->owner = 0;
     L = &K[lane];
+    if (t->p[P_E0] == DK_SAMPLE) {                         /* AMARU: sample kit replaces synthesis */
+        uint8_t slot = (uint8_t)(lane + 1u);               /* lane 0..7 -> slot 1..8 */
+        if (L->role != DVT_SAMPLE || L->key.sample != slot) {
+            drum_sample_start(L, slot);
+            L->role = (uint8_t)DVT_SAMPLE;
+            L->key.sample = slot;
+        }
+        L->st = (int8_t)st;
+        L->owner = (uint8_t)(i + 1u);
+        v->s[0] = (int32_t)lane;
+        v->env_out = v->vel * 258;
+        v->env = 1 << 24;
+        if (lane == DV_HATC && K[DV_HATO].sample_len > 0)  /* closed hat chokes open hat */
+            drum_sample_stop(&K[DV_HATO]);
+        return;
+    }
     if (L->role != role || L->v.type != dv_run_type(role)) {   /* another drum on this lane: from rest */
         dv_init(&L->v, role);
         L->key.type = 0xFF;
@@ -280,22 +398,35 @@ static void drum_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const 
     if (n > CTL)
         n = CTL;
     r = L->role;
-    dv_default(&k, r);                                   /* the knobs move every lane from its design (64) */
-    k.decay = (uint8_t)clamp(k.decay + p[P_E3] - 64, 0, 127);
-    k.tone = (uint8_t)clamp(k.tone + p[P_E2] - 64, 0, 127);
-    k.extra = (uint8_t)clamp(k.extra + p[P_E4] - 64, 0, 127);
-    k.accent = (uint8_t)clamp(acc >> 9, 0, 127);         /* (Q16 -> 0..127) */
-    k.tune = (int16_t)(L->st * 16 + (p[P_E1] - 64) * 3);   /* +-12 semitones */
-    if (((const uint32_t *)&k)[0] != ((const uint32_t *)&L->key)[0] ||
-        ((const uint32_t *)&k)[1] != ((const uint32_t *)&L->key)[1]) {
-        dv_setup(&L->c, &k);                             /* (a parameter moved) */
-        L->key = k;
-        if (dv_uses_metal(L->c.type))
-            dv_metal_tune(&L->mb, &L->c);
+    if (r == DVT_SAMPLE) {                                 /* AMARU: sample lane */
+        if (L->sample_len == 0) {                          /* sample ended: voice done */
+            for (i = 0; i < n; i++)
+                y[i] = 0;
+            L->v.live = 0;
+            L->v.trig = 0;
+        } else {
+            uint32_t ns = drum_sample_run(L, y, n);        /* decode IMA ADPCM into y */
+            for (i = ns; i < n; i++)
+                y[i] = 0;
+        }
+    } else {
+        dv_default(&k, r);                                   /* the knobs move every lane from its design (64) */
+        k.decay = (uint8_t)clamp(k.decay + p[P_E3] - 64, 0, 127);
+        k.tone = (uint8_t)clamp(k.tone + p[P_E2] - 64, 0, 127);
+        k.extra = (uint8_t)clamp(k.extra + p[P_E4] - 64, 0, 127);
+        k.accent = (uint8_t)clamp(acc >> 9, 0, 127);         /* (Q16 -> 0..127) */
+        k.tune = (int16_t)(L->st * 16 + (p[P_E1] - 64) * 3);   /* +-12 semitones */
+        if (((const uint32_t *)&k)[0] != ((const uint32_t *)&L->key)[0] ||
+            ((const uint32_t *)&k)[1] != ((const uint32_t *)&L->key)[1]) {
+            dv_setup(&L->c, &k);                             /* (a parameter moved) */
+            L->key = k;
+            if (dv_uses_metal(L->c.type))
+                dv_metal_tune(&L->mb, &L->c);
+        }
+        if (dv_uses_metal(L->c.type) && (L->v.live || L->v.trig))
+            dv_metal_run(&L->mb, mb, n);
+        dv_run(&L->c, &L->v, mb, y, n);
     }
-    if (dv_uses_metal(L->c.type) && (L->v.live || L->v.trig))
-        dv_metal_run(&L->mb, mb, n);
-    dv_run(&L->c, &L->v, mb, y, n);
     if ((drum_mute[(uint32_t)(t - trk) % NPART] >> ((uint32_t)v->s[0] & (DV_NLANE - 1u))) & 1u)
         return;                                          /* (a muted lane rings on unheard) */
     if (drv > 0) {                                       /* DRV: x1..x4 into the soft clip, the level kept (Q12) */
@@ -319,7 +450,7 @@ static int32_t drum_keys(const track_t *t, uint32_t k)
 
 /* {KIT, TUNE, TONE, DECY, SNAP, ACC, KICK, DRV}; every kit suggests the BEAT pattern (GM notes) */
 static const preset_t DRUM_PRESETS[] = {
-    {"DRUM KIT", DRUM_KIT_E, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 20), PAT(12)},   /* (core.h: SAMPLE PERC's too) */
+    {"DRUM KIT", {0, 64, 70, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 20), PAT(12)},   /* STD kit */
     /* 1.5.6 (Discussion #216): the new kits, appended */
     {"DEEP KIT", {DK_DEEP, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 28), PAT(12)},
     {"TIGHT KIT", {DK_TIGHT, 64, 64, 56, 64, 100, 0, 16}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 8), PAT(12)},
@@ -328,26 +459,22 @@ static const preset_t DRUM_PRESETS[] = {
     {"PSY KICK", {DK_PSY, 64, 64, 64, 64, 100, 0, 12}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 22), PAT(12)},
     {"FOREST", {DK_FOREST, 60, 58, 70, 62, 100, 1, 8}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(12)},
     {"HITECH", {DK_HITECH, 66, 70, 52, 72, 110, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
-    /* AMARU: the five machines the kits are made of, named as Mycelium names them (808 909 606 VINTAGE 80S), so
-     * the presets offer them by name and not only by the KIT knob. TONE DECY SNAP DRV are the machines' character
-     * (a long swelling 808, the 909's punch, the 606's short room, the CR-78's soft box, the 707's bright click) */
+    /* AMARU: the five machines the kits are made of */
     {"808 KIT", {DK_80, 64, 64, 76, 58, 100, 1, 20}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 20), PAT(12)},
     {"909 KIT", {DK_77, 64, 66, 58, 70, 104, 0, 26}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 16), PAT(12)},
     {"606 KIT", {DK_10, 64, 62, 54, 62, 100, 0, 12}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
     {"CR-78 KIT", {DK_66, 64, 66, 62, 56, 96, 0, 8}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 10), PAT(12)},
     {"707 KIT", {DK_55, 64, 68, 56, 72, 102, 0, 22}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 12), PAT(12)},
-    /* AMARU: the genre kits GEN asks for, as Mycelium's own kits shape them (tools/gen_drumkits.py): JUNGLE's
-     * 909 with short hats, a 50 drive kick and a snappier snare (drive 40); TECHNO's kick driven 96 with a rumble
-     * and dark hats; HARDTEKK's short driven kick and cluster hats */
+    /* AMARU: genre kits */
     {"JUNGLE KIT", {DK_77, 64, 62, 44, 82, 108, 0, 50}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 18), PAT(12)},
     {"TECHNO KIT", {DK_77, 64, 52, 70, 74, 104, 1, 96}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 22), PAT(12)},
     {"HARDTEKK KIT", {DK_HITECH, 66, 66, 40, 88, 112, 0, 72}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 10), PAT(12)},
     {"GABBER KIT", {DK_GABBER, 64, 64, 76, 70, 116, 0, 127}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 8), PAT(12)},
     {"TEKNO KIT", {DK_TEKNO, 64, 62, 70, 82, 120, 0, 110}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 6), PAT(12)},
+    /* AMARU: drum samples replace synthesis on SPARK (DK_SAMPLE) */
+    {"SAMPLE KIT", {DK_SAMPLE, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 20), PAT(12)},
 };
-
-/* amaru_gen.c's DP_* enum indexes this table in order (GEN's drum recipes): keep the order, append only */
-_Static_assert(NELEM(DRUM_PRESETS) == 17u, "DRUM presets: amaru_gen.c DP_* order");
+_Static_assert(NELEM(DRUM_PRESETS) == 18u, "DRUM presets: amaru_gen.c DP_* order");
 
 static const engine_t ENG_DRUM = {
     .name = "DRUM",

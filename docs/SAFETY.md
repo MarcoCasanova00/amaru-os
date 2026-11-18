@@ -32,7 +32,7 @@ The published installer (`install.html`) is **generated** from `firmware/web/fm1
 
 - **Identity:** `FM-1_7100002`
 - **Size:** `610090 B`
-- **SHA-256:** `f082a9e5bb26001600e58d5658b59b240f7b5f145adbaf75af35ebc1370864bf`
+- **SHA-256:** `5f023ec37e225655a7ab060a24c8f4eb0ef709168a1bf168566977d7263b4231`
 
 The device **pulls** the image with `0x30` read requests (M-UPGRADE); the page answers them. It never streams raw data at the device. `tests/installer.test.mjs` and `tests/installer.page.test.mjs` replay the whole exchange against a simulated FM-1 and compare every block with the released `.fwsc`.
 
